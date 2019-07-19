@@ -104,28 +104,45 @@ cumsum_coverage_plot = rbind(data.frame(coverage_percent = cum_sum_coverage,
                                ))
 
 library("wesanderson")
-pal <- wes_palette("Zissou1", 1, type = "continuous")
+pal <- wes_palette("Zissou1", 2, type = "continuous")
 
 
-ggplot(cumsum_plot , aes(fill=id, y=var, x=pident, color=id)) + 
-  geom_line()
+ensp_gene_coverage = ggplot(cumsum_plot , aes(fill=id, y=var, x=pident, color=id)) + 
+  geom_line( size = 1)+
+  labs(x = "Sequence identity (%)", 
+       y = "Counts")+ 
+     theme(legend.title=element_blank(), legend.text = element_text(size=30),
+         axis.title = element_text(size = 30),
+         axis.text =   element_text(size = 30))+
+  scale_colour_manual(values= pal)
 
-ggplot(cumsum_coverage_plot , aes( y=coverage_percent, x=pident)) + 
-  geom_line()
+ensp_gene_coverage
+ggsave(file="ensp_gene_coverage.svg", plot=ensp_gene_coverage, width=30, height=25,dpi = 300, units = "cm")
 
-plot(sort(as.numeric(names(ENSP_vs_pident_list)), decreasing = TRUE), cum_sum_coverage)
+target_coverage = ggplot(cumsum_coverage_plot , aes( y=coverage_percent, x=pident)) + 
+  geom_line(size = 2)+ 
+  labs(x = "Sequence identity (%)",
+    y = "Template chain coverage (%)")+ 
+  theme(legend.title=element_blank(), legend.text = element_text(size=30),
+        axis.title = element_text(size = 30),
+        axis.text =   element_text(size = 30))
 
-
+target_coverage
+ggsave(file="template_chain_coverage.svg", plot=target_coverage, width=30, height=25,dpi = 300, units = "cm")
 ####################################################
 # Size distribution of
 ####################################################
-  plot_df2 = unique(unique_interfaces_overlap[, c("ENSP","temp.chain","pdb.id","pident")])
-plot_df2$pident = as.numeric(plot_df2$pident)
-p2 = ggplot(plot_df2, aes(x=pident)) +
-  geom_histogram(binwidth=10, color="black", fill="white")
-p2
+unique_interfaces_overlap$interface_size = count.fields(textConnection(unique_interfaces_overlap$mapped.real.pos), sep = "|")
 
-plot_df %>%
-  group_by(ENSP, pident) %>%
-  summarise(counts = n())
+hist = ggplot(unique_interfaces_overlap, aes(x=interface_size)) +
+  geom_histogram(binwidth=10, color="black", fill="white")+ 
+  labs(x = "Interface size (n of residues)",
+       y = "Counts")+ 
+  theme(legend.title=element_blank(), legend.text = element_text(size=30),
+        axis.title = element_text(size = 30),
+        axis.text =   element_text(size = 30))
 
+hist
+ggsave(file="interface_size_distribution.svg", plot=hist, width=30, height=20,dpi = 300, units = "cm")
+
+subset(unique_interfaces_overlap, interface_size == 1442)
