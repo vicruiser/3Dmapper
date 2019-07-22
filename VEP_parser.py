@@ -5,7 +5,7 @@ import sys
 import os
 import gzip
 import re
-import pandas as pd
+#import pandas as pd
 #import dask.dataframe as dd
 #import re
 #import pkg_resources
@@ -32,13 +32,23 @@ import pandas as pd
 
 #     # Save the merged dataframe
 #     df.to_csv('merged.csv', index=False)
+
 VEPfile = open("/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/vep_PanCan_chr_1_1-100000", "r")
+geneID = 'ENSG00000227232'
+
+def VEPparser(VEPfile, geneID):
+    # for line in VEPfile:
+    #     if re.findall(r geneID, line):
+    #         return line,
+    df = re.findall(geneID, VEPfile)
+    print(df)
+
+
 
 def main():
-    df = d
-    for line in VEPfile:
-        df.append = re.findall(r'ENSG00000227232', line)
-        print(df)
+
+    VEPparser(VEPfile, geneID)
+    return
 
 
 if __name__ == '__main__':
