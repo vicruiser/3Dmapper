@@ -6,7 +6,7 @@ import os
 import gzip
 import re
 import pandas as pd
-from parse import Lexer, Parser, Token, State, NFA, Handler
+#from parse import Lexer, Parser, Token, State, NFA, Handler
 #import dask.dataframe as dd
 #import re
 #import pkg_resources
@@ -56,10 +56,26 @@ def InterfacesDBparser(InterfacesDB, geneID):
     matches = []
     # find all the lines in the VEP file that contain information for a certain geneID
     for line in InterfacesDB:
+        #df = re.findall(r'ENSP00000352835', line)
+        if 'ENSP00000352835' in line:  # it is faster than regex
+            df = line
+        #if we find a match, store it
+            if df:  
+                matches.append(line.split(" "))
+    df = pd.DataFrame(matches)
+    
+    print(df) 
+    return
+
+def InterfacesDBparser2(InterfacesDB, geneID):
+    # create empty list to store 
+    matches = []
+    # find all the lines in the VEP file that contain information for a certain geneID
+    for line in InterfacesDB:
         df = re.findall(r'ENSP00000352835', line)
         #if we find a match, store it
         if df:  
-            matches.append(line.split("\t"))
+            matches.append(line.split(" "))
 
     df = pd.DataFrame(matches)
     
@@ -69,8 +85,8 @@ def InterfacesDBparser(InterfacesDB, geneID):
 # define main function to execute the previous defined functions together
 def main():
 
-    VEPparser(VEPfile, geneID)
-    #InterfacesDBparser(InterfacesDB, geneID)
+    #VEPparser(VEPfile, geneID)
+    InterfacesDBparser(InterfacesDB, geneID)
     return
 
 
