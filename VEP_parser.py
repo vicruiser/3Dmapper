@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
 #from __future__ import print_function
 
 import sys
 import os
 import gzip
-#import pandas as pd
+import re
+import pandas as pd
 #import dask.dataframe as dd
 #import re
 #import pkg_resources
@@ -30,11 +32,13 @@ import gzip
 
 #     # Save the merged dataframe
 #     df.to_csv('merged.csv', index=False)
-
+VEPfile = open("/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/vep_PanCan_chr_1_1-100000", "r")
 
 def main():
-    print(" defenestrar [Conjugar el verbo defenestrar] Del lat de- 'de arriba abajo' y fenestra 'ventana' 1 tr Arrojar a alguien por una ventana 2 tr Destituir o expulsar a alguien de un puesto, cargo, situacion, etc")
-    return
+    df = d
+    for line in VEPfile:
+        df.append = re.findall(r'ENSG00000227232', line)
+        print(df)
 
 
 if __name__ == '__main__':
