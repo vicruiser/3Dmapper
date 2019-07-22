@@ -5,7 +5,7 @@ import sys
 import os
 import gzip
 import re
-#import pandas as pd
+import pandas as pd
 #import dask.dataframe as dd
 #import re
 #import pkg_resources
@@ -37,19 +37,41 @@ VEPfile = open("/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/vep_PanCa
 geneID = 'ENSG00000227232'
 
 def VEPparser(VEPfile, geneID):
-    # for line in VEPfile:
-    #     if re.findall(r geneID, line):
-    #         return line,
-    df = re.findall(geneID, VEPfile)
-    print(df)
+    # create empty list to store 
+    matches = []
+    for line in VEPfile:
+        df = re.findall(r''+geneID, line)
+        if df: 
+            matches.append(line.split("\t"))
 
+    df = pd.DataFrame(matches)
+    
+    print(df[10]) 
 
+def InterfacesDBparser(InterfacesDB, geneID):
+    # create empty list to store 
+    matches = []
+    # find all the lines in the VEP file that contain information for a certain geneID
+    for line in VEPfile:
+        df = re.findall(r''+geneID, line)
+        #if we find a match, store it
+        if df:  
+            matches.append(line.split("\t"))
 
+    df = pd.DataFrame(matches)
+    
+    print(df[10]) 
+    return
+
+# define main function to execute the previous defined functions together
 def main():
 
     VEPparser(VEPfile, geneID)
     return
 
 
+##########################
+# execute main function  #
+##########################
 if __name__ == '__main__':
     main()
