@@ -1,0 +1,2 @@
+def VEPLocalizer(geneID, indexFile):
+    
