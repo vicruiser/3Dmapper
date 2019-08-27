@@ -27,9 +27,9 @@ def VEPfileCrossrefGenerator(VEP_file_path, crossref_filename):
     #append results to new file 
     if os.path.isfile('.'+ crossref_filename) :
 
-        gene_unique_ids.to_csv(crossref_filename,mode='a', sep='\t', header=False, index = False)
+        gene_unique_ids.to_csv(crossref_filename, mode='a', sep='\t', header=False, index = False)
 
     else :
 
-        gene_unique_ids.to_csv(crossref_filename, sep='\t', header=True, index = False)
+        gene_unique_ids.to_csv(crossref_filename, mode = 'a', sep='\t', header=True, index = False)
         
