@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
 #from __future__ import print_function
 
-import sys
-import os
-import gzip
-import re
-import pandas as pd
+#import sys
+#import os
+#import gzip
+#import re
+#import pandas as pd
 #from parse import Lexer, Parser, Token, State, NFA, Handler
 #import dask.dataframe as dd
 #import re
 #import pkg_resources
 #import click
 #import locale
-
+import VEPparser as vp
+import sys
+import os
+import gzip
+import re
+import pandas as pd
+from timeit import default_timer as timer
 # from codecs import open, getreader
 
 
@@ -21,7 +27,40 @@ import pandas as pd
 
 ####            Parser:         ####
 
-# class VEPparser(object):
+
+def ensemblIDtranslator(...): 
+    
+
+
+def VEPparser( VEPfile, vepfile, geneID):
+    # create empty list to store the rows 
+    matches = []
+    for line in VEPfile:
+        df = re.findall(r''+geneID, line) # similar to grep. Faster than reading the 
+        if df: 
+            matches.append(line.split("\t"))
+    df0 = pd.read_csv(vepfile, nrows = 0, skiprows = 42, sep = "\t")
+    df = pd.DataFrame(matches)
+    df.columns = df0.columns
+
+    #index = df_vep.columns.get_loc("Amino_acids")
+    return df
+
+
+def InterfacesDBparser(InterfacesDB, geneID):
+    # create empty list to store 
+    matches = []
+    # find all the lines in the VEP file that contain information for a certain geneID
+    for line in InterfacesDB:
+        #df = re.findall(r'ENSP00000352835', line)
+        if geneID in line:  # it is faster than regex
+            df = line
+        #if we find a match, store it
+            if df:  
+                matches.append(line.split(" "))
+    df = pd.DataFrame(matches)
+    return df
+
 
 # def joinDataFrames(vcf_file, interfaces_db):
 #     # Read the CSVs
@@ -33,65 +72,3 @@ import pandas as pd
 
 #     # Save the merged dataframe
 #     df.to_csv('merged.csv', index=False)
-
-# Input arguments
-geneID = 'ENSG00000227232'
-VEPfile = open("/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/vep_PanCan_chr_1_1-100000", "r")
-InterfacesDB = open("/home/vruizser/PhD/2018-2019/Immunity_interfaces_analysis/raw_data/interfaces_mapped_to_v94.csv", "r")
-
-def VEPparser(VEPfile, geneID):
-    # create empty list to store 
-    matches = []
-    for line in VEPfile:
-        df = re.findall(r''+geneID, line)
-        if df: 
-            matches.append(line.split("\t"))
-
-    df = pd.DataFrame(matches)
-    
-    print(df[10]) 
-
-def InterfacesDBparser(InterfacesDB, geneID):
-    # create empty list to store 
-    matches = []
-    # find all the lines in the VEP file that contain information for a certain geneID
-    for line in InterfacesDB:
-        #df = re.findall(r'ENSP00000352835', line)
-        if 'ENSP00000352835' in line:  # it is faster than regex
-            df = line
-        #if we find a match, store it
-            if df:  
-                matches.append(line.split(" "))
-    df = pd.DataFrame(matches)
-    
-    print(df) 
-    return
-
-def InterfacesDBparser2(InterfacesDB, geneID):
-    # create empty list to store 
-    matches = []
-    # find all the lines in the VEP file that contain information for a certain geneID
-    for line in InterfacesDB:
-        df = re.findall(r'ENSP00000352835', line)
-        #if we find a match, store it
-        if df:  
-            matches.append(line.split(" "))
-
-    df = pd.DataFrame(matches)
-    
-    print(df) 
-    return
-
-# define main function to execute the previous defined functions together
-def main():
-
-    #VEPparser(VEPfile, geneID)
-    InterfacesDBparser(InterfacesDB, geneID)
-    return
-
-
-##########################
-# execute main function  #
-##########################
-if __name__ == '__main__':
-    main()
