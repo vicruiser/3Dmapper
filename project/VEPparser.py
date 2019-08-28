@@ -28,8 +28,35 @@ from timeit import default_timer as timer
 ####            Parser:         ####
 
 
-def ensemblIDtranslator(...): 
-    
+def ensemblIDtranslator(biomartdb, ensid): 
+    cols = biomartdb.readline().split(",")
+    # find all the lines in the VEP file that contain information for a certain geneID
+    for line in biomartdb:
+
+        if ensid in line:  # it is faster than regex
+            
+            gene_col = cols.index("Gene stable ID")
+            prot_col = cols.index("Protein stable ID\n")
+            
+            if "ENSP" in ensid:
+                protID = ensid
+                geneID = line.split(",")[gene_col].strip() # remove \n at the end of the word
+            elif "ENSG" in ensid:
+                protID = line.split(",")[prot_col].strip()
+                geneID = ensid
+            else :
+                print("wrong id format")
+
+    #df = pd.DataFrame(matches)
+    return {'protID': protID, 'geneID': geneID}
+
+def getVEPfile (crossref_file, geneID): 
+     
+    matches = []
+    for line in crossref_file:
+        if geneID in line: 
+            vepf = line.split("\t")[1].strip()
+    print(vepf)
 
 
 def VEPparser( VEPfile, vepfile, geneID):
