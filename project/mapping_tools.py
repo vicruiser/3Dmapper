@@ -1,34 +1,16 @@
 #!/usr/bin/env python3
-#from __future__ import print_function
 
 #import sys
 #import os
-#import gzip
 #import re
 #import pandas as pd
-#from parse import Lexer, Parser, Token, State, NFA, Handler
-#import dask.dataframe as dd
-#import re
-#import pkg_resources
-#import click
-#import locale
-import VEPparser as vp
-import sys
-import os
-import gzip
-import re
-import pandas as pd
-from timeit import default_timer as timer
-# from codecs import open, getreader
-
+#from timeit import default_timer as timer
 
 # from vcf_parser import (Genotype, HeaderParser)
 # from vcf_parser.utils import (format_variant, split_variants)
 
-####            Parser:         ####
 
-
-def ensemblIDtranslator(biomartdb, ensid): 
+def ensemblID_translator(biomartdb, ensid): 
     cols = biomartdb.readline().split(",")
     # find all the lines in the VEP file that contain information for a certain geneID
     for line in biomartdb:
@@ -47,10 +29,11 @@ def ensemblIDtranslator(biomartdb, ensid):
             else :
                 print("wrong id format")
 
-    #df = pd.DataFrame(matches)
     return {'protID': protID, 'geneID': geneID}
 
-def getVEPfile (crossref_file, geneID): 
+
+
+def VEP_getter (crossref_file, geneID): 
      
     matches = []
     for line in crossref_file:
@@ -59,14 +42,15 @@ def getVEPfile (crossref_file, geneID):
     print(vepf)
 
 
-def VEPparser( VEPfile, vepfile, geneID):
+    
+def VEP_parser( VEPfile, geneID):
     # create empty list to store the rows 
     matches = []
     for line in VEPfile:
         df = re.findall(r''+geneID, line) # similar to grep. Faster than reading the 
         if df: 
             matches.append(line.split("\t"))
-    df0 = pd.read_csv(vepfile, nrows = 0, skiprows = 42, sep = "\t")
+    df0 = pd.read_csv(VEPfile, nrows = 0, skiprows = 42, sep = "\t")
     df = pd.DataFrame(matches)
     df.columns = df0.columns
 
@@ -74,7 +58,7 @@ def VEPparser( VEPfile, vepfile, geneID):
     return df
 
 
-def InterfacesDBparser(InterfacesDB, protID):
+def ProtIntDB_parser(InterfacesDB, protID):
     # create empty list to store 
     matches = []
     # find all the lines in the VEP file that contain information for a certain geneID
@@ -86,19 +70,8 @@ def InterfacesDBparser(InterfacesDB, protID):
             if df:  
                 matches.append(line.split(" "))
     df = pd.DataFrame(matches)
-    colnames = InterfacesDB.readline()
+    colnames = InterfacesDB.readline().split(" ")
     df.columns = colnames
     
     return df
 
-
-# def joinDataFrames(vcf_file, interfaces_db):
-#     # Read the CSVs
-#     df1 = dd.read_csv(vcf_file)
-#     df2 = dd.read_csv(interfaces_db)
-
-#     # Merge them
-#     df = dd.merge(df1, df2, on='Bin_ID').compute()
-
-#     # Save the merged dataframe
-#     df.to_csv('merged.csv', index=False)
