@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
 
-#import sys
-#import os
-#import re
-#import pandas as pd
+import sys
+import os
+import re
+import pandas as pd
 #from timeit import default_timer as timer
 
 # from vcf_parser import (Genotype, HeaderParser)
 # from vcf_parser.utils import (format_variant, split_variants)
 
+######## credit to piRSquared from stackoverflow ######################################
+def explode(df, columns):
+    idx = np.repeat(df.index, df[columns[0]].str.len())
+    a = df.T.reindex_axis(columns).values
+    concat = np.concatenate([np.concatenate(a[i]) for i in range(a.shape[0])])
+    p = pd.DataFrame(concat.reshape(a.shape[0], -1).T, idx, columns)
+    return pd.concat([df.drop(columns, axis=1), p], axis=1).reset_index(drop=True)   
+#######################################################################################
 
 def ensemblID_translator(biomartdb, ensid): 
     cols = biomartdb.readline().split(",")
@@ -47,31 +55,29 @@ def VEP_parser( VEPfile, geneID):
     # create empty list to store the rows 
     matches = []
     for line in VEPfile:
-        df = re.findall(r''+geneID, line) # similar to grep. Faster than reading the 
-        if df: 
+        if geneID in line: # similar to grep. Faster than reading the 
             matches.append(line.split("\t"))
-    df0 = pd.read_csv(VEPfile, nrows = 0, skiprows = 42, sep = "\t")
+    
+    cols = pd.read_csv(VEPfile, nrows = 0, skiprows = 42, sep = "\t")
     df = pd.DataFrame(matches)
-    df.columns = df0.columns
+    df.columns = cols
 
     #index = df_vep.columns.get_loc("Amino_acids")
     return df
 
 
-def ProtIntDB_parser(InterfacesDB, protID):
+def ProtIntDB_parser(interfacesDB, protID):
+    cols = interfacesDB.readline().strip().split(" ")
     # create empty list to store 
     matches = []
     # find all the lines in the VEP file that contain information for a certain geneID
-    for line in InterfacesDB:
+    for line in interfacesDB:
         #df = re.findall(r'ENSP00000352835', line)
         if protID in line:  # it is faster than regex
-            df = line
-        #if we find a match, store it
-            if df:  
-                matches.append(line.split(" "))
+            matches.append(line.split(" "))
+    
     df = pd.DataFrame(matches)
-    colnames = InterfacesDB.readline().split(" ")
-    df.columns = colnames
+    df.columns = cols
     
     return df
 
