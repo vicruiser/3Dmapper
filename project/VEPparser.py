@@ -74,18 +74,21 @@ def VEPparser( VEPfile, vepfile, geneID):
     return df
 
 
-def InterfacesDBparser(InterfacesDB, geneID):
+def InterfacesDBparser(InterfacesDB, protID):
     # create empty list to store 
     matches = []
     # find all the lines in the VEP file that contain information for a certain geneID
     for line in InterfacesDB:
         #df = re.findall(r'ENSP00000352835', line)
-        if geneID in line:  # it is faster than regex
+        if protID in line:  # it is faster than regex
             df = line
         #if we find a match, store it
             if df:  
                 matches.append(line.split(" "))
     df = pd.DataFrame(matches)
+    colnames = InterfacesDB.readline()
+    df.columns = colnames
+    
     return df
 
 
