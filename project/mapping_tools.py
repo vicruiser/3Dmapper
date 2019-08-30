@@ -4,12 +4,13 @@ import sys
 import os
 import re
 import pandas as pd
+import numpy as np
 #from timeit import default_timer as timer
 
 # from vcf_parser import (Genotype, HeaderParser)
 # from vcf_parser.utils import (format_variant, split_variants)
 
-######## credit to piRSquared from stackoverflow ######################################
+######## credit to @piRSquared from stackoverflow ######################################
 def explode(df, columns):
     idx = np.repeat(df.index, df[columns[0]].str.len())
     a = df.T.reindex_axis(columns).values
@@ -17,6 +18,19 @@ def explode(df, columns):
     p = pd.DataFrame(concat.reshape(a.shape[0], -1).T, idx, columns)
     return pd.concat([df.drop(columns, axis=1), p], axis=1).reset_index(drop=True)   
 #######################################################################################
+
+def parser( input_file, ensemblID, colnames, sep):
+    
+    # create empty list to store the rows 
+    matches = []
+    for line in input_file:
+        if ensemblID in line: # similar to grep. Faster than reading the 
+            matches.append(line.split(sep))
+    
+    df = pd.DataFrame(matches)
+    df.columns = colnames
+
+    return df
 
 def ensemblID_translator(biomartdb, ensid): 
     cols = biomartdb.readline().split(",")
@@ -47,37 +61,4 @@ def VEP_getter (crossref_file, geneID):
     for line in crossref_file:
         if geneID in line: 
             vepf = line.split("\t")[1].strip()
-    print(vepf)
-
-
-    
-def VEP_parser( VEPfile, geneID):
-    # create empty list to store the rows 
-    matches = []
-    for line in VEPfile:
-        if geneID in line: # similar to grep. Faster than reading the 
-            matches.append(line.split("\t"))
-    
-    cols = pd.read_csv(VEPfile, nrows = 0, skiprows = 42, sep = "\t")
-    df = pd.DataFrame(matches)
-    df.columns = cols
-
-    #index = df_vep.columns.get_loc("Amino_acids")
-    return df
-
-
-def ProtIntDB_parser(interfacesDB, protID):
-    cols = interfacesDB.readline().strip().split(" ")
-    # create empty list to store 
-    matches = []
-    # find all the lines in the VEP file that contain information for a certain geneID
-    for line in interfacesDB:
-        #df = re.findall(r'ENSP00000352835', line)
-        if protID in line:  # it is faster than regex
-            matches.append(line.split(" "))
-    
-    df = pd.DataFrame(matches)
-    df.columns = cols
-    
-    return df
-
+    return vepf
