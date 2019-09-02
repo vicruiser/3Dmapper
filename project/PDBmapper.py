@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
+# Import necesary modules 
 import mapping_tools as mt
 import numpy as np
 import sys
@@ -14,35 +12,38 @@ import pandas as pd
 from timeit import default_timer as timer
 from VEPcrossref import VEPfileCrossrefGenerator as cr
 
-
-# In[ ]:
-
-
-# INTERFACES PART
-
-
-# In[2]:
-
-
 # Extract the info corresponding to the prot ID (Interface parse)
 
-#sys.argv[1]
-#sys.argv[2]
-
-protID = 'ENSP00000482258'
-int_db_file = '/home/vruizser/PhD/2018-2019/Immunity_interfaces_analysis/raw_data/interfaces_mapped_to_v94.csv'
-
-  
-interfacesDB = open(int_db_file, "r")
-cols = interfacesDB.readline().strip().split(" ")
-#prot_interface = mt.ProtIntDB_parser(interfacesDB, protID)
-prot_interface = mt.parser(interfacesDB,  protID, cols, " " )
+#protID = 'ENSP00000482258'
+#int_db_file = '/home/vruizser/PhD/2018-2019/Immunity_interfaces_analysis/raw_data/interfaces_mapped_to_v94.csv'
 
 
-# In[10]:
+def PDBmapper(protID, interfacesDB_filepath):
+    """Generate setID file.
+    
+    Parameters
+    ----------
+    protID : str
+        input path of the VEP file
+    interfacesDB_filepath : str
+        chosen name of the output file
 
+    Returns
+    -------
+    setID.File
+        write data frame to a txt file with two columns: one is the gene ids and the other one the VEP file
+    data.frame 
+        kasklkssklasdkmaskldmakmdalkmd
+    """
 
-subset_prot_interface = prot_interface[['pdb.id',
+    # read interfaces file
+    interfacesDB = open(interfacesDB_filepath, "r")
+    # get colnames of interfaces file
+    intDB_colnames = interfacesDB.readline().strip().split(" ")
+    # parse information related to protein ID
+    prot_interface = mt.parser(interfacesDB,  protID, intDB_colnames, " " )
+    # store 
+    subset_prot_interface = prot_interface[['pdb.id',
                       'ensembl.prot.id',
                       'temp.chain',
                       'int.chain',
@@ -115,10 +116,10 @@ setID = MapVariantToPDB(VEP, subset_prot_interface, 'region_id')
 # define main function to execute the previous defined functions together
 def main():
 
- 
+    protID = sys.argv[1]
+    interfacesDB_filepath = sys.argv[2]
 
-    
-    
+    PDBmapper(protID, interfacesDB_filepath)
     return
 
 
