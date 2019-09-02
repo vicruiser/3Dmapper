@@ -44,57 +44,36 @@ def PDBmapper(protID, interfacesDB_filepath):
     prot_interface = mt.parser(interfacesDB,  protID, intDB_colnames, " " )
     # store 
     subset_prot_interface = prot_interface[['pdb.id',
-                      'ensembl.prot.id',
-                      'temp.chain',
-                      'int.chain',
-                      'interaction',
-                      'resid_sseq',
-                      'mapped.real.pos',
-                      'pdb.pos' ]]
+                                            'ensembl.prot.id',
+                                            'temp.chain',
+                                            'int.chain',
+                                            'interaction',
+                                            'resid_sseq',
+                                            'mapped.real.pos',
+                                            'pdb.pos' ]]
 
-# put it into right format
-subset_prot_interface.columns = subset_prot_interface.columns.str.replace("\\.", "_")
+    # put it into right format
+    subset_prot_interface.columns = subset_prot_interface.columns.str.replace("\\.", "_")
 
-for col in ("resid_sseq", "mapped_real_pos", "pdb_pos"):
-    subset_prot_interface.loc[ : , col] = subset_prot_interface[col].str.replace("-", ',')
-    subset_prot_interface.loc[ : , col] = subset_prot_interface[col].str.split(',')
+    for col in ("resid_sseq", "mapped_real_pos", "pdb_pos"):
+        subset_prot_interface.loc[ : , col] = subset_prot_interface[col].str.replace("-", ',')
+        subset_prot_interface.loc[ : , col] = subset_prot_interface[col].str.split(',')
 
-subset_prot_interface = mt.explode(subset_prot_interface, ["resid_sseq", "mapped_real_pos", "pdb_pos"])
+    subset_prot_interface = mt.explode(subset_prot_interface, ["resid_sseq", "mapped_real_pos", "pdb_pos"])
 
-subset_prot_interface.rename(columns={'mapped_real_pos':'Protein_position'}, inplace=True)
+    subset_prot_interface.rename(columns={'mapped_real_pos':'Protein_position'}, inplace=True)
 
-subset_prot_interface['region_id'] = subset_prot_interface['pdb_id'] + '_' + subset_prot_interface['ensembl_prot_id'] + '_' + subset_prot_interface['temp_chain'] + '_' + subset_prot_interface['int_chain'] + '_' + subset_prot_interface['interaction']
+    subset_prot_interface['region_id'] = subset_prot_interface['pdb_id'] + '_' + subset_prot_interface['ensembl_prot_id'] + '_' + subset_prot_interface['temp_chain'] + '_' + subset_prot_interface['int_chain'] + '_' + subset_prot_interface['interaction']
 
-
-# In[ ]:
-
-
-####################### VARIANTS PART #####################################################
+    biomartdb = open("/home/vruizser/PhD/2018-2019/git/PDBmapper/project/gene_transcript_protein_ens_ids.txt", "r")
+    ensemblIDs = mt.ensemblID_translator(biomartdb, protID)
 
 
-# In[32]:
 
+    # get the corresponding VEP file
+    crossref_file = open("/home/vruizser/PhD/2018-2019/git/PDBmapper/project/geneids_VEPfiles_crossref.txt", "r")
+    VEP_filename = mt.VEP_getter(crossref_file, ensemblIDs["geneID"])
 
-# Translate protID to gene ID
-#subset_prot_interface
-
-
-# In[4]:
-
-
-biomartdb = open("/home/vruizser/PhD/2018-2019/git/PDBmapper/project/gene_transcript_protein_ens_ids.txt", "r")
-ensemblIDs = mt.ensemblID_translator(biomartdb, protID)
-
-
-# In[5]:
-
-
-# get the corresponding VEP file
-crossref_file = open("/home/vruizser/PhD/2018-2019/git/PDBmapper/project/geneids_VEPfiles_crossref.txt", "r")
-VEP_filename = mt.VEP_getter(crossref_file, ensemblIDs["geneID"])
-
-
-# In[6]:
 
 
 VEP_dir= "/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/"
