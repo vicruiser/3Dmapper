@@ -34,11 +34,11 @@ def parse_commandline():
         if args:
             options.fasta = args.pop()
         else:
-            print "Need at least an input file (fasta)"
-            print ""
+            print ("Need at least an input file (fasta)")
+            print ("")
             parser.print_help()
-            print ""
-            print "ERROR: no input file given"
+            print ("")
+            print ("ERROR: no input file given")
             exit(-1)
 
     # check for any leftover command line arguments:

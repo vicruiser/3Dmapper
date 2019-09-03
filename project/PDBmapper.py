@@ -11,6 +11,7 @@ import re
 import pandas as pd
 from timeit import default_timer as timer
 from VEPcrossref import VEPfileCrossrefGenerator as cr
+import optparse
 
 # Extract the info corresponding to the prot ID (Interface parse)
 
@@ -76,24 +77,25 @@ def PDBmapper(protID, interfacesDB_filepath):
 
 
 
-VEP_dir= "/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/"
-VEPfile = open(VEP_dir + VEP_filename, "r")
-geneID = ensemblIDs['geneID']
-cols = pd.read_csv(VEPfile, nrows = 0, skiprows = 42, sep = "\t").columns
-VEP = mt.parser(VEPfile,  geneID, cols, "\t" )
+    VEP_dir= "/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/"
+    VEPfile = open(VEP_dir + VEP_filename, "r")
+    geneID = ensemblIDs['geneID']
+    cols = pd.read_csv(VEPfile, nrows = 0, skiprows = 42, sep = "\t").columns
+    VEP = mt.parser(VEPfile,  geneID, cols, "\t" )
 
 
-# In[9]:
-
-
-setID = MapVariantToPDB(VEP, subset_prot_interface, 'region_id')
-
-
-# In[ ]:
+    setID = MapVariantToPDB(VEP, subset_prot_interface, 'region_id')
 
 
 # define main function to execute the previous defined functions together
 def main():
+    ## in the prompt line, if we write "--orf yes" then we will have the option to
+## see all the possible ORFs in our sequence
+    parser = optparse.OptionParser()
+    parser.add_option('--orf', action='store', dest='orf', type='string')
+    (options, args) = parser.parse_args()
+
+    #if options.orf == 'yes':
 
     protID = sys.argv[1]
     interfacesDB_filepath = sys.argv[2]
@@ -107,4 +109,3 @@ def main():
 ##########################
 if __name__ == '__main__':
     main()
-
