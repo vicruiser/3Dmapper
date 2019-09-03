@@ -18,26 +18,8 @@ import optparse
 #protID = 'ENSP00000482258'
 #int_db_file = '/home/vruizser/PhD/2018-2019/Immunity_interfaces_analysis/raw_data/interfaces_mapped_to_v94.csv'
 
-
-def PDBmapper(protID, interfacesDB_filepath):
-    """Generate setID file.
-    
-    Parameters
-    ----------
-    protID : str
-        input path of the VEP file
-    interfacesDB_filepath : str
-        chosen name of the output file
-
-    Returns
-    -------
-    setID.File
-        write data frame to a txt file with two columns: one is the gene ids and the other one the VEP file
-    data.frame 
-        kasklkssklasdkmaskldmakmdalkmd
-    """
-
-    # read interfaces file
+def interfaceParse (interfacesDB_filepath, protID):
+        # read interfaces file
     interfacesDB = open(interfacesDB_filepath, "r")
     # get colnames of interfaces file
     intDB_colnames = interfacesDB.readline().strip().split(" ")
@@ -65,6 +47,25 @@ def PDBmapper(protID, interfacesDB_filepath):
     subset_prot_interface.rename(columns={'mapped_real_pos':'Protein_position'}, inplace=True)
 
     subset_prot_interface['region_id'] = subset_prot_interface['pdb_id'] + '_' + subset_prot_interface['ensembl_prot_id'] + '_' + subset_prot_interface['temp_chain'] + '_' + subset_prot_interface['int_chain'] + '_' + subset_prot_interface['interaction']
+
+def PDBmapper(protID, interfacesDB_filepath):
+    """Generate setID file.
+    
+    Parameters
+    ----------
+    protID : str
+        input path of the VEP file
+    interfacesDB_filepath : str
+        chosen name of the output file
+
+    Returns
+    -------
+    setID.File
+        write data frame to a txt file with two columns: one is the gene ids and the other one the VEP file
+    data.frame 
+        kasklkssklasdkmaskldmakmdalkmd
+    """
+
 
     biomartdb = open("/home/vruizser/PhD/2018-2019/git/PDBmapper/project/gene_transcript_protein_ens_ids.txt", "r")
     ensemblIDs = mt.ensemblID_translator(biomartdb, protID)
