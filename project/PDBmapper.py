@@ -19,6 +19,22 @@ import optparse
 #int_db_file = '/home/vruizser/PhD/2018-2019/Immunity_interfaces_analysis/raw_data/interfaces_mapped_to_v94.csv'
 
 def interfaceParse (interfacesDB_filepath, protID):
+    """Generate setID file.
+    
+    Parameters
+    ----------
+    protID : str
+        input path of the VEP file
+    interfacesDB_filepath : str
+        chosen name of the output file
+
+    Returns
+    -------
+    setID.File
+        write data frame to a txt file with two columns: one is the gene ids and the other one the VEP file
+    data.frame 
+        kasklkssklasdkmaskldmakmdalkmd
+    """
         # read interfaces file
     interfacesDB = open(interfacesDB_filepath, "r")
     # get colnames of interfaces file
@@ -133,6 +149,7 @@ def main():
     interfacesDB_filepath = sys.argv[2]
 
     PDBmapper(protID, interfacesDB_filepath)
+    
     return
 
 

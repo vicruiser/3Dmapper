@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # for commandline options:
 from optparse import OptionParser, OptionGroup
+import argparse
 from numpy import mean
 import sys
 import urllib2
@@ -19,51 +20,54 @@ def parse_commandline():
     parser = OptionParser(usage=usage, description=description,
                         version="%prog "+version, epilog=epilog)
 
-    # sequence/alignment options:
-    parser.add_option("-f", "--fasta",  dest="fasta", metavar="<file>",
-                    help="input alignment file (fasta)")
-    parser.set_defaults(fasta=None)
+    mutex_group = parser.add_mutually_exclusive_group()
+    parser.add_option("", "--vcf",  dest="vcf", metavar="<file>",
+                    help="input variant annotations (vcf)")
+    parser.set_defaults(vcf=None)
+    
+    parser.add_option("", "--vep",  dest="vep", metavar="<file>",
+                    help="input variant file to annotate them with VEP")
+    parser.set_defaults(vep=None)
 
-    parser.add_option("-e", "",  dest="exchange_matrix",
-                    help="Exchange matrix: pam250, blosum62 or identity (%default)")
-    parser.set_defaults(exchange_matrix="pam250")
+    parser.add_option("-vm", "--varmap",  dest="varmap", action = "store_true",
+                    help="use VarMap db of annotated variants")
+    parser.set_defaults(varmap=True)
 
-    parser.add_option("-l", "",  dest="align_local",  action="store_true",
-                    help="align local")
+
+
+mutex_group.add_argument("--show", action="store_const", 
+    dest="mutex", const="show")
+mutex_group.add_argument("--insert", action="store_const", 
+    dest="mutex", const="insert")
+mutex_group.add_argument('--delete', action="store_const",
+    dest="mutex", const="delete")
+
+
+parser.set_defaults(mutex='show')
+args = parser.parse_args()
+print(args)
+
+
+    parser.add_option("", "--intdb",  dest="intdb", metavar="<file>",
+                    help="Interfaces database")
+    parser.set_defaults(int_db=None)
+
+    parser.add_option("-p", "--protid",  dest="protein_id",  action="store_true",
+                    help="Ensembl protein id")
     parser.set_defaults(align_local=False)
 
-    parser.add_option("-g", "",  dest="align_global", action="store_true",
-                    help="align global")
-    parser.set_defaults(align_global=False)
-
-    parser.add_option("-s", "",  dest="align_semiglobal", action="store_true",
-                    help="align semi-global")
-    parser.set_defaults(align_semiglobal=False)
-
-    parser.add_option("-p", "",  dest="gap_penalty", type="int",
-                    help="Gap penalty (%default)")
-    parser.set_defaults(gap_penalty=2)
-
-        ## in the prompt line, if we write "--orf yes" then we will have the option to
-## see all the possible ORFs in our sequence
-    parser = optparse.OptionParser()
-    parser.add_option('--vep', dest='vep',  metavar="<file>",
-                        help="input alignment file (fasta)")
-    parser.add_option('--vep', action='store', dest='vep', type='file')
-    (options, args) = parser.parse_args()
-
-    if options.vep == 'yes':
-        vcf = vep()
 
     # get the options:
     (options, args) = parser.parse_args()
 
-    if not options.fasta:
+    if not options.vcf:
         # check if we have an option left (to be used as input filename):
         if args:
-            options.fasta = args.pop()
+            options.varmap = args.pop()
+        elif args: 
+            options.vep = args.pop()
         else:
-            print ("Need at least an input file (fasta)")
+            print ("Need at least an input file (--vcf , --varmap or vcf)")
             print ("")
             parser.print_help()
             print ("")
