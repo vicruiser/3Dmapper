@@ -90,13 +90,44 @@ def PDBmapper(protID, interfacesDB_filepath):
 
 # define main function to execute the previous defined functions together
 def main():
-    ## in the prompt line, if we write "--orf yes" then we will have the option to
-## see all the possible ORFs in our sequence
-    parser = optparse.OptionParser()
-    parser.add_option('--orf', action='store', dest='orf', type='string')
-    (options, args) = parser.parse_args()
 
-    #if options.orf == 'yes':
+    
+    # get command line options
+    options = parse_commandline()
+
+    # set substitution matrix:
+    if options.exchange_matrix == "pam250":
+        exchangeMatrix = pam250
+    elif options.exchange_matrix == "blosum62":
+        exchangeMatrix = blosum62
+    elif options.exchange_matrix == "identity":
+        exchangeMatrix = identity
+    else:
+        print "unknown exchange matrix", options.exchange_matrix
+        exit(-1)
+
+    # Set each matching residues with their score with previous defined "SubsMatrix" class.
+    sm=SubsMatrix()
+    exchangeMatrix=sm.subsmatrix_dict(exchangeMatrix)
+
+    # read sequences from fasta file, and catch error reading file
+    try:
+        sequences = readSequences(open(options.fasta))
+    except IOError:
+        print "ERROR: cannot open or read fasta input file:", fastafile
+        exit(-1)
+
+
+    # call alignment routine(s):
+    if options.align_global:
+        do_global_alignment(sequences, exchangeMatrix, options.gap_penalty)
+    elif options.align_local:
+        do_local_alignment(sequences, exchangeMatrix, options.gap_penalty)
+    elif options.align_semiglobal:
+        do_semiglobal_alignment(sequences, exchangeMatrix, options.gap_penalty)
+    else:
+        print "BUG! this should not happen."
+        exit(-1)
 
     protID = sys.argv[1]
     interfacesDB_filepath = sys.argv[2]

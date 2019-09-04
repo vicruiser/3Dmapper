@@ -14,17 +14,46 @@ def parse_commandline():
     epilog = \
         "Copyright (c) 2019 Victoria Ruiz -- "\
         "vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel"
+
+
     parser = OptionParser(usage=usage, description=description,
-                            version="%prog "+version, epilog=epilog)
+                        version="%prog "+version, epilog=epilog)
 
     # sequence/alignment options:
     parser.add_option("-f", "--fasta",  dest="fasta", metavar="<file>",
-                        help="input alignment file (fasta)")
+                    help="input alignment file (fasta)")
     parser.set_defaults(fasta=None)
 
-    #parser.add_option("-b",  dest="fasta2", metavar="<file>",
-    #                 help="input alignment file (fasta)")
-    parser.set_defaults(fasta2=None)
+    parser.add_option("-e", "",  dest="exchange_matrix",
+                    help="Exchange matrix: pam250, blosum62 or identity (%default)")
+    parser.set_defaults(exchange_matrix="pam250")
+
+    parser.add_option("-l", "",  dest="align_local",  action="store_true",
+                    help="align local")
+    parser.set_defaults(align_local=False)
+
+    parser.add_option("-g", "",  dest="align_global", action="store_true",
+                    help="align global")
+    parser.set_defaults(align_global=False)
+
+    parser.add_option("-s", "",  dest="align_semiglobal", action="store_true",
+                    help="align semi-global")
+    parser.set_defaults(align_semiglobal=False)
+
+    parser.add_option("-p", "",  dest="gap_penalty", type="int",
+                    help="Gap penalty (%default)")
+    parser.set_defaults(gap_penalty=2)
+
+        ## in the prompt line, if we write "--orf yes" then we will have the option to
+## see all the possible ORFs in our sequence
+    parser = optparse.OptionParser()
+    parser.add_option('--vep', dest='vep',  metavar="<file>",
+                        help="input alignment file (fasta)")
+    parser.add_option('--vep', action='store', dest='vep', type='file')
+    (options, args) = parser.parse_args()
+
+    if options.vep == 'yes':
+        vcf = vep()
 
     # get the options:
     (options, args) = parser.parse_args()
