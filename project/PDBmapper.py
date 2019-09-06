@@ -16,7 +16,7 @@ import parse_argv
 # Extract the info corresponding to the prot ID (Interface parse)
 
 #protID = 'ENSP00000482258'
-#int_db_file = '/home/vruizser/PhD/2018-2019/Immunity_interfaces_analysis/raw_data/interfaces_mapped_to_v94.csv'
+#int_db_file = './dbs/interfaces_mapped_to_v94.csv'
 
 def interfaceParse (interfacesDB, protID):
     """Parse input interfaces database to put it in the right format.
@@ -26,17 +26,19 @@ def interfaceParse (interfacesDB, protID):
     protID : str
         Ensemble protein id 
     interfacesDB_filepath : str
-        
-
+        DESCRIPTION MISSING!!
     Returns
     -------
     subset_interfaces_db
-        write data frame to a txt file with two columns: one is the gene ids and the other one the VEP file
+        DESCRIPTION MISSING!!
     """
     # get colnames of interfaces file
     intDB_colnames = interfacesDB.readline().strip().split(" ")
     # parse information related to protein ID
-    prot_interface = mt.parser(interfacesDB,  protID, intDB_colnames, " " )
+    prot_interface = mt.parser(input_file = interfacesDB,
+                                ensemblID = protID,
+                                colnames =  intDB_colnames,
+                                sep = " " )
     # store 
     subset_prot_interface = prot_interface[['pdb.id',
                                             'ensembl.prot.id',
@@ -46,7 +48,6 @@ def interfaceParse (interfacesDB, protID):
                                             'resid_sseq',
                                             'mapped.real.pos',
                                             'pdb.pos' ]]
-
     # put it into right format
     subset_prot_interface.columns = subset_prot_interface.columns.str.replace("\\.", "_")
 
@@ -55,26 +56,39 @@ def interfaceParse (interfacesDB, protID):
         subset_prot_interface.loc[ : , col] = subset_prot_interface[col].str.split(',')
 
     subset_prot_interface = mt.explode(subset_prot_interface, ["resid_sseq", "mapped_real_pos", "pdb_pos"])
-
     subset_prot_interface.rename(columns={'mapped_real_pos':'Protein_position'}, inplace=True)
-
     subset_prot_interface['region_id'] = subset_prot_interface['pdb_id'] + '_' + subset_prot_interface['ensembl_prot_id'] + '_' + subset_prot_interface['temp_chain'] + '_' + subset_prot_interface['int_chain'] + '_' + subset_prot_interface['interaction']
     
     return subset_prot_interface
 
-def vcfParser (annovar_filepath, protID):
-    biomartdb = open("/home/vruizser/PhD/2018-2019/git/PDBmapper/project/gene_transcript_protein_ens_ids.txt", "r")
-    ensemblIDs = mt.ensemblID_translator(biomartdb, protID)
+def vcfParser(VEP_file, geneID):
+    """Parse input interfaces database to put it in the right format.
+    
+    Parameters
+    ----------
+    protID : str
+        Ensemble protein id 
+    interfacesDB_filepath : str
+        DESCRIPTION MISSING!!
+    Returns
+    -------
+    subset_interfaces_db
+        DESCRIPTION MISSING!!
+    """
 
-    # get the corresponding VEP file
-    crossref_file = open("/home/vruizser/PhD/2018-2019/git/PDBmapper/project/geneids_VEPfiles_crossref.txt", "r")
-    VEP_filename = mt.VEP_getter(crossref_file, ensemblIDs["geneID"])
+    
     VEP_dir= "/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/"
-    VEPfile = open(VEP_dir + VEP_filename, "r")
     geneID = ensemblIDs['geneID']
+    VEPfile = open(VEP_dir + VEP_filename, "r")
+
+
     cols = pd.read_csv(VEPfile, nrows = 0, skiprows = 42, sep = "\t").columns
-    VEP = mt.parser(VEPfile,  geneID, cols, "\t" )
-    return VEP
+    VCF = mt.parser(input_file = VEPfile,
+                    ensemblID = geneID,
+                    colnames = cols,
+                    sep = "\t" )
+
+    return VCF
 
 def PDBmapper(protID, interfacesDB, annovar):
     """Generate setID file.
@@ -102,28 +116,34 @@ def main():
 
     # get command line options
     args = parse_argv.parse_commandline()
-
+    
     # set interfaces db:
     if args.intdb:
-        interfacesDB_file = args.intdb
         try:
-            interfacesDB = open(interfacesDB_file, 'r')
-            interfacesDB = interfaceParse(interfacesDB, args.protid)
+            interfacesDB = open(args.intdb, 'r')
         except IOError:
-            print ("ERROR: cannot open or read input interfaces db file:")
+            print ("ERROR: cannot open or read input interfaces db file.")
             exit(-1)
     else: 
         print ("Default interfaces DB is used.")
-        interfacesDB_file = open("./PDBmapper/dbs/interfaces.csv", 'r')
-
+        interfacesDB_file = open("./dbs/interfaces_mapped_to_v94.csv", 'r')
+        interfacesDB = interfaceParse(interfacesDB_file, args.protid)
+    
     # set annovar:
     if args.annovar == "vep": 
-        print("VEP option will be available soon. Using VarMap db instead. Provide a vcf file please otherwise.")
+        print("""VEP option will be available soon. Using VarMap db instead.
+        Otherwise, provide your own vcf file with the -vcf option, please.""")
         annovar_file =  open("output_vep.txt", 'r')
     elif args.annovar == "vcf":
         try: 
             print ("VarMap db is used.")
+            biomartdb = open("./dbs/gene_transcript_protein_ens_ids.txt", "r")
+            ensemblIDs = mt.ensemblID_translator(biomartdb, args.protID)
+            # get the corresponding VEP file
+            crossref_file = open("dbs/gene_transcript_protein_ens_ids.txt", "r")
+            VEP_filename = mt.VEP_getter(crossref_file, ensemblIDs["geneID"])
             annovar_file = open(args.annovar, 'r')
+            
             annovar = vcfParser(annovar_file, args.protID)
         except IOError:
             print ("ERROR: cannot open or read input vcf file:")
@@ -138,7 +158,7 @@ def main():
             exit(-1)
     
     # run PDBmapper
-    PDBmapper(args.protid, interfacesDB, annovar)
+    #PDBmapper(args.protid, interfacesDB, annovar)
 
 
 

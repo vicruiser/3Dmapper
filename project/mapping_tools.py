@@ -56,11 +56,11 @@ def ensemblID_translator(biomartdb, ensid):
 
 
 def VEP_getter (crossref_file, geneID): 
-     
     matches = []
     for line in crossref_file:
         if geneID in line: 
             vepf = line.split("\t")[1].strip()
+    
     return vepf
 
 
@@ -69,7 +69,7 @@ def MapVariantToPDB(variantDF, interfacesDF, region_of_interest ):
     # Merge them both files
     df = pd.merge(variantDF, interfacesDF,on=["Protein_position"],how='inner')
     setID_file = df[[region_of_interest,
-                      '#Uploaded_variation']]
+                    '#Uploaded_variation']]
     setID_file = setID_file.drop_duplicates()
     # Save the merged dataframe
     df.to_csv('MappedVariants.File', index=False, header= True, sep = " " )
