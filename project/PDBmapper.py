@@ -66,50 +66,50 @@ def vcfParser(VEP_file, geneID):
     
     Parameters
     ----------
-    protID : str
+    VEP_file : str
         Ensemble protein id 
-    interfacesDB_filepath : str
+    geneID : str
         DESCRIPTION MISSING!!
     Returns
     -------
-    subset_interfaces_db
+    VCF_subset
         DESCRIPTION MISSING!!
     """
-
-    
-    VEP_dir= "/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/"
-    geneID = ensemblIDs['geneID']
-    VEPfile = open(VEP_dir + VEP_filename, "r")
-
-
-    cols = pd.read_csv(VEPfile, nrows = 0, skiprows = 42, sep = "\t").columns
-    VCF = mt.parser(input_file = VEPfile,
+    cols = pd.read_csv(VEP_file, nrows = 0, skiprows = 42, sep = "\t").columns
+    VCF_subset = mt.parser(input_file = VEP_file,
                     ensemblID = geneID,
                     colnames = cols,
                     sep = "\t" )
 
-    return VCF
+    return VCF_subset
 
-def PDBmapper(protID, interfacesDB, annovar):
+def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
     """Generate setID file.
     
     Parameters
     ----------
     protID : str
         input path of the VEP file
-    interfacesDB_filepath : str
+    interfacesDB : str
+        chosen name of the output file
+    VCF_subset : str
         chosen name of the output file
 
     Returns
     -------
     setID.File
-        write data frame to a txt file with two columns: one is the gene ids and the other one the VEP file
-    data.frame 
-        kasklkssklasdkmaskldmakmdalkmd
+        write data frame to a txt file with two columns. One is the gene ids and the other one the VEP file
+    MappedVariants.File
+        more into
     """
-
-    setID = mt.MapVariantToPDB(annovar, interfacesDB, 'region_id')
-    setID.to_csv("setID.File")
+        # Merge them both files
+    df = pd.merge(VCF_subset, interfacesDB,on=["Protein_position"],how='inner')
+    setID_file = df[[protID,
+                    '#Uploaded_variation']]
+    setID_file = setID_file.drop_duplicates()
+    # Save the merged dataframe
+    df.to_csv(output_dir + 'MappedVariants.File', index=False, header= True, sep = " " )
+    setID_file.to_csv(output_dir + 'setID.File', index=False, header= False, sep = " " )
 
 # define main function to execute the previous defined functions together
 def main():
@@ -117,7 +117,7 @@ def main():
     # get command line options
     args = parse_argv.parse_commandline()
     
-    # set interfaces db:
+    # set interfacesDB_susbet:
     if args.intdb:
         try:
             interfacesDB = open(args.intdb, 'r')
@@ -127,22 +127,28 @@ def main():
     else: 
         print ("Default interfaces DB is used.")
         interfacesDB_file = open("./dbs/interfaces_mapped_to_v94.csv", 'r')
-        interfacesDB = interfaceParse(interfacesDB_file, args.protid)
+        interfacesDB_subset = interfaceParse(interfacesDB_file, args.protid)
     
-    # set annovar:
+    # set VCF_subset:
     if args.annovar == "vep": 
         print("""VEP option will be available soon. Using VarMap db instead.
         Otherwise, provide your own vcf file with the -vcf option, please.""")
-        annovar_file =  open("output_vep.txt", 'r')
+        args.annovar = "varmap"
     elif args.annovar == "vcf":
         try: 
-            print ("VarMap db is used.")
+            print ("vcf. file provided")
             biomartdb = open("./dbs/gene_transcript_protein_ens_ids.txt", "r")
+            print ("Reading file...")
             ensemblIDs = mt.ensemblID_translator(biomartdb, args.protID)
             # get the corresponding VEP file
-            crossref_file = open("dbs/gene_transcript_protein_ens_ids.txt", "r")
+            crossref_file = open("dbs/geneids_VEPfiles_crossref.txt", "r")
             VEP_filename = mt.VEP_getter(crossref_file, ensemblIDs["geneID"])
             annovar_file = open(args.annovar, 'r')
+            
+                
+            VEP_dir= "/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/"
+            geneID = ensemblIDs['geneID']
+            VEPfile = open(VEP_dir + VEP_filename, "r")
             
             annovar = vcfParser(annovar_file, args.protID)
         except IOError:
@@ -151,14 +157,14 @@ def main():
     elif args.annovar == "varmap": 
         try: 
             print ("VarMap db is used.")
-            annovar_file =  open("./PDBmapper/dbs/VarMap.csv", 'r')
+            annovar_file =  open("./PDBmapper/dbs/ClinVar.csv", 'r')
             annovar = vcfParser(annovar_file, args.protID)
         except IOError:
             print ("ERROR: cannot open or read input VarMap db file:")
             exit(-1)
     
     # run PDBmapper
-    #PDBmapper(args.protid, interfacesDB, annovar)
+    #PDBmapper(args.protid, interfacesDB_subset, VCF_subset)
 
 
 

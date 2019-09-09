@@ -62,16 +62,3 @@ def VEP_getter (crossref_file, geneID):
             vepf = line.split("\t")[1].strip()
     
     return vepf
-
-
-def MapVariantToPDB(variantDF, interfacesDF, region_of_interest ):
-
-    # Merge them both files
-    df = pd.merge(variantDF, interfacesDF,on=["Protein_position"],how='inner')
-    setID_file = df[[region_of_interest,
-                    '#Uploaded_variation']]
-    setID_file = setID_file.drop_duplicates()
-    # Save the merged dataframe
-    df.to_csv('MappedVariants.File', index=False, header= True, sep = " " )
-    setID_file.to_csv( 'setID.File', index=False, header= False, sep = " " )
-    
