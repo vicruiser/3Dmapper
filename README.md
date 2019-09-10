@@ -1,3 +1,6 @@
+<img src= "project/logo/image4.png" width = "600" heigh = "300">
+
+
 <<<<<<< HEAD
 ## Welcome to GitHub Pages
 
