@@ -83,7 +83,7 @@ def vcfParser(VCF_file, geneID):
                         colnames = cols,
                         sep = "\t" )
     elif args.varmap: 
-        
+
     return VCF_subset
 
 def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
@@ -176,7 +176,10 @@ def main():
     # set default output dir:
     if args.out is None:
         args.out = "./out/"
-        
+    
+    if args.chimera is not None:
+        chimera()
+    
     # run PDBmapper
     PDBmapper(args.protid, interfacesDB_subset, VCF_subset, args.out)
 

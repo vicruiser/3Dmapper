@@ -38,6 +38,10 @@ def parse_commandline():
     # protein id string
     parser.add_argument("-protid",  metavar = "<String>"  , dest= "protid",
                     help="Ensembl protein id", required = True)
+
+    # create chimera script to visualize the region of interest
+    parser.add_argument("-chimera",  action = "store_true", dest = "chimera",
+                    help="generates chimeraX script", type=dir_path )
     
     # create default output directory
     parser.add_argument("-out",  metavar = "<String>"  , dest = "out",
