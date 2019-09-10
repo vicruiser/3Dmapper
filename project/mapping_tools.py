@@ -5,10 +5,7 @@ import os
 import re
 import pandas as pd
 import numpy as np
-#from timeit import default_timer as timer
 
-# from vcf_parser import (Genotype, HeaderParser)
-# from vcf_parser.utils import (format_variant, split_variants)
 
 ######## credit to @piRSquared from stackoverflow ######################################
 def explode(df, columns):

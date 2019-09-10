@@ -61,7 +61,7 @@ def interfaceParse (interfacesDB, protID):
     
     return subset_prot_interface
 
-def vcfParser(VEP_file, geneID):
+def vcfParser(VCF_file, geneID):
     """Parse input interfaces database to put it in the right format.
     
     Parameters
@@ -75,12 +75,15 @@ def vcfParser(VEP_file, geneID):
     VCF_subset
         DESCRIPTION MISSING!!
     """
-    cols = pd.read_csv(VEP_file, nrows = 0, skiprows = 42,  sep = "\t").columns
-    VEP_file= open(VEP_file, 'r')
-    VCF_subset = mt.parser(input_file = VEP_file,
-                    ensemblID = geneID,
-                    colnames = cols,
-                    sep = "\t" )
+    if args.vcf:
+        cols = pd.read_csv(VCF_file, nrows = 0, skiprows = 42,  sep = "\t").columns
+        VCF_file= open(VCF_file, 'r')
+        VCF_subset = mt.parser(input_file = VCF_file,
+                        ensemblID = geneID,
+                        colnames = cols,
+                        sep = "\t" )
+    elif args.varmap: 
+        
     return VCF_subset
 
 def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
@@ -108,9 +111,13 @@ def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
                     '#Uploaded_variation']]
     print(output_dir)
     setID_file = setID_file.drop_duplicates()
-    # Save the merged dataframe
-    df.to_csv(output_dir + 'MappedVariants.File', index=False, header= True,   sep = " " )
-    setID_file.to_csv(output_dir + 'setID.File', index=False, header= False, sep = " " )
+    # Save the merged dataframe, appending results and not reapeting headers
+    with open(output_dir + 'setID.File', 'a') as f:
+        setID_file.to_csv(f, sep = " ", index=False,  header=f.tell()==0)
+
+    with open(output_dir + 'MappedVariants.File', 'a') as f:
+        df.to_csv(f, sep = " ", index=False,  header=f.tell()==0)
+
 
 # define main function to execute the previous defined functions together
 def main():
@@ -160,7 +167,7 @@ def main():
     elif args.varmap: 
         try: 
             print ("VarMap db is used.")
-            ClinVarDB =  open("./dbs/ClinVar.tsv", 'r')
+            ClinVarDB =  "./dbs/ClinVar.tsv"
             VCF_subset = vcfParser(ClinVarDB, args.protid)
         except IOError:
             print ("ERROR: cannot open or read input VarMap db file:")
@@ -181,7 +188,7 @@ if __name__ == '__main__':
     start = timer()
     main()
     end = timer()
-    print(end - start) 
+    print("Congratulations!. PDBmapper has run in" + end - start + "seconds.") 
 
 
 
