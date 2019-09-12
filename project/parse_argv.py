@@ -5,9 +5,9 @@ def dir_path(dirName):
     # Create target Directory if don't exist
     if not os.path.exists(dirName):
         os.mkdir(dirName)
-        print("Directory " , dirName ,  " Created ")
+        print("Directory" , dirName ,  "created.")
     else:    
-        print("Directory " , dirName ,  " already exists")
+        print( dirName ,  "is an existing directory. Results will be written in there.")
 
 def parse_commandline():
 
@@ -41,7 +41,7 @@ def parse_commandline():
 
     # create chimera script to visualize the region of interest
     parser.add_argument("-chimera",  action = "store_true", dest = "chimera",
-                    help="generates chimeraX script", type=dir_path )
+                    help="generates chimeraX script")
     
     # create default output directory
     parser.add_argument("-out",  metavar = "<String>"  , dest = "out",

@@ -11,3 +11,5 @@ project/logo/logoPDB_modificaciones.pdf
 project/dbs/ClinVar.tsv
 project/out/MappedVariants.File
 project/out/setID.File
+project/setID.File
+project/dbs/.~lock.ClinVar.tsv#

@@ -58,10 +58,10 @@ def interfaceParse (interfacesDB, protID):
     subset_prot_interface = mt.explode(subset_prot_interface, ["resid_sseq", "mapped_real_pos", "pdb_pos"])
     subset_prot_interface.rename(columns={'mapped_real_pos':'Protein_position'}, inplace=True)
     subset_prot_interface['region_id'] = subset_prot_interface['pdb_id'] + '_' + subset_prot_interface['ensembl_prot_id'] + '_' + subset_prot_interface['temp_chain'] + '_' + subset_prot_interface['int_chain'] + '_' + subset_prot_interface['interaction']
-    
+
     return subset_prot_interface
 
-def vcfParser(VCF_file, geneID):
+def vcfParser(VCF_file, geneID, *args):
     """Parse input interfaces database to put it in the right format.
     
     Parameters
@@ -75,16 +75,47 @@ def vcfParser(VCF_file, geneID):
     VCF_subset
         DESCRIPTION MISSING!!
     """
-    if args.vcf:
+
+    if  args[0] == "vcf":
         cols = pd.read_csv(VCF_file, nrows = 0, skiprows = 42,  sep = "\t").columns
         VCF_file= open(VCF_file, 'r')
         VCF_subset = mt.parser(input_file = VCF_file,
                         ensemblID = geneID,
                         colnames = cols,
                         sep = "\t" )
-    elif args.varmap: 
 
-    return VCF_subset
+        return VCF_subset
+    elif args[0] == "varmap": 
+        cols = pd.read_csv(VCF_file, nrows = 0, sep = "\t").columns
+        VCF_file= open(VCF_file, 'r')
+        VCF_subset = mt.parser(input_file = VCF_file,
+                        ensemblID = geneID,
+                        colnames = cols,
+                        sep = "\t" )
+        # 
+        VCF_subset = VCF_subset[["CHROMOSOME",
+                                "COORDS",
+                                "USER_BASE",
+                                "USER_VARIANT",
+                                "ENSEMBL_BASE",
+                                "VEP_CODING_BASE",
+                                "GENE",	
+                                "GENE_ACC",
+                                "TRANSCRIPT",
+                                "CODON_CHANGE",
+                                "VEP_AA",
+                                "UNIPROT_AA",
+                                "AA_CHANGE",
+                                "CHANGE_TYPE",
+                                "RES_NAME",
+                                "RES_NUM"]]
+        VCF_subset.drop_duplicates()
+        VCF_subset = VCF_subset.rename(columns={'RES_NUM': 'Protein_position'})
+        VCF_subset['#Uploaded_variation'] = VCF_subset['CHROMOSOME'] + '_' + VCF_subset['COORDS'] + '_' + VCF_subset['USER_BASE'] + '_' + VCF_subset['USER_VARIANT'] 
+        return VCF_subset
+    else: 
+        print("Error, wrong input vcf file.")
+    
 
 def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
     """Generate setID file.
@@ -105,18 +136,25 @@ def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
     MappedVariants.File
         more into
     """
-        # Merge them both files
-    df = pd.merge(VCF_subset, interfacesDB,on=["Protein_position"],how='inner')
-    setID_file = df[["region_id",
-                    '#Uploaded_variation']]
-    print(output_dir)
-    setID_file = setID_file.drop_duplicates()
-    # Save the merged dataframe, appending results and not reapeting headers
-    with open(output_dir + 'setID.File', 'a') as f:
-        setID_file.to_csv(f, sep = " ", index=False,  header=f.tell()==0)
-
-    with open(output_dir + 'MappedVariants.File', 'a') as f:
-        df.to_csv(f, sep = " ", index=False,  header=f.tell()==0)
+    VCF_subset.Protein_position = VCF_subset.Protein_position.astype(str)
+    interfacesDB.Protein_position = interfacesDB.Protein_position.astype(str)
+    # Merge them both files
+    mapped_variants = pd.merge(VCF_subset, interfacesDB,on=["Protein_position"],how='inner')
+    # stop if there are no results 
+    if mapped_variants.empty: 
+        print ("Warning:", protID , "does not map with any annotated variant.")
+        exit (-1)
+    # if merging was successful, create setID file and 
+    # save the merged dataframe as well
+    else: 
+        setID_file = mapped_variants[["region_id",
+                        '#Uploaded_variation']]
+        setID_file = setID_file.drop_duplicates()
+        # Save the merged dataframe, appending results and not reapeting headers
+        with open(output_dir + 'setID.File', 'a') as f:
+            setID_file.to_csv(f, sep = " ", index=False,  header=f.tell()==0)
+        with open(output_dir + 'MappedVariants.File', 'a') as f:
+            mapped_variants.to_csv(f, sep = " ", index=False,  header=f.tell()==0)
 
 
 # define main function to execute the previous defined functions together
@@ -160,38 +198,48 @@ def main():
             VEP_file = VEP_dir + '/' + VEP_filename
             print("We have the VEP file", VEP_file)
             # get subset VEP file
-            VCF_subset = vcfParser(VEP_file, geneID)
+            VCF_subset = vcfParser(VEP_file, geneID, 'vcf')
         except IOError:
-            print ("ERROR: cannot open or read input vcf file:")
+            print ("ERROR: cannot open or read input vcf file.")
             exit(-1)
     elif args.varmap: 
         try: 
             print ("VarMap db is used.")
             ClinVarDB =  "./dbs/ClinVar.tsv"
-            VCF_subset = vcfParser(ClinVarDB, args.protid)
+            VCF_subset = vcfParser(ClinVarDB, args.protid, "varmap")
         except IOError:
-            print ("ERROR: cannot open or read input VarMap db file:")
+            print ("ERROR: cannot open or read input VarMap db file.")
             exit(-1)
     
     # set default output dir:
     if args.out is None:
         args.out = "./out/"
     
+    # create chimera scripts:
     if args.chimera is not None:
-        chimera()
+        #chimera()
+        pass
     
     # run PDBmapper
-    PDBmapper(args.protid, interfacesDB_subset, VCF_subset, args.out)
+    if args.protid:
+        try:
+            PDBmapper(args.protid, interfacesDB_subset, VCF_subset, args.out)
+        except IOError:
+            print ("ERROR: Ensembl protein id provided is no supported.")
+            exit(-1)
+    
 
 
 ##########################
 # execute main function  #
 ##########################
 if __name__ == '__main__':
+    # measure execution time
     start = timer()
     main()
     end = timer()
-    print("Congratulations!. PDBmapper has run in" + end - start + "seconds.") 
+    finish= end - start
+    print("Congratulations!. PDBmapper has run in", finish, "seconds.") 
 
 
 
