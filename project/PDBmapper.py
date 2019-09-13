@@ -12,7 +12,7 @@ import pandas as pd
 from timeit import default_timer as timer
 from VEPcrossref import VEPfileCrossrefGenerator as cr
 import parse_argv
-#jeje
+
 
 
 # Extract the info corresponding to the prot ID (Interface parse)
