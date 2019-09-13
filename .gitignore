@@ -12,3 +12,5 @@ project/dbs/ClinVar
 project/out/MappedVariants.File
 project/out/setID.File
 project/setID.File
+project/out/vcf.tsv
+project/out/int.tsv
