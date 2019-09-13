@@ -13,6 +13,7 @@ from timeit import default_timer as timer
 from VEPcrossref import VEPfileCrossrefGenerator as cr
 import parse_argv
 
+
 # Extract the info corresponding to the prot ID (Interface parse)
 
 #protID = 'ENSP00000482258'
@@ -92,7 +93,7 @@ def vcfParser(VCF_file, geneID, *args):
                         ensemblID = geneID,
                         colnames = cols,
                         sep = "\t" )
-        # 
+        # drop columns
         VCF_subset = VCF_subset[["CHROMOSOME",
                                 "COORDS",
                                 "USER_BASE",
@@ -136,10 +137,9 @@ def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
     MappedVariants.File
         more into
     """
-    VCF_subset.Protein_position = VCF_subset.Protein_position.astype(str)
-    interfacesDB.Protein_position = interfacesDB.Protein_position.astype(str)
+
     # Merge them both files
-    mapped_variants = pd.merge(VCF_subset, interfacesDB,on=["Protein_position"],how='inner')
+    mapped_variants = pd.concat([VCF_subset, interfacesDB], axis = 1, join='inner')
     # stop if there are no results 
     if mapped_variants.empty: 
         print ("Warning:", protID , "does not map with any annotated variant.")
@@ -161,24 +161,18 @@ def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
 def main():
     # get command line options
     args = parse_argv.parse_commandline()
-    
-    # set interfacesDB_susbet:
-    if args.intdb:
-        try:
-            interfacesDB = open(args.intdb, 'r')
-        except IOError:
-            print ("ERROR: cannot open or read input interfaces db file.")
-            exit(-1)
-    else: 
-        print ("Default interfaces DB is used.")
-        interfacesDB_file = open("./dbs/interfaces_mapped_to_v94.csv", 'r')
-        interfacesDB_subset = interfaceParse(interfacesDB_file, args.protid)
-    
+
     # set VCF_subset:
     if args.vep: 
         print("""VEP option will be available soon. Using VarMap db instead.
-        Otherwise, provide your own vcf file with the -vcf option, please.""")
-        args.annovar = "varmap"
+        Otherwise, please provide your own vcf file with the -vcf option.""")
+        try: 
+            print ("VarMap db is used.")
+            ClinVarDB =  "./dbs/ClinVar"
+            VCF_subset = vcfParser(ClinVarDB, args.protid, "varmap")
+        except IOError:
+            print ("ERROR: cannot open or read input VarMap db file.")
+            exit(-1)
     elif args.vcf:
         try: 
             print ("vcf. file provided")
@@ -202,14 +196,29 @@ def main():
         except IOError:
             print ("ERROR: cannot open or read input vcf file.")
             exit(-1)
+
     elif args.varmap: 
         try: 
             print ("VarMap db is used.")
-            ClinVarDB =  "./dbs/ClinVar.tsv"
+            ClinVarDB =  "./dbs/ClinVar"
             VCF_subset = vcfParser(ClinVarDB, args.protid, "varmap")
         except IOError:
             print ("ERROR: cannot open or read input VarMap db file.")
             exit(-1)
+
+    # set interfacesDB_susbet:
+    if args.intdb:
+        try:
+            interfacesDB = open(args.intdb, 'r')
+        except IOError:
+            print ("ERROR: cannot open or read input interfaces db file.")
+            exit(-1)
+    else: 
+        print ("Default interfaces DB is used.")
+        interfacesDB_file = open("./dbs/interfaces_mapped_to_v94.csv", 'r')
+        interfacesDB_subset = interfaceParse(interfacesDB_file, args.protid)
+    
+
     
     # set default output dir:
     if args.out is None:
