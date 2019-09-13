@@ -8,8 +8,7 @@ project/logo/image1.png
 project/logo/image2.png
 project/logo/LogoPDB copy.pdf
 project/logo/logoPDB_modificaciones.pdf
-project/dbs/ClinVar.tsv
+project/dbs/ClinVar
 project/out/MappedVariants.File
 project/out/setID.File
 project/setID.File
-project/dbs/.~lock.ClinVar.tsv#
