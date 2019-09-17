@@ -14,3 +14,6 @@ project/out/setID.File
 project/setID.File
 project/out/vcf.tsv
 project/out/int.tsv
+project/dbs/splitted_interfaces_db
+project/dbs/splitted_ClinVar
+project/dbs/splitted_vep_db
