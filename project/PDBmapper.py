@@ -101,13 +101,19 @@ def vcfParser(VCF_file, geneID, *args):
          '_vep_spplited.csv'
         VCF_subset = pd.read_csv(VCF_file, sep=' ', header=0)
         return VCF_subset
+
     elif args[0] == 'varmap':
-        cols = pd.read_csv(VCF_file, nrows=0, sep='\t').columns
-        VCF_file = open(VCF_file, 'r')
-        VCF_subset = mt.parser(input_file=VCF_file,
-                               ensemblID=geneID,
-                               colnames=cols,
-                               sep='\t')
+        # cols = pd.read_csv(VCF_file, nrows=0, sep='\t').columns
+        # VCF_file = open(VCF_file, 'r')
+        # VCF_subset = mt.parser(input_file=VCF_file,
+        #                        ensemblID=geneID,
+        #                        colnames=cols,
+        #                        sep='\t')
+        print(geneID)
+        VCF_file = './dbs/splitted_ClinVar/' + geneID + \
+                   '_splitted_clinvar.csv' 
+        VCF_subset = pd.read_csv(VCF_file, sep='\t', header=0)
+        return VCF_subset
         # drop columns
         VCF_subset = VCF_subset[['CHROMOSOME',
                                  'COORDS',
