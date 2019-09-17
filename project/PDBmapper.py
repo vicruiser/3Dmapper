@@ -109,9 +109,8 @@ def vcfParser(VCF_file, geneID, *args):
         #                        ensemblID=geneID,
         #                        colnames=cols,
         #                        sep='\t')
-        print(geneID)
         VCF_file = './dbs/splitted_ClinVar/' + geneID + \
-                   '_splitted_clinvar.csv' 
+                   '_splitted_clinvar.csv'
         VCF_subset = pd.read_csv(VCF_file, sep='\t', header=0)
         return VCF_subset
         # drop columns
