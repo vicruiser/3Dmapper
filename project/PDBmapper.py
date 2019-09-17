@@ -29,12 +29,16 @@ def interfaceParse(interfacesDB, protID):
         DESCRIPTION MISSING!!
     '''
     # get colnames of interfaces file
-    intDB_colnames = interfacesDB.readline().strip().split(' ')
+    # intDB_colnames = interfacesDB.readline().strip().split(' ')
     # parse information related to protein ID
-    prot_interface = mt.parser(input_file=interfacesDB,
-                               ensemblID=protID,
-                               colnames=intDB_colnames,
-                               sep=' ')
+    # prot_interface = mt.parser(input_file=interfacesDB,
+    #                           ensemblID=protID,
+    #    colnames=intDB_colnames,
+    #    sep=' ')
+    fp = './dbs/splitted_interfaces_db/' + protID + \
+         '_interfaces_mapped_to_v94.csv'
+    prot_interface = pd.read_csv(fp, sep=' ', header=0)
+
     # store subspace
     subset_prot_interface = prot_interface[['pdb.id',
                                             'ensembl.prot.id',
@@ -87,20 +91,29 @@ def vcfParser(VCF_file, geneID, *args):
 
     if args[0] == 'vcf':
 
-        cols = pd.read_csv(VCF_file, nrows=0, skiprows=42, sep='\t').columns
-        VCF_file = open(VCF_file, 'r')
-        VCF_subset = mt.parser(input_file=VCF_file,
-                               ensemblID=geneID,
-                               colnames=cols,
-                               sep='\t')
+        # cols = pd.read_csv(VCF_file, nrows=0, skiprows=42, sep='\t').columns
+        # VCF_file = open(VCF_file, 'r')
+        # VCF_subset = mt.parser(input_file=VCF_file,
+        #                        ensemblID=geneID,
+        #                        colnames=cols,
+        #                        sep='\t')
+        VCF_file = './dbs/splitted_vep_db/' + geneID + \
+         '_vep_spplited.csv'
+        VCF_subset = pd.read_csv(VCF_file, sep=' ', header=0)
         return VCF_subset
-    elif args[0] == 'varmap': 
-        cols = pd.read_csv(VCF_file, nrows=0, sep='\t').columns
-        VCF_file = open(VCF_file, 'r')
-        VCF_subset = mt.parser(input_file=VCF_file,
-                               ensemblID=geneID,
-                               colnames=cols,
-                               sep='\t')
+
+    elif args[0] == 'varmap':
+        # cols = pd.read_csv(VCF_file, nrows=0, sep='\t').columns
+        # VCF_file = open(VCF_file, 'r')
+        # VCF_subset = mt.parser(input_file=VCF_file,
+        #                        ensemblID=geneID,
+        #                        colnames=cols,
+        #                        sep='\t')
+        print(geneID)
+        VCF_file = './dbs/splitted_ClinVar/' + geneID + \
+                   '_splitted_clinvar.csv' 
+        VCF_subset = pd.read_csv(VCF_file, sep='\t', header=0)
+        return VCF_subset
         # drop columns
         VCF_subset = VCF_subset[['CHROMOSOME',
                                  'COORDS',
