@@ -1,8 +1,35 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+"""
+Corazón de la caluladora.
+
+La calculadora tiene un *stack* (que es una cola LIFO, lo último que entra es lo
+primero que sale). Trabaja con *float*.
+
+Los números se ponen en el *stack*. Los comandos sacan cero o más números del
+*stack*, hacen una operación con ellos y ponen el resultado en el *stack*.
+
+Por ejemplo al comienzo el *stack* contiene varios números, los últimos números
+están abajo.
+
+::
+
+    5
+    6
+    2
+    4
+
+Al usar el comando ``+``, el se toman los últimos dos números del *stack* y se
+coloca su suma::
+
+    5
+    6
+    6
+"""
+
 # Import necesary modules
-import mapping_tools as mt
+from . import mapping_tools as mt
 import numpy as np
 import sys
 import os
@@ -11,8 +38,15 @@ import re
 import pandas as pd
 from timeit import default_timer as timer
 from VEPcrossref import VEPfileCrossrefGenerator as cr
-import parse_argv
+from . import parse_argv
+import glob
 
+
+"""@package docstring
+Documentation for this module.
+ 
+More details.
+"""
 
 # Extract the info corresponding to the prot ID (Interface parse)
 def interfaceParse(interfacesDB, protID):
@@ -28,15 +62,8 @@ def interfaceParse(interfacesDB, protID):
     subset_interfaces_db
         DESCRIPTION MISSING!!
     '''
-    # get colnames of interfaces file
-    # intDB_colnames = interfacesDB.readline().strip().split(' ')
-    # parse information related to protein ID
-    # prot_interface = mt.parser(input_file=interfacesDB,
-    #                           ensemblID=protID,
-    #    colnames=intDB_colnames,
-    #    sep=' ')
-    fp = './dbs/splitted_interfaces_db/' + protID + \
-         '_interfaces_mapped_to_v94.csv'
+    # read file
+    fp = glob.glob(interfacesDB + '/' + protID + '*.csv')[0] 
     prot_interface = pd.read_csv(fp, sep=' ', header=0)
 
     # store subspace
@@ -48,6 +75,7 @@ def interfaceParse(interfacesDB, protID):
                                             'resid_sseq',
                                             'mapped.real.pos',
                                             'pdb.pos']]
+   
     # put it into right format
     subset_prot_interface.columns = \
         subset_prot_interface.columns.str.replace('\\.', '_')
@@ -64,55 +92,37 @@ def interfaceParse(interfacesDB, protID):
                                         'pdb_pos'])
     subset_prot_interface.rename(columns={'mapped_real_pos':
                                           'Protein_position'}, inplace=True)
-    
+    # create region id for setID file
     subset_prot_interface['region_id'] = subset_prot_interface['pdb_id'] + \
         '_' + subset_prot_interface['ensembl_prot_id'] + '_' + \
         subset_prot_interface['temp_chain'] + '_' + \
         subset_prot_interface['int_chain'] + '_' + \
         subset_prot_interface['interaction']
-    
+
     return subset_prot_interface
 
 
-def vcfParser(VCF_file, geneID, *args):
-    '''Parse input interfaces database to put it in the right format.
+def vcfParser(VCF_dir, geneID, sep,  *args):
+    '''Parse vcf file and put it in the right format if necessary.
 
     Parameters
     ----------
-    VEP_file : str
-        Ensemble protein id 
+    VEP_dir : str
+        Where th VEP file is
     geneID : str
-        DESCRIPTION MISSING!!
+        Ensemble gene ID corresponding to the translated protein ID
+    
     Returns
     -------
     VCF_subset
-        DESCRIPTION MISSING!!
+        Data frame containing subset information vep
     '''
-
-    if args[0] == 'vcf':
-
-        # cols = pd.read_csv(VCF_file, nrows=0, skiprows=42, sep='\t').columns
-        # VCF_file = open(VCF_file, 'r')
-        # VCF_subset = mt.parser(input_file=VCF_file,
-        #                        ensemblID=geneID,
-        #                        colnames=cols,
-        #                        sep='\t')
-        VCF_file = './dbs/splitted_vep_db/' + geneID + \
-         '_vep_spplited.csv'
-        VCF_subset = pd.read_csv(VCF_file, sep=' ', header=0)
-        return VCF_subset
-
-    elif args[0] == 'varmap':
-        # cols = pd.read_csv(VCF_file, nrows=0, sep='\t').columns
-        # VCF_file = open(VCF_file, 'r')
-        # VCF_subset = mt.parser(input_file=VCF_file,
-        #                        ensemblID=geneID,
-        #                        colnames=cols,
-        #                        sep='\t')
-        VCF_file = './dbs/splitted_ClinVar/' + geneID + \
-                   '_splitted_clinvar.csv'
-        VCF_subset = pd.read_csv(VCF_file, sep='\t', header=0)
-        return VCF_subset
+    # read the vep file
+    VCF_file = glob.glob(VCF_dir + '/' + geneID + '*.csv')[0]
+    print(VCF_file)
+    VCF_subset = pd.read_csv(VCF_file, sep=sep, header=0)
+    # when the thingy is varmap
+    if args[0] == 'varmap':
         # drop columns
         VCF_subset = VCF_subset[['CHROMOSOME',
                                  'COORDS',
@@ -132,13 +142,13 @@ def vcfParser(VCF_file, geneID, *args):
                                  'RES_NUM']]
         VCF_subset.drop_duplicates()
         VCF_subset = VCF_subset.rename(columns={'RES_NUM': 'Protein_position'})
-        VCF_subset['#Uploaded_variation'] = VCF_subset['CHROMOSOME'] + '_' + \
-            VCF_subset['COORDS'] + '_' + VCF_subset['USER_BASE'] + '_' +\
-            VCF_subset['USER_VARIANT']
-
-        return VCF_subset
-    else:
-        print('Error, wrong input vcf file.')
+        VCF_subset['#Uploaded_variation'] = \
+            VCF_subset['CHROMOSOME'].map(str) +\
+            '_' + VCF_subset['COORDS'].map(str) + \
+            '_' + VCF_subset['USER_BASE'].map(str) + \
+            '_' + VCF_subset['USER_VARIANT'].map(str)
+    # return the loaded subset
+    return VCF_subset
 
 
 def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
@@ -189,45 +199,37 @@ def main():
     # get command line options
     args = parse_argv.parse_commandline()
 
+    # get geneID
+    biomartdb = open('./dbs/gene_transcript_protein_ens_ids.txt', 'r')
+    print('Biomart file read...')
+    ensemblIDs = mt.ensemblID_translator(biomartdb, args.protid)
+    geneID = ensemblIDs['geneID']
+
     # set VCF_subset:
     if args.vep:
         print('''VEP option will be available soon. Using VarMap db instead.
         Otherwise, please provide your own vcf file with the -vcf option.''')
         try:
             print('VarMap db is used.')
-            ClinVarDB = './dbs/ClinVar'
-            VCF_subset = vcfParser(ClinVarDB, args.protid, 'varmap')
+            ClinVarDB = './dbs/splitted_ClinVar'
+            VCF_subset = vcfParser(ClinVarDB, geneID, "\t", 'varmap')
         except IOError:
             print('ERROR: cannot open or read input VarMap db file.')
             exit(-1)
     elif args.vcf:
-        try: 
+        try:
             print('vcf. file provided')
-            biomartdb = open('./dbs/gene_transcript_protein_ens_ids.txt', 'r')
-            print('Biomart file read...')
-            # get geneID
-            ensemblIDs = mt.ensemblID_translator(biomartdb, args.protid)
-            geneID = ensemblIDs['geneID']
-            print('We have the gene ID...', geneID)
-            # get the corresponding VEP file location
-            crossref_file = open('dbs/geneids_VEPfiles_crossref.txt', 'r')
-            print('We have the crossref file...', crossref_file)
-            # read VEP file
-            VEP_filename = mt.VEP_getter(crossref_file, geneID)
-            print('We have the VEP filename', VEP_filename)
-            VEP_dir = args.vcf
-            VEP_file = VEP_dir + '/' + VEP_filename
-            print('We have the VEP file', VEP_file)
+            VEP_dir = './dbs/splitted_vep_db/'
             # get subset VEP file
-            VCF_subset = vcfParser(VEP_file, geneID, 'vcf')
+            VCF_subset = vcfParser(VEP_dir, geneID, "\t", 'vcf')
         except IOError:
             print('ERROR: cannot open or read input vcf file.')
             exit(-1)
     elif args.varmap:
         try:
             print('VarMap db is used.')
-            ClinVarDB = './dbs/ClinVar'
-            VCF_subset = vcfParser(ClinVarDB, args.protid, 'varmap')
+            ClinVarDB = './dbs/splitted_ClinVar/'
+            VCF_subset = vcfParser(ClinVarDB, geneID, "\t", 'varmap')
         except IOError:
             print('ERROR: cannot open or read input VarMap db file.')
             exit(-1)
@@ -241,8 +243,8 @@ def main():
             exit(-1)
     else:
         print('Default interfaces DB is used.')
-        interfacesDB_file = open('./dbs/interfaces_mapped_to_v94.csv', 'r')
-        interfacesDB_subset = interfaceParse(interfacesDB_file, args.protid) 
+        interfaces_dir = './dbs/splitted_interfaces_db'
+        interfacesDB_subset = interfaceParse(interfaces_dir, args.protid)
     # set default output dir:
     if args.out is None:
         args.out = './out/'
@@ -251,13 +253,23 @@ def main():
     if args.chimera is not None:
         #chimera()
         pass
+
     # run PDBmapper
     if args.protid:
-        try:
-            PDBmapper(args.protid, interfacesDB_subset, VCF_subset, args.out)
-        except IOError:
-            print('ERROR: Ensembl protein id provided is no supported.')
-            exit(-1)
+        # input list of proteins
+        if isinstance(args.protid, list):
+            # iterate over list
+            for one_protid in args.protid:
+                PDBmapper(one_protid, interfacesDB_subset, VCF_subset,
+                          args.out)
+        # single protein id as input
+        else:
+            try:
+                PDBmapper(args.protid, interfacesDB_subset, VCF_subset,
+                          args.out)
+            except IOError:
+                print('ERROR: Ensembl protein id provided is no supported.')
+                exit(-1)
 
 ##########################
 # execute main function  #

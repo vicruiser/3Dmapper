@@ -41,7 +41,7 @@ def parse_commandline():
     parser.set_defaults(intdb=None)
 
     # protein id string
-    parser.add_argument("-protid", metavar="<String>", dest="protid",
+    parser.add_argument("-protid",nargs='+', metavar="<String>", dest="protid",
                         help="Ensembl protein id", required=True)
 
     # create chimera script to visualize the region of interest
