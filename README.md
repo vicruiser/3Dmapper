@@ -1,6 +1,25 @@
 <img src= "pics/logo/image4.png" width = "600" heigh = "300">
 
+# Introduction
 
+## Motivation
+PDB mapper is a tool to map kamsldkmalskdmaksdmalkdm because aoskdakdosakdpoaksd. 
+
+## Overview
+The PDBmaper program supports three different search methods:
+
+    Users can ssh into the instance and run stand-alone BLAST+ at the command-line.
+    The instance has a simple webpage for search submission.
+    The instance supports the NCBI-BLAST Common URL API interface.
+
+
+
+# Usage
+
+## Running PDBmapper
+```markdown
+python PDBmapper -protid ensmblprotid 
+```
 
 ## Reference
 
@@ -23,7 +42,7 @@ Using a CLI                                     | Command                       
 [Trace](docs/using-cli.md#trace-flag)           | `command -- --trace`                    | Gets a Fire trace for the command.
 [Verbose](docs/using-cli.md#verbose-flag)       | `command -- --verbose`                  |
 
-## Welcome to GitHub Pages
+# PDBmapper databases
 
 You can use the [editor on GitHub](https://github.com/vicruiser/PDBmapper/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
