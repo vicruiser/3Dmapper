@@ -1,8 +1,47 @@
 #!/usr/bin/python3
+"""
+Corazón de la caluladora.
+
+La calculadora tiene un *stack* (que es una cola LIFO, lo último que entra es lo
+primero que sale). Trabaja con *float*.
+
+Los números se ponen en el *stack*. Los comandos sacan cero o más números del
+*stack*, hacen una operación con ellos y ponen el resultado en el *stack*.
+
+Por ejemplo al comienzo el *stack* contiene varios números, los últimos números
+están abajo.
+
+::
+
+    5
+    6
+    2
+    4
+
+Al usar el comando ``+``, el se toman los últimos dos números del *stack* y se
+coloca su suma::
+
+    5
+    6
+    6
+"""
+
 import argparse, os
 
 
 def dir_path(dirName):
+    '''Parse input interfaces database to put it in the right format.
+    Parameters
+    ----------
+    protID : str
+        Ensemble protein id 
+    interfacesDB_filepath : str
+        DESCRIPTION MISSING!!
+    Returns
+    -------
+    subset_interfaces_db
+        DESCRIPTION MISSING!!
+    '''
     # Create target Directory if don't exist
     if not os.path.exists(dirName):
         os.mkdir(dirName)
@@ -13,7 +52,18 @@ def dir_path(dirName):
 
 
 def parse_commandline():
-
+    '''Parse input interfaces database to put it in the right format.
+    Parameters
+    ----------
+    protID : str
+        Ensemble protein id 
+    interfacesDB_filepath : str
+        DESCRIPTION MISSING!!
+    Returns
+    -------
+    subset_interfaces_db
+        DESCRIPTION MISSING!!
+    '''
     description = \
         "%(prog)s maps rare variants to protein interfaces data in 3D."
     epilog = \

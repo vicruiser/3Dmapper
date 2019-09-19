@@ -1,5 +1,5 @@
-interfaceParse
-==============
+PDBmapper
+=========
 
 .. currentmodule:: project.PDBmapper
 

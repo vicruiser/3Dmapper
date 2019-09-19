@@ -29,7 +29,7 @@ coloca su suma::
 """
 
 # Import necesary modules
-from . import mapping_tools as mt
+import mapping_tools as mt
 import numpy as np
 import sys
 import os
@@ -38,15 +38,10 @@ import re
 import pandas as pd
 from timeit import default_timer as timer
 from VEPcrossref import VEPfileCrossrefGenerator as cr
-from . import parse_argv
+import parse_argv
 import glob
 
 
-"""@package docstring
-Documentation for this module.
- 
-More details.
-"""
 
 # Extract the info corresponding to the prot ID (Interface parse)
 def interfaceParse(interfacesDB, protID):

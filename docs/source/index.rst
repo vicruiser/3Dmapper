@@ -18,6 +18,10 @@ PDB mapper is really cool
    :toctree: _autosummary
 
    project.PDBmapper
+   project.parse_argv
+
+.. autoprogram:: parse_argv:parse_commandline
+   :prog: project.parse_argv.py
 
 
 Indices and tables
