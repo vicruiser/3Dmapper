@@ -21,6 +21,9 @@ The PDBmaper program supports three different search methods:
 ```markdown
 python PDBmapper -protid ensmblprotid 
 ```
+### Test
+
+example in ./test
 
 ## Reference
 
@@ -43,9 +46,16 @@ Using a CLI                                     | Command                       
 [Trace](docs/using-cli.md#trace-flag)           | `command -- --trace`                    | Gets a Fire trace for the command.
 [Verbose](docs/using-cli.md#verbose-flag)       | `command -- --verbose`                  |
 
+### Paralellization
+
+to run in parallel 
+
+
 # PDBmapper databases
 
 ## Interfaces database
+
+generated with interfacer (repository link)
 
 ## Variant annotated files
 
@@ -56,6 +66,13 @@ Using a CLI                                     | Command                       
 Para poner tus propias databases han de cumplir con los siguientes requisitos de formato. 
 
 
+# 3D visualization with ChimeraX
+
+soon available
+
+# FAQs
+
+is not intended as a interface generator. 
 
 
 You can use the [editor on GitHub](https://github.com/vicruiser/PDBmapper/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
