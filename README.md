@@ -1,4 +1,4 @@
-<img src= "pics/logo/image4.png" width = "600" heigh = "300">
+<img src= "./pics/logo/image4.png" width = "600" heigh = "300">
 
 # Introduction
 
@@ -17,6 +17,7 @@ The PDBmaper program supports three different search methods:
 # Usage
 
 ## Running PDBmapper
+
 ```markdown
 python PDBmapper -protid ensmblprotid 
 ```
@@ -43,6 +44,19 @@ Using a CLI                                     | Command                       
 [Verbose](docs/using-cli.md#verbose-flag)       | `command -- --verbose`                  |
 
 # PDBmapper databases
+
+## Interfaces database
+
+## Variant annotated files
+
+### ClinVar
+
+## Custom
+
+Para poner tus propias databases han de cumplir con los siguientes requisitos de formato. 
+
+
+
 
 You can use the [editor on GitHub](https://github.com/vicruiser/PDBmapper/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
