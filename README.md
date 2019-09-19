@@ -1,4 +1,4 @@
-<img src= "project/logo/image4.png" width = "600" heigh = "300">
+<img src= "pics/logo/image4.png" width = "600" heigh = "300">
 
 
 
