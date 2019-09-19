@@ -2,18 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-project/dbs/interfaces_mapped_to_v94.csv
-project/logo/image3.png
-project/logo/image1.png
-project/logo/image2.png
-project/logo/LogoPDB copy.pdf
-project/logo/logoPDB_modificaciones.pdf
-project/dbs/ClinVar
-project/out/MappedVariants.File
-project/out/setID.File
-project/setID.File
-project/out/vcf.tsv
-project/out/int.tsv
-project/dbs/splitted_interfaces_db
-project/dbs/splitted_ClinVar
-project/dbs/splitted_vep_db
+pics
+default_input_data
+test/out
