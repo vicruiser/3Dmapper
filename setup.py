@@ -12,7 +12,8 @@ setup(
         #                 consistency_module, aligner3d_module,
         #                 squared_distance_matrix_module],
         # package_dir  = {'pytadbit': PATH + '/_pytadbit'},
-        # packages     = ['pytadbit', 'pytadbit.parsers', 'pytadbit.tools',
+        packages     = find_packages(),
+        #['pytadbit', 'pytadbit.parsers', 'pytadbit.tools',
         #                 'pytadbit.boundary_aligner', 'pytadbit.utils',
         #                 'pytadbit.tad_clustering', 'pytadbit.modelling',
         #                 'pytadbit.mapping'],
@@ -21,7 +22,7 @@ setup(
         license = "GPLv3",
         description  = 'Map rare variants to protein interfaces data in 3D.',
         long_description = (open("README.rst").read() +
-                            open("doc/source/install.rst").read()),
+                            open("docs/source/install.rst").read()),
         #classifiers  = TAGS,
         #provides     = ["pytadbit"],
         #keywords     = ["testing"],

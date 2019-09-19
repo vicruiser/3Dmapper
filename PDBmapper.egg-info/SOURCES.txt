@@ -1,0 +1,16 @@
+README.rst
+setup.py
+PDBmapper.egg-info/PKG-INFO
+PDBmapper.egg-info/SOURCES.txt
+PDBmapper.egg-info/dependency_links.txt
+PDBmapper.egg-info/top_level.txt
+scripts/PDBmapper.py
+scripts/VEPcrossref.py
+scripts/__init__.py
+scripts/chimera_executable.py
+scripts/faster_than_regex.py
+scripts/leftovers.py
+scripts/mapping_tools.py
+scripts/parse_argv.py
+scripts/pdbmapper_v1.py
+scripts/prog.py
