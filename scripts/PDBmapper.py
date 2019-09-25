@@ -1,33 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-"""
-Corazón de la caluladora.
-
-La calculadora tiene un *stack* (que es una cola LIFO, lo último que entra es lo
-primero que sale). Trabaja con *float*.
-
-Los números se ponen en el *stack*. Los comandos sacan cero o más números del
-*stack*, hacen una operación con ellos y ponen el resultado en el *stack*.
-
-Por ejemplo al comienzo el *stack* contiene varios números, los últimos números
-están abajo.
-
-::
-
-    5
-    6
-    2
-    4
-
-Al usar el comando ``+``, el se toman los últimos dos números del *stack* y se
-coloca su suma::
-
-    5
-    6
-    6
-"""
-
 # Import necesary modules
 import mapping_tools as mt
 import numpy as np
@@ -255,13 +228,26 @@ def main():
         if isinstance(args.protid, list):
             # iterate over list
             for one_protid in args.protid:
-                PDBmapper(one_protid, interfacesDB_subset, VCF_subset,
-                          args.out)
+                try:
+                    PDBmapper(one_protid, interfacesDB_subset, VCF_subset,
+                            args.out)
+                except IOError:
+                    print('ERROR: Ensembl protein id provided is no supported.')
+                    exit(-1)
         # single protein id as input
         else:
             try:
                 PDBmapper(args.protid, interfacesDB_subset, VCF_subset,
                           args.out)
+            except IOError:
+                print('ERROR: Ensembl protein id provided is no supported.')
+                exit(-1)
+    if args.protid_file: 
+         
+        for one_protid in args.protid:
+            try:
+                PDBmapper(one_protid, interfacesDB_subset, VCF_subset,
+                        args.out)
             except IOError:
                 print('ERROR: Ensembl protein id provided is no supported.')
                 exit(-1)

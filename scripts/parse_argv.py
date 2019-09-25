@@ -1,30 +1,4 @@
 #!/usr/bin/python3
-"""
-Corazón de la caluladora.
-
-La calculadora tiene un *stack* (que es una cola LIFO, lo último que entra es lo
-primero que sale). Trabaja con *float*.
-
-Los números se ponen en el *stack*. Los comandos sacan cero o más números del
-*stack*, hacen una operación con ellos y ponen el resultado en el *stack*.
-
-Por ejemplo al comienzo el *stack* contiene varios números, los últimos números
-están abajo.
-
-::
-
-    5
-    6
-    2
-    4
-
-Al usar el comando ``+``, el se toman los últimos dos números del *stack* y se
-coloca su suma::
-
-    5
-    6
-    6
-"""
 
 import argparse, os
 
@@ -91,8 +65,11 @@ def parse_commandline():
     parser.set_defaults(intdb=None)
 
     # protein id string
-    parser.add_argument("-protid",nargs='+', metavar="<String>", dest="protid",
-                        help="Ensembl protein id", required=True)
+    protid_group = parser.add_mutually_exclusive_group()
+    protid_group.add_argument("-protid",nargs='+', metavar="<String>", dest="protid",
+                        help="Ensembl protein id")
+    protid_group.add_argument("-protid-from-file", metavar="<file>", dest="protid_file",
+                        help="File with a list of Ensembl protein ids")
 
     # create chimera script to visualize the region of interest
     parser.add_argument("-chimera", action="store_true", dest="chimera",
