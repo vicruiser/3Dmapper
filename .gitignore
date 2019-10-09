@@ -11,3 +11,5 @@ scripts/__pycache__
 scripts/.ipynb_checkpoints
 scripts/.vscode
 setup.py
+test/input
+test/output
