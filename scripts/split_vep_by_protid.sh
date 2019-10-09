@@ -13,7 +13,6 @@ COLUMN_INDEX=$(awk -F " " '{for(i=1;i<=NF;i++)\
                             }'\
                     $VEP_FILE)
 
-
 # split .vep file by protein ID
 awk -v ci="$COLUMN_INDEX" \
     -v od="$OUTPUT_DIR" \

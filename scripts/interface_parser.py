@@ -1,3 +1,20 @@
+# Import necesary modules
+import numpy as np
+import sys
+import os
+import gzip
+import re
+import pandas as pd
+from timeit import default_timer as timer
+import glob
+
+# import functions from scripts
+import vep_parser
+import parse_argv
+from VEPcrossref import VEPfileCrossrefGenerator as cr
+import mapping_tools as mt
+import PDBmapper
+
 # Extract the info corresponding to the prot ID (Interface parse)
 def interfaceParse(interfacesDB, protID):
     '''Parse input interfaces database to put it in the right format.

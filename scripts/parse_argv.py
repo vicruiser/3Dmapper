@@ -1,28 +1,27 @@
 #!/usr/bin/python3
-
 import argparse, os
 
 
-def dir_path(dirName):
-    '''Parse input interfaces database to put it in the right format.
-    Parameters
-    ----------
-    protID : str
-        Ensemble protein id 
-    interfacesDB_filepath : str
-        DESCRIPTION MISSING!!
-    Returns
-    -------
-    subset_interfaces_db
-        DESCRIPTION MISSING!!
-    '''
-    # Create target Directory if don't exist
-    if not os.path.exists(dirName):
-        os.mkdir(dirName)
-        print("Directory", dirName,  "created.")
-    else:    
-        print(dirName,
-              "is an existing directory. Results will be written in there.")
+# def dir_path(dirName):
+#     '''Parse input interfaces database to put it in the right format.
+#     Parameters
+#     ----------
+#     protID : str
+#         Ensemble protein id 
+#     interfacesDB_filepath : str
+#         DESCRIPTION MISSING!!
+#     Returns
+#     -------
+#     subset_interfaces_db
+#         DESCRIPTION MISSING!!
+#     '''
+#     # Create target Directory if don't exist
+#     if not os.path.exists(dirName):
+#         os.mkdir(dirName)
+#         print("Directory", dirName,  "created.")
+#     else:    
+#         print(dirName,
+#               "is an existing directory. Results will be written in there.")
 
 
 def parse_commandline():
@@ -50,8 +49,8 @@ def parse_commandline():
     # vcf file
     annovar_group = parser.add_mutually_exclusive_group()
     annovar_group.add_argument('-vcf', metavar="<String>", dest="vcf",
-                               help='input directory containing all \
-                                annotated variants files (vcf)')
+                               help='input directory containing single or \
+                                    multiple annotated variants files (vcf)')
     annovar_group.add_argument("-vep",   metavar="<file>",  dest="vep",
                                help="default VEP input")
     annovar_group.add_argument("-varmap", action='store_true', dest="varmap",
@@ -77,11 +76,13 @@ def parse_commandline():
     
     # create default output directory
     parser.add_argument("-out", metavar="<String>", dest="out",
-                        help="output directory", type=dir_path)
-    parser.set_defaults(out="./out/")
+                        help="output directory")
+    parser.set_defaults(out="./out")
+    
     # store arguments into variable
     args = parser.parse_args()
 
-    # # clean up (recommended):
+    # clean up (recommended)
     del(parser)
+
     return args

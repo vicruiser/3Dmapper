@@ -2,7 +2,6 @@
 # coding: utf-8
 
 # Import necesary modules
-import mapping_tools as mt
 import numpy as np
 import sys
 import os
@@ -10,20 +9,34 @@ import gzip
 import re
 import pandas as pd
 from timeit import default_timer as timer
-from VEPcrossref import VEPfileCrossrefGenerator as cr
-import parse_argv
 import glob
+
+# import functions from scripts
+import parse_argv
+from VEPcrossref import VEPfileCrossrefGenerator as cr
+import mapping_tools as mt
+import PDBmapper
+import vep_parser
 
 # define main function to execute the previous defined functions together
 def main():
     # get command line options
     args = parse_argv.parse_commandline()
 
+    # Create output directory if it doesn't exist
+    if not os.path.exists(args.out):
+        os.mkdir(args.out)
+        print("Directory", args.out,  "created.")
+    else:    
+        print(args.out,
+              "is an existing directory. Results will be written in there.")
+
+
     # get geneID
-    biomartdb = open('./dbs/gene_transcript_protein_ens_ids.txt', 'r')
-    print('Biomart file read...')
-    ensemblIDs = mt.ensemblID_translator(biomartdb, args.protid)
-    geneID = ensemblIDs['geneID']
+        # biomartdb = open('./dbs/gene_transcript_protein_ens_ids.txt', 'r')
+        # print('Biomart file read...')
+        # ensemblIDs = mt.ensemblID_translator(biomartdb, args.protid)
+        # geneID = ensemblIDs['geneID']
 
     # set VCF_subset:
     if args.vep:
@@ -38,7 +51,10 @@ def main():
             exit(-1)
     elif args.vcf:
         try:
-            print('vcf. file provided')
+            print('VCF file provided')
+            print('Detecting format...')
+            os.system("sh detect_vcf_format.sh args.vcf args.vcf")
+            #This will list all the files in present #working directory
             VEP_dir = './dbs/splitted_vep_db/'
             # get subset VEP file
             VCF_subset = vcfParser(VEP_dir, geneID, "\t", 'vcf')
