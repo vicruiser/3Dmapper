@@ -10,13 +10,15 @@ import re
 import pandas as pd
 from timeit import default_timer as timer
 import glob
+from subprocess import call
 
 # import functions from scripts
 import parse_argv
 from VEPcrossref import VEPfileCrossrefGenerator as cr
 import mapping_tools as mt
 import PDBmapper
-import vep_parser
+import scripts.vep_parser
+from scripts.detect_vcf_format import detect_format
 
 # define main function to execute the previous defined functions together
 def main():
@@ -43,16 +45,30 @@ def main():
         print('''VEP option will be available soon. Using VarMap db instead.
         Otherwise, please provide your own vcf file with the -vcf option.''')
         try:
+            # ./vep -i input.vcf -o out.txt -offline
             print('VarMap db is used.')
             ClinVarDB = './dbs/splitted_ClinVar'
             VCF_subset = vcfParser(ClinVarDB, geneID, "\t", 'varmap')
-        except IOError:
+        
             print('ERROR: cannot open or read input VarMap db file.')
             exit(-1)
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
     elif args.vcf:
         try:
-            print('VCF file provided')
-            print('Detecting format...')
+            print('Detecting inputs variants file format...')
+            input_format = detect_format(args.vcf)
+            if input_format == "vcf":
+                call('sh', './vcf_to_vep.sh', args.vcf, '.data/converted_vcf.vep' )
+            elif input_format == "vep":
+                call('sh', 'split_vep_by_protid.sh', './data/converted_vcf.vep' )
+            else: 
+                print(input_format)
+
+
+            #execute
             os.system("sh detect_vcf_format.sh args.vcf args.vcf")
             #This will list all the files in present #working directory
             VEP_dir = './dbs/splitted_vep_db/'
@@ -61,6 +77,10 @@ def main():
         except IOError:
             print('ERROR: cannot open or read input vcf file.')
             exit(-1)
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
     elif args.varmap:
         try:
             print('VarMap db is used.')

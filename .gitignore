@@ -13,3 +13,7 @@ scripts/.vscode
 setup.py
 test/input
 test/output
+required_packages/pyVEP-master.zip
+scripts/test_file.txt
+pics/protein_logo.cxs
+pics/LogoPDB_PDBmapper_LOGO2.svg

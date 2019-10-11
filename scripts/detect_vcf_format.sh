@@ -6,3 +6,4 @@ if grep -q CSQ $VCF_FILE; then
 else
     return 'VEP'
 fi
+
