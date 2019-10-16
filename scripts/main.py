@@ -62,6 +62,7 @@ def main():
             input_format = detect_format(args.vcf)
             if input_format == "vcf":
                 call('sh', './vcf_to_vep.sh', args.vcf, '.data/converted_vcf.vep' )
+                call('sh', 'split_vep_by_protid.sh', './data/converted_vcf.vep' )
             elif input_format == "vep":
                 call('sh', 'split_vep_by_protid.sh', './data/converted_vcf.vep' )
             else: 

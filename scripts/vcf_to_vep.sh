@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # if bcftools not installed, install it, 
 # activate pluginh to split vep
 VCF_FILE="$1"
@@ -12,6 +12,7 @@ OUT_FILENAME=$OUTPUT_DIR/converted_vcf.vep
 # subfields:
 
 export BCFTOOLS_PLUGINS=./required_packages/bcftools/plugins 
+
 ./required_packages/bcftools/bcftools +split-vep $VCF_FILE \
                                        -o $OUT_FILENAME \
                                        -f '%CHROM\_%POS\_%REF\/%ALT \
