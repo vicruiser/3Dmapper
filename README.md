@@ -1,4 +1,4 @@
-<img src= "./pics/Convoluto/LogoPDB copy.svg" width = "800" heigh = "400">
+<img src= "./pics/Convoluto/LogoPDBcopy2.svg" width = "800" heigh = "400">
 
 # Introduction
 
