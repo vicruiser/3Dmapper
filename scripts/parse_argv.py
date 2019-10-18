@@ -2,6 +2,7 @@
 import argparse, os
 
 
+
 # def dir_path(dirName):
 #     '''Parse input interfaces database to put it in the right format.
 #     Parameters
@@ -37,18 +38,39 @@ def parse_commandline():
     subset_interfaces_db
         DESCRIPTION MISSING!!
     '''
-    description = \
-        "%(prog)s maps rare variants to protein interfaces data in 3D."
+    description = '''
+
+ ------------------------------------------------------------------------------------------------------------------ 
+
+        $$$$$$$\  $$$$$$$\  $$$$$$$\                                                                
+        $$  __$$\ $$  __$$\ $$  __$$\                                                                 
+        $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
+        $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
+        $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
+        $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |      
+        $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |      
+        \__|      \_______/ \_______/ \__| \__| \__| \_______|$$  ____/ $$  ____/  \_______|\__|      
+                                                              $$ |      $$ |                          
+                                                              $$ |      $$ |                          
+                                                              \__|      \__|   
+        
+        
+------------------------  Map annotated genomic variants to protein interfaces data in 3D. ------------------------'''
     epilog = \
-        "Copyright (c) 2019 Victoria Ruiz -- "\
-        "vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel"\
-        ""
+        '''
+          -------------------------------------------------------------------------        
+         |  Copyright (c) 2019 Victoria Ruiz --                                    |  
+         |  vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
+          -------------------------------------------------------------------------
+
+        '''
     # innit parser
-    parser = argparse.ArgumentParser(epilog=epilog, description=description)                 
+    parser = argparse.ArgumentParser(epilog=epilog,
+     formatter_class=argparse.RawDescriptionHelpFormatter, description=description)                 
     
     # vcf file
     annovar_group = parser.add_mutually_exclusive_group()
-    annovar_group.add_argument('-vcf', metavar="<String>", dest="vcf",
+    annovar_group.add_argument('-vcf', nargs='+', metavar="<String>", dest="vcf",
                                help='input directory containing single or \
                                     multiple annotated variants files (vcf)')
     annovar_group.add_argument("-vep",   metavar="<file>",  dest="vep",
@@ -59,12 +81,17 @@ def parse_commandline():
     #parser.set_defaults(annovar = "varmap")
     
     # interfaces database file
+    parser.add_argument("-force", dest="force", metavar="<String>",
+                        help="Force to owerwrite? (y/n)", default = "n")
+    parser.set_defaults(intdb=None)
+
+    # interfaces database file
     parser.add_argument("-intdb", dest="intdb", metavar="<file>",
                         help="Interfaces database")
     parser.set_defaults(intdb=None)
 
     # protein id string
-    protid_group = parser.add_mutually_exclusive_group()
+    protid_group = parser.add_mutually_exclusive_group(required = True)
     protid_group.add_argument("-protid",nargs='+', metavar="<String>", dest="protid",
                         help="Ensembl protein id")
     protid_group.add_argument("-protid-from-file", metavar="<file>", dest="protid_file",

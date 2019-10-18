@@ -17,9 +17,8 @@ Feature Feature_type Consequence cDNA_position CDS_position Protein_position \
 Amino_acids Codons Existing_variation\\n\"$0; print $0}; if(NR!=1){print $0}}' "
 
 
-
 # run function
-def vcf_to_vep (input_file, out_dir, out_file):
+def vcf_to_vep (input_file, out_dir, out_file, overwrite):
     '''
     Input
     ------
@@ -27,8 +26,10 @@ def vcf_to_vep (input_file, out_dir, out_file):
     Output
     ------
     '''
+    #create dir if it doesn't exist
+    os.makedirs(out_dir, exist_ok=True)
+
     if os.path.isfile(out_file):
-        overwrite = input('File already exists. Overwrite? Y = yes, N = no\n')
         if overwrite.lower() == 'y':
             # export enviroment
             os.environ["BCFTOOLS_PLUGINS"] = "./required_packages/bcftools/plugins"
@@ -51,9 +52,9 @@ def vcf_to_vep (input_file, out_dir, out_file):
             p2.communicate()
 
 
-input_file = '/home/vruizser/PhD/2019-2020/ExAC_benchmark/ExAC.r1.sites.vep.vcf'
-input_file = '/home/vruizser/PhD/2019-2020/ExAC_benchmark/head_vcf.txt'
-out_dir='./scripts/input_pdbmapper/'
-out_file = out_dir + 'converted_vcf.vep2'
-vcf_to_vep(input_file, out_dir, out_file)
+# input_file = '/home/vruizser/PhD/2019-2020/ExAC_benchmark/ExAC.r1.sites.vep.vcf'
+# input_file = '/home/vruizser/PhD/2019-2020/ExAC_benchmark/head_vcf.txt'
+# out_dir='./scripts/input_pdbmapper/'
+# out_file = out_dir + 'converted_vcf.vep2'
+# vcf_to_vep(input_file, out_dir, out_file)
 

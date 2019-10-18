@@ -2,16 +2,13 @@
 # coding: utf-8
 
 # Import necesary modules
-import mapping_tools as mt
+#import mapping_tools as mt
 import numpy as np
 import sys
 import os
 import gzip
 import re
 import pandas as pd
-from timeit import default_timer as timer
-from VEPcrossref import VEPfileCrossrefGenerator as cr
-import parse_argv
 import glob
 
 

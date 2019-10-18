@@ -3,7 +3,7 @@ import subprocess
 import os
 
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
-{{if ($i ~ /ENSG/){{print i; exit}}}}}}' {} "
+{{if ($i ~ /ENSP/){{print i; exit}}}}}}' {} "
 
 split = "grep -v '##' {} | \
 awk -v ci=\"{}\" \
@@ -31,7 +31,7 @@ def request(input_file, out_dir):
     p2.communicate()
 
 # funciton
-def split_vep (input_file, out_dir):
+def split_vep (input_file, out_dir, overwrite):
     '''
     Input
     ------
@@ -44,7 +44,6 @@ def split_vep (input_file, out_dir):
 
     # check if this process has been already executed. 
     if any(f.endswith(".vep") for f in os.listdir(out_dir)):
-        overwrite = input('File already exists. Overwrite? Y = yes, N = no\n')
         if overwrite.lower() == 'y':    
                 request(input_file, out_dir)
     else: 
@@ -53,11 +52,11 @@ def split_vep (input_file, out_dir):
                     
 
 
-input_file = ['/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/vep_PanCan_chr_1_1-100000',
-              '/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/vep_PanCan_chr_1_100001-200000']
+#input_file = ['/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/vep_PanCan_chr_1_1-100000',
+#              '/home/vruizser/PhD/2018-2019/PanCancer_data/vep_output/vep_PanCan_chr_1_100001-200000']
 
-out_dir='./scripts/input_pdbmapper/splitted_vcf_db/'
-print("heloo")
+#out_dir='./scripts/input_pdbmapper/splitted_vcf_db/'
+#print("heloo")
 
-for f in input_file: 
-    split_vep(f, out_dir) # overwrite !!!!
+#for f in input_file: 
+#    split_vep(f, out_dir) # overwrite !!!!

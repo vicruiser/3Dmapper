@@ -11,7 +11,7 @@ setup(
         #                 eqv_rmsd_module, centroid_module,
         #                 consistency_module, aligner3d_module,
         #                 squared_distance_matrix_module],
-        # package_dir  = {'pytadbit': PATH + '/_pytadbit'},
+        package_dir  = {'pdbmapper': 'pdbmapper'}, #PATH + '/_pytadbit'},
         packages     = find_packages(),
         #['pytadbit', 'pytadbit.parsers', 'pytadbit.tools',
         #                 'pytadbit.boundary_aligner', 'pytadbit.utils',
@@ -20,7 +20,7 @@ setup(
         # py_modules   = ["pytadbit"],
         platforms = "OS Independent",
         license = "GPLv3",
-        description  = 'Map rare variants to protein interfaces data in 3D.',
+        description  = 'Map annotated genomic variants to protein interfaces data in 3D.',
         long_description = (open("README.rst").read() +
                             open("docs/source/install.rst").read()),
         #classifiers  = TAGS,
@@ -28,8 +28,10 @@ setup(
         #keywords     = ["testing"],
         url          = 'https://github.com/vicruiser/PDBmapper',
         download_url = 'https://github.com/vicruiser/PDBmapper/tarball/master',
-        scripts      = ['scripts/PDBmapper.py', 'scripts/mapping_tools.py',
-                        'scripts/VEPcrossref.py', 'scripts/parse_argv.py'],
+        scripts      = ['scripts/PDBmapper.py',
+                        'scripts/mapping_tools.py',
+                        'scripts/VEPcrossref.py',
+                        'scripts/parse_argv.py'],
         #data_files   = [(path.expanduser('~'),
         #                 ['extras/.bash_completion'])]
 )

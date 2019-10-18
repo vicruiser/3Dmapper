@@ -19,6 +19,8 @@ import mapping_tools as mt
 import PDBmapper
 import scripts.vep_parser
 from scripts.detect_vcf_format import detect_format
+from scripts.vcf_to_vep import vcf_to_vep
+from scripts.split_vep import split_vep
 
 # define main function to execute the previous defined functions together
 def main():
@@ -32,8 +34,6 @@ def main():
     else:    
         print(args.out,
               "is an existing directory. Results will be written in there.")
-
-
     # get geneID
         # biomartdb = open('./dbs/gene_transcript_protein_ens_ids.txt', 'r')
         # print('Biomart file read...')
@@ -59,22 +59,27 @@ def main():
     elif args.vcf:
         try:
             print('Detecting inputs variants file format...')
-            input_format = detect_format(args.vcf)
-            if input_format == "vcf":
-                call('sh', './vcf_to_vep.sh', args.vcf, '.data/converted_vcf.vep' )
-                call('sh', 'split_vep_by_protid.sh', './data/converted_vcf.vep' )
-            elif input_format == "vep":
-                call('sh', 'split_vep_by_protid.sh', './data/converted_vcf.vep' )
-            else: 
-                print(input_format)
-
-
-            #execute
-            os.system("sh detect_vcf_format.sh args.vcf args.vcf")
-            #This will list all the files in present #working directory
-            VEP_dir = './dbs/splitted_vep_db/'
-            # get subset VEP file
-            VCF_subset = vcfParser(VEP_dir, geneID, "\t", 'vcf')
+            # for loop in case we have multiple inputs to read
+            for f in args.vcf: 
+                # detect the format of the vcf file(s)
+                # possible formats: .vcf or .vep
+                input_format = detect_format(f)
+                if input_format == "vcf":
+                    # 1) put vcf into vep format
+                    out_dir = './pdbmapper/input/' #created by default
+                    out_file = out_dir + 'converted_vcf.vep'
+                    vcf_to_vep(f, out_dir, out_file)
+                    # 2) split vep file by protein id to speed up the
+                    # mapping proccess
+                    vcf_db_dir = out_dir + 'vcf_db/' #created by default
+                    split_vep(f, vcf_db_dir)
+                elif input_format == "vep":
+                    # split vep file by protein id to speed up the
+                    # mapping proccess
+                    vcf_db_dir = './pdbmapper/input/vcf_db/'
+                    split_vep(f, vcf_db_dir) 
+                else: 
+                    print(input_format)
         except IOError:
             print('ERROR: cannot open or read input vcf file.')
             exit(-1)
@@ -102,9 +107,7 @@ def main():
         print('Default interfaces DB is used.')
         interfaces_dir = './dbs/splitted_interfaces_db'
         interfacesDB_subset = interfaceParse(interfaces_dir, args.protid)
-    # set default output dir:
-    if args.out is None:
-        args.out = './out/'
+
 
     # create chimera scripts:
     if args.chimera is not None:
