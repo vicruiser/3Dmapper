@@ -24,16 +24,12 @@ import scripts.PDBmapper
 import scripts.vep_parser
 from scripts.detect_vcf_format import detect_format
 from scripts.vcf_to_vep import vcf_to_vep
-from scripts.split_vep import split_vep
+#from scripts.split_vep import split_vep
+from scripts.translate_ensembl import translate_ensembl
+from scripts.split import split 
 
-# define main function to execute the previous defined functions together
-
-
-def main():
-
-    # parse command line options
-    args = parse_commandline()
-    description = '''
+# aesthetics
+description = '''
 
  ------------------------------------------------------------------------------------------------------------------ 
 
@@ -53,6 +49,16 @@ def main():
 ------------------------  Map annotated genomic variants to protein interfaces data in 3D. ------------------------
 
 '''
+
+# define main function to execute the previous defined functions together
+
+
+def main():
+
+    # parse command line options
+    args = parse_commandline()
+    
+    # print ascii art
     print(description)
 
     # create output directory if it doesn't exist
@@ -63,13 +69,8 @@ def main():
         print(args.out,
               "is an existing directory. Results will be written in there.")
 
-    # get geneID
-    #biomartdb = open('./default_input_data/gene_transcript_protein_ens_ids.txt', 'r')
-    #print('Biomart file read...')
-    #ensemblIDs = mt.ensemblID_translator(biomartdb, args.protid)
-    #geneID = ensemblIDs['geneID']
-
-     # variants input:
+    # Manage all possible genomic variant input files
+    # 1) vep = run VEP
     if args.vep:
         print('''VEP option will be available soon. Using VarMap db instead.
         Otherwise, please provide your own vcf file with the -vcf option.''')
@@ -81,15 +82,15 @@ def main():
         except:
             print('ERROR: cannot open or read input VarMap db file.')
             exit(-1)
-
+    
+    # 2) vcf = an annotated variant file as input either in .vcf or .vep format.
     elif args.vcf:
-
-        print('Detecting inputs variants file format...')
         # for loop in case we have multiple inputs to read
-        # if len(args.vcf) == 1:
-        #    args.vcf= [args.vcf]
         for f in args.vcf:
+            # check if file is in the right format
             try:
+                # detect the format of the input file
+                print('Detecting inputs variants file format...')
                 # detect the format of the vcf file(s), either .vcf or .vep
                 input_format = detect_format(f)
                 # set out dir and out file names
@@ -122,7 +123,7 @@ def main():
                         This might take a while....")
                     # split vep file by protein id to speed up the
                     try:
-                        split_vep(out_file, vcf_db_dir, args.force)
+                        split(out_file, vcf_db_dir, args.force, 'ENSG', 'vep')
                         # print ending message
                         print("File successfully splitted.")
                     except IOError:
@@ -131,14 +132,14 @@ def main():
 
                 # If vep, only split
                 elif input_format == "vep":
-                    # set output dir to split vep
-                    vcf_db_dir = './out/pdbmapper/input/vcf_db/'
-                    # print starting message
-                    print("Splitting VEP file. \
-                        This might take a while....")
                     # split vep file by protein id to speed up the
                     try:
-                        split_vep(f, vcf_db_dir, args.force)
+                        # set output dir to split vep
+                        vcf_db_dir = './out/pdbmapper/input/vcf_db/'
+                        # print starting message
+                        print("Splitting VEP file. \
+                        This might take a while....")
+                        split(f, vcf_db_dir, args.force, 'ENSG', 'vep')
                         # print ending message
                         print("File successfully splitted.")
                     except IOError:
@@ -149,6 +150,7 @@ def main():
                 print('ERROR: cannot open or read input vcf file.')
                 exit(-1)
 
+    # 3) varmap = use VarMap as reference annotated variants file 
     elif args.varmap:
         try:
             print('VarMap db is used.')
@@ -159,13 +161,20 @@ def main():
             print('ERROR: cannot open or read input VarMap db file.')
             exit(-1)
 
-#     # set interfacesDB_susbet:
-#     if args.intdb:
-#         try:
-#             interfacesDB = open(args.intdb, 'r')
-#         except IOError:
-#             print('ERROR: cannot open or read input interfaces db file.')
-#             exit(-1)
+    # set interfacesDB_susbet:
+    if args.intdb:
+        try:
+            # set outdir
+            out_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/test/out/pdbmapper/input/interface_db/"
+            # print starting message
+            print("Splitting interfaces file...")
+            # split interface db
+            split(args.intdb, out_dir, args.force, 'ENSP', 'txt')
+            
+            print("finished!")
+        except IOError:
+            print('ERROR: cannot open or read input interfaces db file.')
+            exit(-1)
 #     else:
 #         print('Default interfaces DB is used.')
 #         interfaces_dir = './dbs/splitted_interfaces_db'
@@ -179,6 +188,14 @@ def main():
     # run PDBmapper
     if args.protid:
         print(args.protid)
+        for pid in args.protid:
+            # get geneID
+            biomartdb = open('/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/gene_transcript_protein_ens_ids.txt', 'r')
+            print('Biomart file read...')
+            ensemblIDs = translate_ensembl(biomartdb, pid)
+            geneID = ensemblIDs['geneID']
+
+            print(geneID)
         # input list of proteins from file
     #     for f in args.protid:
     #         if os.path.isfile(f):

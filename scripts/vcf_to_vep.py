@@ -24,8 +24,7 @@ def request(input_file, out_dir, out_file):
 
     # register processes
     cmd = bcftools.format(input_file, out_file)
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=log, shell = True)
-    p.communicate()
+    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=log, shell = True)
 
 
 # run function

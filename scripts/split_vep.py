@@ -3,7 +3,7 @@ import subprocess
 import os
 
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
-{{if ($i ~ /ENSP/){{print i; exit}}}}}}' {} "
+{{if ($i ~ /ENSG/){{print i; exit}}}}}}' {} "
 
 split = "grep -v '##' {} | \
 awk -v ci=\"{}\" \
@@ -27,9 +27,7 @@ def request(input_file, out_dir):
         # Second command
         cmd2 = split.format(input_file, out.decode('utf8'), out_dir) 
         #registe process
-        p2 = subprocess.Popen(cmd2, stdout=subprocess.PIPE, shell = True)
-        # Execute processes
-        p2.communicate()
+        subprocess.Popen(cmd2, stdout=subprocess.PIPE, shell = True)
     else: 
         raise IOError()
 

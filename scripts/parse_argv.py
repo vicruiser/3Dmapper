@@ -91,9 +91,8 @@ def parse_commandline():
     parser.set_defaults(intdb=None)
 
     # protein id string
-    protid_group = parser.add_mutually_exclusive_group(required = True)
-    protid_group.add_argument("-protid",nargs='+', metavar="<String>", dest="protid",
-                        help="Ensembl protein id")
+    parser.add_argument("-protid", nargs='+', metavar="<String>", dest="protid",
+                        help="Ensembl protein id", required = True)
 
     # create chimera script to visualize the region of interest
     parser.add_argument("-chimera", action="store_true", dest="chimera",
