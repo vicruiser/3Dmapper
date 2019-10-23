@@ -52,5 +52,6 @@ def detect_format(infile):
                 print("is vep format") 
                 infile_format = "vep"
                 return infile_format
-        return "Sorry, input format not recognized. Possible input\
-                     formats are .vep or .vcf"
+
+        raise IOError("Sorry, input format not recognized. Possible input\
+                     formats are .vep or .vcf")

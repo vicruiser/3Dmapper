@@ -3,7 +3,7 @@
 .RData
 .Ruserdata
 default_input_data
-test/out
+test
 .ipynb_checkpoints
 .Rproj.user
 __pycache__
@@ -11,8 +11,6 @@ scripts/__pycache__
 scripts/.ipynb_checkpoints
 scripts/.vscode
 setup.py
-test/input
-test/output
 required_packages/pyVEP-master.zip
 scripts/test_file.txt
 pics/protein_logo.cxs

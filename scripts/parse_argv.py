@@ -82,7 +82,7 @@ def parse_commandline():
     
     # interfaces database file
     parser.add_argument("-force", dest="force", metavar="<String>",
-                        help="Force to owerwrite? (y/n)", default = "n")
+                        help="Force to owerwrite? (y/n)", default = "y")
     parser.set_defaults(intdb=None)
 
     # interfaces database file
@@ -94,8 +94,6 @@ def parse_commandline():
     protid_group = parser.add_mutually_exclusive_group(required = True)
     protid_group.add_argument("-protid",nargs='+', metavar="<String>", dest="protid",
                         help="Ensembl protein id")
-    protid_group.add_argument("-protid-from-file", metavar="<file>", dest="protid_file",
-                        help="File with a list of Ensembl protein ids")
 
     # create chimera script to visualize the region of interest
     parser.add_argument("-chimera", action="store_true", dest="chimera",
