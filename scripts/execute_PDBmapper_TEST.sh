@@ -1,1 +1,0 @@
-python3 PDBmapper --protid ENSP00000482258 -vcf 
