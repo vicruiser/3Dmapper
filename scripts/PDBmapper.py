@@ -10,9 +10,11 @@ import gzip
 import re
 import pandas as pd
 import glob
+from scripts.db_parser import parser
+from scripts.interface_parser import reshape
 
 
-def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
+def PDBmapper(pid, geneid, int_db_dir, vcf_db_dir, out_dir):
     '''Generate setID file.
   
     Parameters
@@ -32,13 +34,17 @@ def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
     MappedVariants.File
         more into
     '''
+    annovars = parser(geneid, vcf_db_dir, "\t")
+    annoint  = parser(pid, int_db_dir, " ")
+    
+    annoint_reshape = reshape(annoint)
 
     # Merge them both files
-    mapped_variants = pd.concat([VCF_subset, interfacesDB],
+    mapped_variants = pd.concat([annovars, annoint_reshape],
                                 axis=1, join='inner')
     # stop if there are no results
     if mapped_variants.empty:
-        print('Warning:', protID, 'does not map with any annotated variant.')
+        print('Warning:', pid, 'does not map with any annotated variant.')
         exit(-1)
     # if merging was successful, create setID file and
     # save the merged dataframe as well
@@ -46,11 +52,12 @@ def PDBmapper(protID, interfacesDB, VCF_subset, output_dir):
         setID_file = mapped_variants[['region_id',
                                       '#Uploaded_variation']]
         setID_file = setID_file.drop_duplicates()
+        
         # Save the merged dataframe, appending results and not
         #  reapeting headers
-        with open(output_dir + 'setID.File', 'a') as f:
+        with open(out_dir + 'setID.File', 'a') as f:
             setID_file.to_csv(f, sep=' ', index=False,  header=f.tell() == 0)
-        with open(output_dir + 'MappedVariants.File', 'a') as f:
+        with open(out_dir + 'MappedVariants.File', 'a') as f:
             mapped_variants.to_csv(f, sep=' ', index=False,
                                    header=f.tell() == 0)
 

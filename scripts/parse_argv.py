@@ -40,7 +40,7 @@ def parse_commandline():
     '''
     description = '''
 
- ------------------------------------------------------------------------------------------------------------------ 
+ ----------------------------------------------- Welcome to ------------------------------------------------------- 
 
         $$$$$$$\  $$$$$$$\  $$$$$$$\                                                                
         $$  __$$\ $$  __$$\ $$  __$$\                                                                 
@@ -55,7 +55,9 @@ def parse_commandline():
                                                               \__|      \__|   
         
         
-------------------------  Map annotated genomic variants to protein interfaces data in 3D. ------------------------'''
+------------------------  Map annotated genomic variants to protein interfaces data in 3D. ------------------------
+
+'''
     epilog = \
         '''
           -------------------------------------------------------------------------        
@@ -101,7 +103,7 @@ def parse_commandline():
     # create default output directory
     parser.add_argument("-out", metavar="<String>", dest="out",
                         help="output directory")
-    parser.set_defaults(out="./out")
+    parser.set_defaults(out="./out/")
     
     # store arguments into variable
     args = parser.parse_args()

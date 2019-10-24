@@ -2,21 +2,13 @@
 import numpy as np
 import sys
 import os
-import gzip
 import re
 import pandas as pd
-from timeit import default_timer as timer
-import glob
+from scripts.explode import explode
 
-# import functions from scripts
-import vep_parser
-import parse_argv
-from VEPcrossref import VEPfileCrossrefGenerator as cr
-import mapping_tools as mt
-import PDBmapper
 
 # Extract the info corresponding to the prot ID (Interface parse)
-def interfaceParse(interfacesDB, protID):
+def reshape(annoint):
     '''Parse input interfaces database to put it in the right format.
     Parameters
     ----------
@@ -29,41 +21,37 @@ def interfaceParse(interfacesDB, protID):
     subset_interfaces_db
         DESCRIPTION MISSING!!
     '''
-    # read file
-    fp = glob.glob(interfacesDB + '/' + protID + '*.csv')[0] 
-    prot_interface = pd.read_csv(fp, sep=' ', header=0)
-
     # store subspace
-    subset_prot_interface = prot_interface[['pdb.id',
-                                            'ensembl.prot.id',
-                                            'temp.chain',
-                                            'int.chain',
-                                            'interaction',
-                                            'resid_sseq',
-                                            'mapped.real.pos',
-                                            'pdb.pos']]
+    sub_annoint = annoint[['pdb.id',
+                           'ensembl.prot.id',
+                           'temp.chain',
+                           'int.chain',
+                           'interaction',
+                           'resid_sseq',
+                           'mapped.real.pos',
+                           'pdb.pos']]
    
     # put it into right format
-    subset_prot_interface.columns = \
-        subset_prot_interface.columns.str.replace('\\.', '_')
+    sub_annoint.columns = \
+        sub_annoint.columns.str.replace('\\.', '_')
 
     for col in ('resid_sseq', 'mapped_real_pos', 'pdb_pos'):
-        subset_prot_interface.loc[:, col] = \
-            subset_prot_interface[col].str.replace('-', ',')
-        subset_prot_interface.loc[:, col] = \
-            subset_prot_interface[col].str.split(',')
+        sub_annoint.loc[:, col] = \
+            sub_annoint[col].str.replace('-', ',')
+        sub_annoint.loc[:, col] = \
+            sub_annoint[col].str.split(',')
 
-    subset_prot_interface = mt.explode(subset_prot_interface,
-                                       ['resid_sseq',
-                                        'mapped_real_pos',
-                                        'pdb_pos'])
-    subset_prot_interface.rename(columns={'mapped_real_pos':
+    sub_annoint = explode(sub_annoint,
+                          ['resid_sseq',
+                           'mapped_real_pos',
+                            'pdb_pos'])
+    sub_annoint.rename(columns={'mapped_real_pos':
                                           'Protein_position'}, inplace=True)
     # create region id for setID file
-    subset_prot_interface['region_id'] = subset_prot_interface['pdb_id'] + \
-        '_' + subset_prot_interface['ensembl_prot_id'] + '_' + \
-        subset_prot_interface['temp_chain'] + '_' + \
-        subset_prot_interface['int_chain'] + '_' + \
-        subset_prot_interface['interaction']
+    sub_annoint['region_id'] = sub_annoint['pdb_id'] + '_' + \
+        sub_annoint['ensembl_prot_id'] + '_' + \
+        sub_annoint['temp_chain'] + '_' + \
+        sub_annoint['int_chain'] + '_' + \
+        sub_annoint['interaction']
 
-    return subset_prot_interface
+    return sub_annoint

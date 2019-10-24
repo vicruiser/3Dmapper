@@ -15,13 +15,15 @@ import subprocess
 import vcfpy
 import time
 import progressbar
+from halo import Halo
+import emoji
 
 # import functions from scripts
 from scripts.parse_argv import parse_commandline
-from scripts.VEPcrossref import VEPfileCrossrefGenerator as cr
-import scripts.mapping_tools as mt
-import scripts.PDBmapper
-import scripts.vep_parser
+#from scripts.VEPcrossref import VEPfileCrossrefGenerator as cr
+#import scripts.mapping_tools as mt
+from scripts.PDBmapper import PDBmapper
+#import scripts.vep_parser
 from scripts.detect_vcf_format import detect_format
 from scripts.vcf_to_vep import vcf_to_vep
 #from scripts.split_vep import split_vep
@@ -31,7 +33,7 @@ from scripts.split import split
 # aesthetics
 description = '''
 
- ------------------------------------------------------------------------------------------------------------------ 
+ ----------------------------------------------- Welcome to ------------------------------------------------------- 
 
         $$$$$$$\  $$$$$$$\  $$$$$$$\                                                                
         $$  __$$\ $$  __$$\ $$  __$$\                                                                 
@@ -49,6 +51,17 @@ description = '''
 ------------------------  Map annotated genomic variants to protein interfaces data in 3D. ------------------------
 
 '''
+
+
+# Emojis
+
+DNA = '\U0001F52C'  
+
+#spinner
+
+spinner = Halo(text='Loading', spinner='dots')
+
+
 
 # define main function to execute the previous defined functions together
 
@@ -165,20 +178,24 @@ def main():
     if args.intdb:
         try:
             # set outdir
-            out_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/test/out/pdbmapper/input/interface_db/"
+            int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/test/out/pdbmapper/input/interface_db/"
             # print starting message
             print("Splitting interfaces file...")
             # split interface db
-            split(args.intdb, out_dir, args.force, 'ENSP', 'txt')
+            split(args.intdb, int_db_dir, args.force, 'ENSP', 'txt')
             
             print("finished!")
         except IOError:
             print('ERROR: cannot open or read input interfaces db file.')
             exit(-1)
-#     else:
-#         print('Default interfaces DB is used.')
-#         interfaces_dir = './dbs/splitted_interfaces_db'
-#         interfacesDB_subset = interfaceParse(interfaces_dir, args.protid)
+    else:
+
+        spinner.start('Default interfaces DB is used.')
+        
+        #set default interfaces database
+        int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_interfaces_db/"
+                      
+        spinner.stop_and_persist(symbol= DNA ,text= ' Default interfaces DB is used.')
 
     # create chimera scripts:
     if args.chimera is not None:
@@ -187,17 +204,29 @@ def main():
 
     # run PDBmapper
     if args.protid:
+        # measure execution time
+        start = timer()
         print(args.protid)
+        #try:
+        #    with open(args.input) as f:
+        #        lines = f.read()
+        #        somefunction(*lines)
+                # or
+                # for line in lines:
+                #   somefuncion(line.strip())
+        #except:
+        #somefunction(arg.input)
+
         for pid in args.protid:
             # get geneID
             biomartdb = open('/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/gene_transcript_protein_ens_ids.txt', 'r')
-            print('Biomart file read...')
+            spinner.start('Reading Biomart...')
             ensemblIDs = translate_ensembl(biomartdb, pid)
             geneID = ensemblIDs['geneID']
-
+            spinner.succeed('ENSP translated to ENSG')
             print(geneID)
         # input list of proteins from file
-    #     for f in args.protid:
+     
     #         if os.path.isfile(f):
     #             protids_file = open(args.protid, 'r')
     #             for one_protid in protids_file:
@@ -205,8 +234,10 @@ def main():
     #                 print(one_protid)
     #                 try:
     #                     pass
-    # #                     PDBmapper(one_protid, interfacesDB_subset, VCF_subset,
-    # #                             args.out)
+
+            print(pid, geneID, int_db_dir, vcf_db_dir, args.out)
+            PDBmapper(pid, geneID, int_db_dir, vcf_db_dir, args.out)
+
     #                 except IOError:
     #                     print('ERROR: Ensembl protein id provided is no supported.')
     #                     exit(-1)
@@ -222,15 +253,13 @@ def main():
     #                 except IOError:
     #                     print('ERROR: Ensembl protein id provided is no supported.')
     #                     exit(-1)
-
+        end = timer()
+        finish = end - start
+        print('Congratulations!. PDBmapper has run in', finish, 'seconds.')
 
 ##########################
 # execute main function  #
 ##########################
 if __name__ == '__main__':
-    # measure execution time
-    start = timer()
     main()
-    end = timer()
-    finish = end - start
-    print('Congratulations!. PDBmapper has run in', finish, 'seconds.')
+
