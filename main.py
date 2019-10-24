@@ -14,21 +14,16 @@ from subprocess import call
 import subprocess
 import vcfpy
 import time
-import progressbar
 from halo import Halo
 import emoji
 
 # import functions from scripts
 from scripts.parse_argv import parse_commandline
-#from scripts.VEPcrossref import VEPfileCrossrefGenerator as cr
-#import scripts.mapping_tools as mt
-from scripts.PDBmapper import PDBmapper
-#import scripts.vep_parser
+from scripts.split import split 
 from scripts.detect_vcf_format import detect_format
 from scripts.vcf_to_vep import vcf_to_vep
-#from scripts.split_vep import split_vep
 from scripts.translate_ensembl import translate_ensembl
-from scripts.split import split 
+from scripts.PDBmapper import PDBmapper
 
 # aesthetics
 description = '''
@@ -54,18 +49,13 @@ description = '''
 
 
 # Emojis
-
 DNA = '\U0001F52C'  
+searching_girl = '\U0001F575'
 
 #spinner
-
-spinner = Halo(text='Loading', spinner='dots')
-
-
+spinner = Halo(text='Loading', spinner='dots', color= "yellow")
 
 # define main function to execute the previous defined functions together
-
-
 def main():
 
     # parse command line options
@@ -77,16 +67,15 @@ def main():
     # create output directory if it doesn't exist
     if not os.path.exists(args.out):
         os.mkdir(args.out)
-        print("Directory", args.out,  "created.")
+        spinner.info(text = "Directory "+ args.out +  " created.")
     else:
-        print(args.out,
-              "is an existing directory. Results will be written in there.")
-
+        spinner.info(text = args.out + " is an existing directory. Results will be written in there.")
+        
     # Manage all possible genomic variant input files
     # 1) vep = run VEP
     if args.vep:
-        print('''VEP option will be available soon. Using VarMap db instead.
-        Otherwise, please provide your own vcf file with the -vcf option.''')
+        spinner.warn( text = 'VEP option will be available soon. Using VarMap db instead. \
+        Otherwise, please provide your own vcf file with the -vcf option.')
         try:
             # ./vep -i input.vcf -o out.txt -offline
             print('VarMap db is used.')
@@ -195,7 +184,7 @@ def main():
         #set default interfaces database
         int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_interfaces_db/"
                       
-        spinner.stop_and_persist(symbol= DNA ,text= ' Default interfaces DB is used.')
+        spinner.stop_and_persist(symbol= DNA + searching_girl ,text= ' Default interfaces DB is used.')
 
     # create chimera scripts:
     if args.chimera is not None:
@@ -205,58 +194,47 @@ def main():
     # run PDBmapper
     if args.protid:
         # measure execution time
+        spinner.start("Running PDBmapper")
         start = timer()
         print(args.protid)
-        #try:
-        #    with open(args.input) as f:
-        #        lines = f.read()
-        #        somefunction(*lines)
+        
+        # prot ids are stored in an file as list
+        try:
+            with open(args.protid) as f:
+                lines = f.read()
+                for line in lines:
+                    # get geneID
+                    biomartdb = open('/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/gene_transcript_protein_ens_ids.txt', 'r')
+                    spinner.start('Reading Biomart...')
+                    ensemblIDs = translate_ensembl(biomartdb, pid)
+                    geneID = ensemblIDs['geneID']
+                    spinner.succeed('ENSP translated to ENSG')
+                    print(geneID)
+                    print(pid, geneID, int_db_dir, vcf_db_dir, args.out)
+                    PDBmapper(pid, geneID, int_db_dir, vcf_db_dir, args.out)
                 # or
-                # for line in lines:
-                #   somefuncion(line.strip())
-        #except:
-        #somefunction(arg.input)
 
-        for pid in args.protid:
-            # get geneID
-            biomartdb = open('/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/gene_transcript_protein_ens_ids.txt', 'r')
-            spinner.start('Reading Biomart...')
-            ensemblIDs = translate_ensembl(biomartdb, pid)
-            geneID = ensemblIDs['geneID']
-            spinner.succeed('ENSP translated to ENSG')
-            print(geneID)
-        # input list of proteins from file
-     
-    #         if os.path.isfile(f):
-    #             protids_file = open(args.protid, 'r')
-    #             for one_protid in protids_file:
-    #             # iterate over list
-    #                 print(one_protid)
-    #                 try:
-    #                     pass
+        except:
+            for pid in args.protid:
+                # get geneID
+                biomartdb = open('/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/gene_transcript_protein_ens_ids.txt', 'r')
+                spinner.start('Reading Biomart...')
+                ensemblIDs = translate_ensembl(biomartdb, pid)
+                geneID = ensemblIDs['geneID']
+                spinner.succeed('ENSP translated to ENSG')
+                print(geneID)
 
-            print(pid, geneID, int_db_dir, vcf_db_dir, args.out)
-            PDBmapper(pid, geneID, int_db_dir, vcf_db_dir, args.out)
 
-    #                 except IOError:
-    #                     print('ERROR: Ensembl protein id provided is no supported.')
-    #                     exit(-1)
-    #         # input list of proteins or single protein
-    #         else:
-    #             if len(args.protid) == 1:
-    #                 args.protid= [args.protid]
-    #             for one_protid in args.protid:
-    #                 try:
-    #                     pass
-    # #                     PDBmapper(one_protid, interfacesDB_subset, VCF_subset,
-    # #                             args.out)
-    #                 except IOError:
-    #                     print('ERROR: Ensembl protein id provided is no supported.')
-    #                     exit(-1)
-        end = timer()
-        finish = end - start
-        print('Congratulations!. PDBmapper has run in', finish, 'seconds.')
+                print(pid, geneID, int_db_dir, vcf_db_dir, args.out)
+                PDBmapper(pid, geneID, int_db_dir, vcf_db_dir, args.out)
 
+        #                 except IOError:
+        #                     print('ERROR: Ensembl protein id provided is no supported.')
+        #                     exit(-1)
+
+            finish = end - start
+            #print('Congratulations!. PDBmapper has run in', finish, 'seconds.')
+            spinner.succeed(text = 'Congratulations!. PDBmapper has run in  seconds.')
 ##########################
 # execute main function  #
 ##########################
