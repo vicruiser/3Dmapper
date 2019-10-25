@@ -170,13 +170,12 @@ def main():
     # run PDBmapper
     if args.protid:
         # measure execution time
+        biomartdb = open('/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/gene_transcript_protein_ens_ids.txt', 'r')
         start = timer()
         for pid in args.protid:
             # prot ids are stored in an file as list
             try:
-                biomartdb = open('/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/gene_transcript_protein_ens_ids.txt', 'r')
                 with open(pid) as f:
-                    #print(f)
                     lines = f.read().splitlines()
                     for pids in lines:
                         # get geneID

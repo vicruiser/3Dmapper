@@ -38,13 +38,11 @@ def PDBmapper(pid, geneid, int_db_dir, vcf_db_dir, out_dir):
     MappedVariants.File
         more into
     '''
+    
     annovars = parser(geneid, vcf_db_dir, "\t")
-    #print(annovars)
     annoint  = parser(pid, int_db_dir, " ")
-    print(annoint)
-
     annoint_reshape = reshape(annoint)
-    print(annovars)
+
     # Merge them both files
     mapped_variants = pd.concat([annovars, annoint_reshape],
                                 axis=1, join='inner')
