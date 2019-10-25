@@ -12,8 +12,12 @@ import pandas as pd
 import glob
 from scripts.db_parser import parser
 from scripts.interface_parser import reshape
+from scripts.decorator import tags
 
-
+@tags(text_start = "Runing PDBmapper...",
+      text_succeed = "Runing PDBmapper...done.",
+      text_fail = "Runing PDBmapper...failed!",
+      emoji = "🦸")
 def PDBmapper(pid, geneid, int_db_dir, vcf_db_dir, out_dir):
     '''Generate setID file.
   
@@ -35,10 +39,12 @@ def PDBmapper(pid, geneid, int_db_dir, vcf_db_dir, out_dir):
         more into
     '''
     annovars = parser(geneid, vcf_db_dir, "\t")
+    #print(annovars)
     annoint  = parser(pid, int_db_dir, " ")
-    
-    annoint_reshape = reshape(annoint)
+    print(annoint)
 
+    annoint_reshape = reshape(annoint)
+    print(annovars)
     # Merge them both files
     mapped_variants = pd.concat([annovars, annoint_reshape],
                                 axis=1, join='inner')
@@ -55,9 +61,9 @@ def PDBmapper(pid, geneid, int_db_dir, vcf_db_dir, out_dir):
         
         # Save the merged dataframe, appending results and not
         #  reapeting headers
-        with open(out_dir + 'setID.File', 'a') as f:
+        with open(out_dir + '/setID.File', 'a') as f:
             setID_file.to_csv(f, sep=' ', index=False,  header=f.tell() == 0)
-        with open(out_dir + 'MappedVariants.File', 'a') as f:
+        with open(out_dir + '/MappedVariants.File', 'a') as f:
             mapped_variants.to_csv(f, sep=' ', index=False,
                                    header=f.tell() == 0)
 

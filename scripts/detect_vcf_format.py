@@ -2,7 +2,12 @@
 
 # import necessary packages
 import vcfpy
+from scripts.decorator import tags
 
+@tags(text_start = "Detect inputs variants file format...",
+      text_succeed = "Detect inputs variants file format...done.",
+      text_fail = "Detect inputs variants file format...failed!",
+      emoji = "🦸")
 def detect_format(infile):
     '''Parse input and detect whether is a VCF or VEP file. Any other format
     is invalid. 

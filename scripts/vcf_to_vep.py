@@ -2,6 +2,7 @@
 import os
 import subprocess
 import sys
+from scripts.decorator import tags
 
 
 def request(input_file, out_dir, out_file):
@@ -24,10 +25,20 @@ def request(input_file, out_dir, out_file):
 
     # register processes
     cmd = bcftools.format(input_file, out_file)
-    subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=log, shell = True)
-
+    p =  subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=log, shell = True)
+    p.wait()
+    out, err = p.communicate()
+    
+    if(err is None):
+        pass
+    else:
+	    raise IOError("ss")
 
 # run function
+@tags(text_start = "Converting vcf to vep...This might take up some time...",
+      text_succeed = "Converting vcf to vep...done.",
+      text_fail = "Converting vcf to vep...failed!",
+      emoji = "🦸")
 def vcf_to_vep (input_file, out_dir, out_file, overwrite):
     '''
     Input

@@ -1,30 +1,6 @@
 #!/usr/bin/python3
 import argparse, os
 
-
-
-# def dir_path(dirName):
-#     '''Parse input interfaces database to put it in the right format.
-#     Parameters
-#     ----------
-#     protID : str
-#         Ensemble protein id 
-#     interfacesDB_filepath : str
-#         DESCRIPTION MISSING!!
-#     Returns
-#     -------
-#     subset_interfaces_db
-#         DESCRIPTION MISSING!!
-#     '''
-#     # Create target Directory if don't exist
-#     if not os.path.exists(dirName):
-#         os.mkdir(dirName)
-#         print("Directory", dirName,  "created.")
-#     else:    
-#         print(dirName,
-#               "is an existing directory. Results will be written in there.")
-
-
 def parse_commandline():
     '''Parse input interfaces database to put it in the right format.
     Parameters
@@ -103,7 +79,7 @@ def parse_commandline():
     # create default output directory
     parser.add_argument("-out", metavar="<String>", dest="out",
                         help="output directory")
-    parser.set_defaults(out="./out/")
+    parser.set_defaults(out="./out")
     
     # store arguments into variable
     args = parser.parse_args()
