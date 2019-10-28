@@ -14,10 +14,7 @@ from scripts.db_parser import parser
 from scripts.interface_parser import reshape
 from scripts.decorator import tags
 
-@tags(text_start = "Runing PDBmapper...",
-      text_succeed = "Runing PDBmapper...done.",
-      text_fail = "Runing PDBmapper...failed!",
-      emoji = "🦸")
+
 def PDBmapper(pid, geneid, int_db_dir, vcf_db_dir, out_dir):
     '''Generate setID file.
   
@@ -39,17 +36,21 @@ def PDBmapper(pid, geneid, int_db_dir, vcf_db_dir, out_dir):
         more into
     '''
     
-    annovars = parser(geneid, vcf_db_dir, "\t")
+    annovars = parser(geneid, vcf_db_dir, " ")
+    print(annovars)
     annoint  = parser(pid, int_db_dir, " ")
     annoint_reshape = reshape(annoint)
-
+    print("HELOOOO")
     # Merge them both files
     mapped_variants = pd.concat([annovars, annoint_reshape],
                                 axis=1, join='inner')
     # stop if there are no results
     if mapped_variants.empty:
-        print('Warning:', pid, 'does not map with any annotated variant.')
-        exit(-1)
+        log = open(out_dir + '/log.File', 'a')
+        log.write('Warning:', pid, 'does not map with any annotated variant.\n')
+        log.flush()
+        return IOError('Warning:', pid, 'does not map with any annotated variant.')
+    
     # if merging was successful, create setID file and
     # save the merged dataframe as well
     else:

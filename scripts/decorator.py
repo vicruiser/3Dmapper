@@ -38,3 +38,18 @@ def only_fail_tag(text_fail):
         return wrapper
         
     return my_decorator
+
+
+def try_except(func):
+
+    def wrapper(*args):
+
+        try: 
+            func(*args)
+            return func(*args)
+        except IOError:
+            spinner.fail(text=text_fail)
+        
+        return wrapper
+        
+    

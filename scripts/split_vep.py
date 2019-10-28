@@ -27,7 +27,8 @@ def request(input_file, out_dir):
         # Second command
         cmd2 = split.format(input_file, out.decode('utf8'), out_dir) 
         #registe process
-        subprocess.Popen(cmd2, stdout=subprocess.PIPE, shell = True)
+        p2 = subprocess.Popen(cmd2, stdout=subprocess.PIPE, shell = True)
+        p2.wait()
     else: 
         raise IOError()
 

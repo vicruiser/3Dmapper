@@ -35,7 +35,7 @@ def request(prefix, input_file, out_dir, out_extension):
         cmd2 = split_cmd.format(input_file, n, out_dir, out_extension)
         # write log file
         log = open(out_dir +'/' + 'log.txt', 'a')
-        log.write('Using bcftools to split the vcf file into vep format...\n')
+        log.write('Using bcftools to split the vcf into vep format...\n')
         log.flush() 
 
         #register process

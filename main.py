@@ -94,6 +94,8 @@ def main():
         for f in args.vcf:
             # check if file is in the right format
             try:
+                print(f)
+                print("LA VICKT")
                 # detect the format of the vcf file(s), either .vcf or .vep
                 input_format = detect_format(f)
                 # set out dir and out file names
@@ -101,20 +103,22 @@ def main():
                 out_file = out_dir + 'converted_vcf.vep'
                 # If vcf transform into vep format and split
                 if input_format == "vcf":
-                                    # set output dir to split vep
+                    
+                    # set output dir to split vep
                     vcf_db_dir = out_dir + 'vcf_db/'  # created by default
 
                     if os.path.isfile(out_file) is False:
                         # from vcf to vep
+                        print("how many times heheheheh")
                         vcf_to_vep(f, out_dir, out_file, args.force)
                         # add header to resulting vep file
                         add_header(out_file)
-                    # split vep file by protein id to speed up the
-                    try:
-                        split(out_file, vcf_db_dir, args.force, 'ENSG', 'vep')
-                    except IOError:
-                        # print error message
-                        print("File " + f + " does not contain any ENSP id.")
+                        # split vep file by protein id to speed up the
+                        try:
+                            split(out_file, vcf_db_dir, args.force, 'ENSG', 'vep')
+                        except IOError:
+                            # print error message
+                            print("File " + f + " does not contain any ENSP id.")
                 # If vep, only split
                 elif input_format == "vep":
                     # split vep file by protein id to speed up the
@@ -170,8 +174,13 @@ def main():
     # run PDBmapper
     if args.protid:
         # measure execution time
-        biomartdb = open('/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/gene_transcript_protein_ens_ids.txt', 'r')
+        biomartdb = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/gene_transcript_protein_ens_ids.txt'
         start = timer()
+        #@tags(text_start = "Runing PDBmapper...",
+        #text_succeed = "Runing PDBmapper...done.",
+        #text_fail = "Runing PDBmapper...failed!",
+        #emoji = "🦸")
+        #def f():
         for pid in args.protid:
             # prot ids are stored in an file as list
             try:
@@ -179,22 +188,41 @@ def main():
                     lines = f.read().splitlines()
                     for pids in lines:
                         # get geneID
-                        ensemblIDs = translate_ensembl(biomartdb, pids)
-                        geneID = ensemblIDs['geneID']
-                        #run PDBmapper
-                        PDBmapper(pids, geneID, int_db_dir, vcf_db_dir, args.out)
+                        try:
+                            ensemblIDs = translate_ensembl(biomartdb, pids)
+                            geneID = ensemblIDs['geneID']
+                            try: 
+                                #run PDBmapper
+                                PDBmapper(pids, geneID, int_db_dir, vcf_db_dir, args.out)
+                            except IOError:
+                                next
+                        except IOError: 
+                            next
             except:
+                
                 # get geneID
-                ensemblIDs = translate_ensembl(biomartdb, pid)
-                geneID = ensemblIDs['geneID']
-                #run PDBmapper
-                PDBmapper(pid, geneID, int_db_dir, vcf_db_dir, args.out)
+                try:
+                    print("estoy aqui")
+                    print(pid)
+                    print("HOLAAAAAAA!!")
+                    ensemblIDs = translate_ensembl(biomartdb, pid)
+                    geneID = ensemblIDs['geneID']
+                    print(geneID)
+                    #run PDBmapper
+                    try: 
+                        pass
+                        #PDBmapper(pid, geneID, int_db_dir, vcf_db_dir, args.out)
+                    except IOError: 
+                        next
+                except IOError: 
+                    next
+        #f()
 
 
         end = timer()
         finish = end - start
         spinner.stop_and_persist(symbol = '🧬' ,
-        text = 'Congratulations!. PDBmapper has run in ' +  finish +' seconds.')
+        text = 'Congratulations!. PDBmapper has run in ' +  str(finish)  +' seconds.')
 ##########################
 # execute main function  #
 ##########################

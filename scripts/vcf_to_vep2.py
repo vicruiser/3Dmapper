@@ -1,9 +1,9 @@
 #!/usr/bin/python3
-import os, os.path
-import time
+import os
 import subprocess
 import sys
 from scripts.decorator import tags
+
 
 def request(input_file, out_dir, out_file):
     # export enviroment
@@ -25,12 +25,8 @@ def request(input_file, out_dir, out_file):
 
     # register processes
     cmd = bcftools.format(input_file, out_file)
-    p =  subprocess(cmd,  stdout=subprocess.PIPE, stderr=log, shell=True)
-    out, err = p.communicate()
-    #return p
-    p.wait()
-    
-    #return p
+    p =  subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=log, shell=True)
+    #p.wait()
     #out, err = p.communicate()
     
     # if(err is None):
@@ -53,13 +49,17 @@ def vcf_to_vep (input_file, out_dir, out_file, overwrite):
     '''
     #create dir if it doesn't exist
     os.makedirs(out_dir, exist_ok=True)
-    #if not os.path.isfile(out_file) or overwrite.lower() == 'y':
-    print("how many times")
-    request(input_file, out_dir, out_file )
-    #else: 
-    #    pass
 
+    if os.path.isfile(out_file):
 
-            
+        if overwrite.lower() == 'y':
+            return request(input_file, out_dir, out_file)
+            print("jeje")
+        else:
+            print('Using already created converted_vcf.vep file.')
+
+    else:
+        return request(input_file, out_dir, out_file)
+        
 
 
