@@ -59,7 +59,7 @@ An already pre-computed database with a total number of **the number** proteins.
 
 | Column name     | Notes                                                                                                                                                                 |
 | :-------------- | :---------------------                                                                                                                                                |
-| **pdb.id**      | Biological Assembly pdb id                                                                                                                                            |
+| *pdb.id*      | Biological Assembly pdb id                                                                                                                                            |
 | ensembl.prot.id | Ensembl protein ID                                                                                                                                                    |
 | temp.chain      | Template chain (only protein)                                                                                                                                         |
 | int.chain       | Interacting chain (protein, ligand or DNA)                                                                                                                            |
