@@ -37,7 +37,7 @@ def detect_format(infile):
             # is vcf format
             return "vcf"
     except:
-        # define the columns that must be present in a VEP file.  
+        # define the columns that must be present in the VEP file.  
         vep_header = set(['#Uploaded_variation',
                           'Location',
                           'Allele',

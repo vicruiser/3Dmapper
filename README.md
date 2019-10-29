@@ -59,6 +59,8 @@ generated with interfacer (repository link)
 
 ## Variant annotated files
 
+The input annotated genomic variants file must be either in [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format) or [VEP](https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout) default format. 
+
 ### ClinVar
 
 ## Custom
