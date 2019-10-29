@@ -31,25 +31,26 @@ More details in ./test
 | :------ | :------------------ | :---------
 | install | `pip install fire`  |
 
-| Creating a CLI | Command                | Notes
+<!-- | Creating a CLI | Command                | Notes
 | :--------------| :--------------------- | :---------
 | import         | `import fire`          |
 | Call           | `fire.Fire()`          | Turns the current module into a Fire CLI.
-| Call           | `fire.Fire(component)` | Turns `component` into a Fire CLI.
+| Call           | `fire.Fire(component)` | Turns `component` into a Fire CLI. -->
 
-Using a CLI                                     | Command                                 | Notes
+<!-- Using a CLI                                     | Command                                 | Notes
 :---------------------------------------------- | :-------------------------------------- | :----
 [Help](docs/using-cli.md#help-flag)             | `command --help` or `command -- --help` |
 [REPL](docs/using-cli.md#interactive-flag)      | `command -- --protid`                   | Protein id ensembl.
 [Separator](docs/using-cli.md#separator-flag)   | `command -- --separator=X`              | Sets the separator to `X`. The default separator is `-`.
 [Completion](docs/using-cli.md#completion-flag) | `command -- --completion [shell]`       | Generates a completion script for the CLI.
 [Trace](docs/using-cli.md#trace-flag)           | `command -- --trace`                    | Gets a Fire trace for the command.
-[Verbose](docs/using-cli.md#verbose-flag)       | `command -- --verbose`                  |
+[Verbose](docs/using-cli.md#verbose-flag)       | `command -- --verbose`                  | -->
 
 ### Paralellization
 
-to run in parallel 
+PDBmapper is not possible to run in parallel per se. However, the easiest way to do this is to give as input the protein ids individually in parallel tasks. The first task should write the initial files. The rest set the option `-force n` to prevent repeating innecesary steps. 
 
+**Explain better or implemen a parallel option** 
 
 # PDBmapper databases
 
@@ -57,25 +58,25 @@ to run in parallel
 
 An already pre-computed database with a total number of **the number** proteins. Since an interface database is not an standard thing to  have, PDBmapper has been designed to manage databases of interfaces that are in a certain format. The default format is a 10 column tab-delimited file. Empty values are denoted by '-'. The output columns are: 
 
-| Column name     | Notes                                                                                                                                                                 |
-| :-------------- | :---------------------                                                                                                                                                |
-| *pdb.id*      | Biological Assembly pdb id                                                                                                                                            |
-| ensembl.prot.id | Ensembl protein ID                                                                                                                                                    |
-| temp.chain      | Template chain (only protein)                                                                                                                                         |
-| int.chain       | Interacting chain (protein, ligand or DNA)                                                                                                                            |
-| temp.length     | Length of the Ensembl protein sequence (without including the gaps of the alignment)                                                                                  |
-| temp.start      | Start of alignment in the Ensembl protein sequence (template chain)                                                                                                   |
-| temp.end        | End of alignment in the Ensembl protein sequence (template chain)                                                                                                     |
-| length.ali      | Length of the alignment between Ensembl protein sequence (subject) and PDB chain sequence (query)                                                                     |
-| pident          | Sequence Identity percent. This parameter serves as threshold. Only results with pident equal or higher to 50% are included                                           |
-| interaction     | Type of interfacial interaction, i.e., “protein”,”nucleic” or “ligand”                                                                                                |
-| resid_qseq      | residues of aligned query (PDB chain) sequence (i.e.: only aligned and includes gaps.)                                                                                |
-| resid_sseq      | residues of aligned subject (Ensembl) sequence (i.e.: only aligned and includes gaps.)                                                                                |
-| qpos            | index position of each residue of the aligned query (PDB chain) sequence starting from 1                                                                              |
-| spos            | index position of each residue of the aligned subject (Ensembl) sequence starting from 1                                                                              |
-| q_ali_pos       | real index position of each residue of the aligned query (PDB chain) sequence (i.e, + qstart)                                                                         |
-| mapped.real.pos | Position of the interfacial residues on the Ensembl protein sequence. At the end of the day, this is the column of your interest! (Protein position in the MC3 file). |
-| pdb.pos         | Corresponding position of the interfacial residues on the PDB chain sequence                                                                                          |
+| Column name         | Notes                                                                                                                                                                 |
+| :--------------     | :---------------------                                                                                                                                                |
+| **pdb.id**          | Biological Assembly pdb id                                                                                                                                            |
+| **ensembl.prot.id** | Ensembl protein ID                                                                                                                                                    |
+| **temp.chain**      | Template chain (only protein)                                                                                                                                         |
+| **int.chain**       | Interacting chain (protein, ligand or DNA)                                                                                                                            |
+| **temp.length**     | Length of the Ensembl protein sequence (without including the gaps of the alignment)                                                                                  |
+| **temp.start**      | Start of alignment in the Ensembl protein sequence (template chain)                                                                                                   |
+| **temp.end**        | End of alignment in the Ensembl protein sequence (template chain)                                                                                                     |
+| **length.ali**      | Length of the alignment between Ensembl protein sequence (subject) and PDB chain sequence (query)                                                                     |
+| **pident**          | Sequence Identity percent. This parameter serves as threshold. Only results with pident equal or higher to 50% are included                                           |
+| **interaction**     | Type of interfacial interaction, i.e., “protein”,”nucleic” or “ligand”                                                                                                |
+| **resid_qseq**      | residues of aligned query (PDB chain) sequence (i.e.: only aligned and includes gaps.)                                                                                |
+| **resid_sseq**      | residues of aligned subject (Ensembl) sequence (i.e.: only aligned and includes gaps.)                                                                                |
+| **qpos**            | index position of each residue of the aligned query (PDB chain) sequence starting from 1                                                                              |
+| **spos**            | index position of each residue of the aligned subject (Ensembl) sequence starting from 1                                                                              |
+| **q_ali_pos**       | real index position of each residue of the aligned query (PDB chain) sequence (i.e, + qstart)                                                                         |
+| **mapped.real.pos** | Position of the interfacial residues on the Ensembl protein sequence. At the end of the day, this is the column of your interest! (Protein position in the MC3 file). |
+| **pdb.pos**         | Corresponding position of the interfacial residues on the PDB chain sequence                                                                                          |
 
 ## Variant annotated files
 
