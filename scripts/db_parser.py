@@ -11,7 +11,7 @@ def parser(ensemblID, db_dir, sep):
     # similar to grep. Faster than reading the
     # create empty list to store the rows
     
-    f = glob.glob(db_dir + '/' + ensemblID + '*')
+    f = glob.glob(db_dir + ensemblID + '*')
     
     if not f:
         raise IOError()

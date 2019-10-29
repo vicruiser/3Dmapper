@@ -4,6 +4,7 @@ import time
 import subprocess
 import sys
 from scripts.decorator import tags
+from timeit import default_timer as timer
 
 def request(input_file, out_dir, out_file):
     # export enviroment
@@ -25,8 +26,8 @@ def request(input_file, out_dir, out_file):
 
     # register processes
     cmd = bcftools.format(input_file, out_file)
-    p =  subprocess(cmd,  stdout=subprocess.PIPE, stderr=log, shell=True)
-    out, err = p.communicate()
+    p =  subprocess.Popen(cmd,  stdout=subprocess.PIPE, stderr=log, shell=True)
+    #out, err = p.communicate()
     #return p
     p.wait()
     
@@ -38,11 +39,11 @@ def request(input_file, out_dir, out_file):
     # else:
 	#     raise IOError("ss")
 
-# run function
-@tags(text_start = "Converting vcf to vep...This might take up some time...",
-      text_succeed = "Converting vcf to vep...done.",
-      text_fail = "Converting vcf to vep...failed!",
-      emoji = "🦸")
+# run function         
+@tags(text_start = "Converting vcf to vep...This might take up some time...\n",
+      text_succeed = "Converting vcf to vep...done.\n",
+      text_fail = "Converting vcf to vep...failed!\n",
+      emoji = "\U0001F504 ")
 def vcf_to_vep (input_file, out_dir, out_file, overwrite):
     '''
     Input
@@ -51,12 +52,15 @@ def vcf_to_vep (input_file, out_dir, out_file, overwrite):
     Output
     ------
     '''
+    print("vcf to vep times")
     #create dir if it doesn't exist
     os.makedirs(out_dir, exist_ok=True)
-    #if not os.path.isfile(out_file) or overwrite.lower() == 'y':
-    print("how many times")
-    request(input_file, out_dir, out_file )
-    #else: 
+    if os.path.isfile(out_file):
+        if overwrite.lower() == 'y':
+            print("how many times")
+            request(input_file, out_dir, out_file )
+    else: 
+        request(input_file, out_dir, out_file )
     #    pass
 
 

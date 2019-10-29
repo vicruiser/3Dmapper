@@ -35,29 +35,28 @@ def PDBmapper(pid, geneid, int_db_dir, vcf_db_dir, out_dir):
     MappedVariants.File
         more into
     '''
-    
+  
     annovars = parser(geneid, vcf_db_dir, " ")
     print(annovars)
     annoint  = parser(pid, int_db_dir, " ")
     annoint_reshape = reshape(annoint)
-    print("HELOOOO")
+
     # Merge them both files
     mapped_variants = pd.concat([annovars, annoint_reshape],
                                 axis=1, join='inner')
     # stop if there are no results
     if mapped_variants.empty:
         log = open(out_dir + '/log.File', 'a')
-        log.write('Warning:', pid, 'does not map with any annotated variant.\n')
-        log.flush()
-        return IOError('Warning:', pid, 'does not map with any annotated variant.')
-    
-    # if merging was successful, create setID file and
+        log.write('Warning: '+ pid+ ' does not map with any annotated variant.\n')
+        #log.flush()
+        raise IOError('Warning: ' + pid + ' does not map with any annotated variant.')
+       # # if merging was successful, create setID file and
     # save the merged dataframe as well
     else:
         setID_file = mapped_variants[['region_id',
-                                      '#Uploaded_variation']]
+                                       '#Uploaded_variation']]
         setID_file = setID_file.drop_duplicates()
-        
+      
         # Save the merged dataframe, appending results and not
         #  reapeting headers
         with open(out_dir + '/setID.File', 'a') as f:
