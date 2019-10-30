@@ -9,9 +9,7 @@ test
 __pycache__
 scripts/__pycache__
 setup.py
-required_packages/pyVEP-master.zip
-required_packages/ensembl-vep
-required_packages/pyVEP-master
+required_packages
 scripts/test_file.txt
 pics/protein_logo.cxs
 pics/LogoPDB_PDBmapper_LOGO2.svg
