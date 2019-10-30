@@ -7,7 +7,7 @@ def tags(text_start, text_succeed, text_fail, emoji):
     def my_decorator(func):
 
         def wrapper(*args):
-            spinner = Halo(text='Loading', spinner='dots12', color = "red")
+            spinner = Halo(text='Loading', spinner='dots12', color = "cyan")
             spinner.start(text=text_start)
             try: 
                 f = func(*args)

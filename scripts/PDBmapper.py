@@ -2,17 +2,14 @@
 # coding: utf-8
 
 # Import necesary modules
-#import mapping_tools as mt
-import numpy as np
 import sys
 import os
-import gzip
 import re
-import pandas as pd
 import glob
-from scripts.db_parser import parser
+import pandas as pd
+from scripts.db_parser        import parser
 from scripts.interface_parser import reshape
-from scripts.decorator import tags
+from scripts.decorator        import tags
 
 
 def PDBmapper(protID, geneID, int_db_dir, vcf_db_dir, out_dir, pident):
@@ -71,10 +68,10 @@ def PDBmapper(protID, geneID, int_db_dir, vcf_db_dir, out_dir, pident):
                                 axis=1, join='inner')
     # stop if there are no results
     if mapped_variants.empty:
+        #report results
         log = open(out_dir + '/log.File', 'a')
         log.write('Warning: ' + protID + ' does not map with any annotated variant.\n')
-        #log.flush()
-        raise IOError('Warning: ' + protID + ' does not map with any annotated variant.')
+        raise IOError()
     
     # if merging was successful, create setID file and
     # save the merged dataframe as well

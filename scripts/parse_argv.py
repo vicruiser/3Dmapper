@@ -2,17 +2,13 @@
 import argparse, os
 
 def parse_commandline():
-    '''Parse input interfaces database to put it in the right format.
-    Parameters
-    ----------
-    protID : str
-        Ensemble protein id 
-    interfacesDB_filepath : str
-        DESCRIPTION MISSING!!
+    '''
+    Parse inputs from command line.
+
     Returns
     -------
-    subset_interfaces_db
-        DESCRIPTION MISSING!!
+    args
+        arguments to give to the functions
     '''
     description = '''
 

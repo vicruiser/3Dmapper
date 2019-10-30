@@ -17,23 +17,3 @@ def explode(df, columns):
     return res
 ##############################################################################
 
-
-# def parser(input_file, ensemblID, colnames, sep):
-#     # similar to grep. Faster than reading the
-#     # create empty list to store the rows
-#     matches = []
-#     for line in input_file:
-#         if ensemblID in line:
-#             matches.append(line.split(sep))
-
-#     df = pd.DataFrame(matches)
-#     df.columns = colnames
-
-#     return df
-
-# def VEP_getter(crossref_file, geneID):
-#     matches = []
-#     for line in crossref_file:
-#         if geneID in line:
-#             vepf = line.split("\t")[1].strip()
-#     return vepf

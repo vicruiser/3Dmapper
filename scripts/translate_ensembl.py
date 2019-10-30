@@ -25,7 +25,6 @@ def translate_ensembl(ensid):
     with open(biomartdb) as f:
         # get col names
         cols = f.readline()
-        print(cols)
         # parse file 
         for line in f:
             # stop when find input ensembl id
