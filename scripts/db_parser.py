@@ -8,6 +8,24 @@ from scripts.decorator import tags
 #       text_fail = "Parsing...failed!",
 #       emoji = "🦸")
 def parser(ensemblID, db_dir, sep):
+    '''
+    Parse input and detect whether is a VCF or VEP file. Any other format
+    is invalid. 
+ 
+    Parameters
+    ----------
+    ensemblID : str        
+        Ensemble protein id 
+    db_dir : str
+        directory where to find the database to parse
+    sep : str
+        separation of the input file (e.g., " ", "\t", ...)
+        
+    Returns
+    -------
+    df 
+        parsed file
+    '''
     # similar to grep. Faster than reading the
     # create empty list to store the rows
     

@@ -9,17 +9,18 @@ from scripts.explode import explode
 
 # Extract the info corresponding to the prot ID (Interface parse)
 def reshape(annoint):
-    '''Parse input interfaces database to put it in the right format.
+    '''
+    Parse input interfaces database to put it in the right format.
+    
     Parameters
     ----------
-    protID : str
-        Ensemble protein id 
-    interfacesDB_filepath : str
-        DESCRIPTION MISSING!!
+    annoint : df
+        input interfaces file
+        
     Returns
     -------
-    subset_interfaces_db
-        DESCRIPTION MISSING!!
+    sub_annoint
+        reshaped interfaces file
     '''
     # store subspace
     sub_annoint = annoint[['pdb.id',
@@ -46,7 +47,7 @@ def reshape(annoint):
                            'mapped_real_pos',
                             'pdb_pos'])
     sub_annoint.rename(columns={'mapped_real_pos':
-                                          'Protein_position'}, inplace=True)
+                                'Protein_position'}, inplace=True)
     # create region id for setID file
     sub_annoint['region_id'] = sub_annoint['pdb_id'] + '_' + \
         sub_annoint['ensembl_prot_id'] + '_' + \

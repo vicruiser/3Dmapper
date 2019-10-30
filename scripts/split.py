@@ -5,7 +5,7 @@ import re
 import threading
 import subprocess
 import time
-from halo import Halo
+from halo              import Halo
 from scripts.decorator import tags
 
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
@@ -22,60 +22,91 @@ awk -v ci=\"{}\" \
 
 
 def request(prefix, input_file, out_dir, out_extension):
-    # First command
-    cmd = detect_column.format(prefix, input_file)
-    # register process
-    p1 = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell = True)
-    # execute process
-    out, err = p1.communicate()
-    n = re.findall('\d+', out.decode('utf8'))[0]
-    # stop if no ENSP id detected
-    if n != '' :
-        # Second command
-        cmd2 = split_cmd.format(input_file, n, out_dir, out_extension)
-        # write log file
-        log = open(out_dir +'/' + 'log.txt', 'a')
-        log.write('Using bcftools to split the vcf into vep format...\n')
-        log.flush() 
-
-        #register process
-        p = subprocess.Popen(cmd2, stdout=subprocess.PIPE, stderr = log, shell = True)
-
-        #while p.poll() is None:
-        #    spinner.start( "Splitting file")
-
-        #spinner.stop()
-        #spinner.succeed("Now you have your database")
-
-        out1, err1 = p.communicate()
-        print(out1.decode('utf-8'))
-        if(err1 is not None):
-	        print(err1.decode('utf-8'))    
-    else: 
-        #spinner.fail("Failed")
-        raise IOError("alrighty")
-
-# funciton
-@tags(text_start = "Split variants file by gene id...This might take up some time...",
-      text_succeed = "Split variants file by gene id...done.",
-      text_fail = "Split variants file by gene id...failed!",
-      emoji = "🦸")
-def split (input_file, out_dir, overwrite, prefix, out_extension):
     '''
-    Input
-    ------
+    VCF to VEP format using the plugin "split-vep" from bcftools.
+     
+    Parameters
+    ----------
+    prefix : str
+        Ensembl ID prefix. Either ESNG or ENSP. 
+    input_file : str        
+        Path to infile.
+    out_dir : str        
+        Path to output.
+    out_extension : str        
+        Output filename extension 
+        
+    Returns
+    -------
+    ./dir 
+        Directory containing splitted files. 
+    '''
+    # log file
+    log1 = open(out_dir +'/' + 'log_find_column.txt', 'a')
+    log1.write('Splitting VEP file...\n')
+    log1.flush() 
+    # First command
+    cmd1 = detect_column.format(prefix, input_file)
+    # execute process
+    p1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE,
+                            shell = True)
+    # get output
+    out1, err1 = p1.communicate()
+    # detect if there is output
+    col_index = re.findall('\d+', out1.decode('utf8'))[0]
+    # stop if no ENSP id detected
+    if col_index != '' :
+        # write log file
+        log2 = open(out_dir + '/' + 'log_split_files.txt', 'a')
+        log2.write('Splitting VEP file...\n')
+        log2.flush() 
+        # Second command
+        cmd2 = split_cmd.format(input_file, col_index, out_dir, out_extension)
+        #register process
+        p2 = subprocess.Popen(cmd2, stdout=subprocess.PIPE,
+                               stderr = log2, shell = True)
+        # error handling
+        out2, err2 = p2.communicate()
+        if err2 is not None:
+	        raise IOError()
+    else: 
+        raise IOError()
 
-    Output
-    ------
+
+# add decorator to main function   
+@tags(text_start = "Split file by selected ensembl id...This might take up some time...",
+      text_succeed = "Split file by selected ensembl id...done.",
+      text_fail = "Split file by selected ensembl id...failed!",
+      emoji = "\U00002702")
+
+def split (prefix, input_file, out_dir, out_extension, overwrite):
+    '''
+    VCF to VEP format using the plugin "split-vep" from bcftools.
+     
+    Parameters
+    ----------
+    prefix : str
+        Ensembl ID prefix. Either ESNG or ENSP. 
+    input_file : str        
+        Path to infile.
+    out_dir : str        
+        Path to output.
+    out_extension : str        
+        Output filename extension 
+    overwrite : str
+        Force to overwrite. Default is yes.
+        
+    Returns
+    -------
+    ./dir 
+        Directory containing splitted files. 
     '''
     #create dir if it doesn't exist
     os.makedirs(out_dir, exist_ok=True)
-    # check if this process has been already executed. 
+    # execute request function 
     if any(f.endswith("." + out_extension) for f in os.listdir(out_dir)):
+
         if overwrite.lower() == 'y':    
-            try:
-                request(prefix, input_file, out_dir, out_extension)
-            except IOError:
-                print("que ha pachao")
+            request(prefix, input_file, out_dir, out_extension)
     else: 
         request(prefix, input_file, out_dir, out_extension)

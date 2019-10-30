@@ -19,7 +19,7 @@ The PDBmaper program supports three different search methods:
 ## Running PDBmapper
 
 ```markdown
-python3 main.py -protid ENSP00000482258 -vcf file.vcf 
+python3 pdbmapper -protid ENSP00000482258 -vcf file.vcf 
 ```
 ### Test
 
@@ -29,7 +29,7 @@ More details in ./test
 
 | Setup   | Command             | Notes
 | :------ | :------------------ | :---------
-| install | `pip install fire`  |
+| install | `pip install pdbmapper`  |
 
 <!-- | Creating a CLI | Command                | Notes
 | :--------------| :--------------------- | :---------

@@ -11,6 +11,7 @@ def tags(text_start, text_succeed, text_fail, emoji):
             spinner.start(text=text_start)
             try: 
                 f = func(*args)
+                spinner.stop()
                 spinner.stop_and_persist(symbol = emoji, text=text_succeed)
                 return f
             except IOError:
@@ -20,23 +21,7 @@ def tags(text_start, text_succeed, text_fail, emoji):
         
     return my_decorator
 
-# def tags_subprocess(text_start, text_succeed, text_fail, emoji):
 
-#     def my_decorator(func):
-
-#         def wrapper(*args):
-#             spinner = Halo(text='Loading', spinner='dots12', color = "red")
-#             spinner.start(text=text_start)
-#             try: 
-#                 func(*args)
-#                 spinner.stop_and_persist(symbol = emoji, text=text_succeed)
-#                 #return func(*args)
-#             except IOError:
-#                 spinner.fail(text=text_fail)
-#                 exit(-1)
-#         return wrapper
-        
-#     return my_decorator
 
 
 def only_fail_tag(text_fail):

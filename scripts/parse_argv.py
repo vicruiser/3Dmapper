@@ -67,6 +67,11 @@ def parse_commandline():
     parser.add_argument("-intdb", dest="intdb", metavar="<file>",
                         help="Interfaces database")
     parser.set_defaults(intdb=None)
+    
+    # interfaces database file
+    parser.add_argument("-pident", dest="pident", metavar="<int>",
+                        help="Thershold of sequence identity (percertage).")
+    parser.set_defaults(pident=0)
 
     # protein id string
     parser.add_argument("-protid", nargs='+', metavar="<String>", dest="protid",

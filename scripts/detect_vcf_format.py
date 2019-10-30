@@ -8,22 +8,23 @@ from scripts.decorator import tags
 @tags(text_start = "Detect input annotated genomic variants file format...\n",
       text_succeed = "Detect input annotated genomic variants file format...done.\n",
       text_fail = '''Detect input annotated genomic variants file format...failed!. \n \
-Please provide an file either in VCF or VEP format. \n''',
+Please provide a file either in VCF or VEP format. \n''',
       emoji = "\U0001F50D ")
 
 def detect_format(infile):
     '''
     Parse input and detect whether is a VCF or VEP file. Any other format
     is invalid. 
-    
+ 
     Parameters
     ----------
     infile : str        
         Path to infile.
+        
     Returns
     -------
-    infile_format : str 
-        Detected file format (.vep or .vcf)
+    str 
+        Detected file format ("vep" or "vcf")
     '''
     try:
         # if vcf file, check if annotated with VEP
