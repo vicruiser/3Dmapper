@@ -18,7 +18,7 @@ def PDBmapper(protID, geneID, int_db_dir, vcf_db_dir, out_dir, pident):
     setID.File, necessary input for SKAT. Additionaly, it creates
     another file with detailed information regarding the maped areas. 
   
-    Parameters
+    Parameterss
     ----------
     protID : str
         Ensembl protein ID
