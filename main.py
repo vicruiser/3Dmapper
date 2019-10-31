@@ -30,13 +30,15 @@ from scripts.translate_ensembl import translate_ensembl
 from scripts.PDBmapper import PDBmapper
 from scripts.decorator import tags
 
+pd.options.mode.chained_assignment = None
+
 # aesthetics
 description = '''
 
 ----------------------------------------- Welcome to ----------------------------------------------
 
-   $$$$$$$\  $$$$$$$\  $$$$$$$\ 
-   $$  __$$\ $$  __$$\ $$  __$$\ 
+   $$$$$$$\  $$$$$$$\  $$$$$$$\   
+   $$  __$$\ $$  __$$\ $$  __$$\     
    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
    $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
@@ -206,27 +208,41 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
             for pid in args.protid:
                 # check if input is a file
                 try:
+
                     with open(pid) as f:
                         lines = f.read().splitlines()
+
+                        input = "file"
                         # for every prot id
-                        for pids in lines:
-                           # get geneID
-                            try:
-                                ensemblIDs = translate_ensembl(pids)
-                                geneID = ensemblIDs['geneID']
-                                # run PDBmapper
-                                try:
-                                    PDBmapper(pids, geneID, int_db_dir,
-                                              vcf_db_dir, args.out, args.pident)
-                             # error handling
-                                except IOError:
-                                    next
-                            except IOError:
-                                next
-                # input is not a file but one or more protein ids
-                # given in command line
+
+                        # get geneID
+
                 except:
-                    # for prot id get the gene id
+                    input = "not_file"
+
+                if input == "file":
+                    for pids in lines:
+                        try:
+                            # for pids in lines:
+                            ensemblIDs = translate_ensembl(pids)
+                            geneID = ensemblIDs['geneID']
+                            # run PDBmapper
+                            try:
+                                PDBmapper(pids, geneID, int_db_dir,
+                                          vcf_db_dir, args.out, args.pident)
+
+                                # error handling
+                            except IOError:
+                                log = open(out_dir + '/log_ensembl.File', 'a')
+                                log.write('Warning: ' + pids +
+                                          ' has no ENGS.\n')
+                                continue
+                        except IOError:
+                            continue
+                    # input is not a file but one or more protein ids
+                # given in command line
+                elif input == "not_file":
+                        # for prot id get the gene id
                     try:
                         ensemblIDs = translate_ensembl(pid)
                         geneID = ensemblIDs['geneID']
@@ -239,6 +255,8 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                             next
                     except IOError:
                         next
+                else:
+                    print("wrong input!!")
         # execute function
         f()
         # time execution

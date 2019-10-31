@@ -65,14 +65,16 @@ def PDBmapper(protID, geneID, int_db_dir, vcf_db_dir, out_dir, pident):
     annovars = parser(geneID, vcf_db_dir, " ")
     # Merge them both files
     mapped_variants = pd.merge(annovars, annoint_reshape,
-                               on='Protein_position')
-
+                               # , 'Amino_acids'],
+                               left_on=['Protein_position'],
+                               right_on=['Protein_position'])  # , 'resid_sseq'])
     # stop if there are no results
     if mapped_variants.empty:
         # report results
         log = open(out_dir + '/log.File', 'a')
         log.write('Warning: ' + protID +
                   ' does not map with any annotated variant.\n')
+
         raise IOError()
 
     # if merging was successful, create setID file and
@@ -89,3 +91,5 @@ def PDBmapper(protID, geneID, int_db_dir, vcf_db_dir, out_dir, pident):
         with open(out_dir + '/MappedVariants.File', 'a') as f:
             mapped_variants.to_csv(f, sep=' ', index=False,
                                    header=f.tell() == 0)
+
+    del(annoint, annoint_reshape, annoint_pident, annovars)
