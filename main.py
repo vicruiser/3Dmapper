@@ -13,22 +13,22 @@ import vcfpy
 import time
 
 import pandas as pd
-import numpy  as np
+import numpy as np
 
-from halo       import Halo
-from timeit     import default_timer as timer
+from halo import Halo
+from timeit import default_timer as timer
 from subprocess import call
 
 # import functions from scripts
-from scripts.parse_argv        import parse_commandline
-from scripts.run_vep           import run_vep
-from scripts.split             import split
+from scripts.parse_argv import parse_commandline
+from scripts.run_vep import run_vep
+from scripts.split import split
 from scripts.detect_vcf_format import detect_format
-from scripts.vcf_to_vep        import vcf_to_vep
-from scripts.add_header        import add_header
+from scripts.vcf_to_vep import vcf_to_vep
+from scripts.add_header import add_header
 from scripts.translate_ensembl import translate_ensembl
-from scripts.PDBmapper         import PDBmapper
-from scripts.decorator         import tags
+from scripts.PDBmapper import PDBmapper
+from scripts.decorator import tags
 
 # aesthetics
 description = '''
@@ -60,6 +60,8 @@ searching_girl = '\U0001F575'
 spinner = Halo(text='Loading', spinner='dots12', color="red")
 
 # define main function
+
+
 def main():
 
     # parse command line options
@@ -90,38 +92,82 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
 
     # 2) vcf = an annotated variant file as input either in .vcf or .vep format.
     elif args.vcf:
-        # for loop in case we have multiple inputs to read
-        for f in args.vcf:
-            # detect the format of the vcf file(s), either .vcf or .vep
-            input_format = detect_format(f)
-            # set out dir and out file names
-            out_dir  = args.out + '/pdbmapper/input/'  # created by default
-            out_file = out_dir  + 'converted_vcf.vep'  # created by default
-             
-            # If vcf transform into vep format and split
-            if input_format == "vcf":
-                # set output dir to split vep
-                vcf_db_dir = out_dir + 'vcf_db/'  # created by default
-                # change input format if file doesn't exists or overwrite is True 
-                if os.path.isfile(out_file) is False or args.force.lower() == 'y':
-                    # from vcf to vep
-                    vcf_to_vep(f, out_dir, out_file, args.force)
-                    # add header to resulting vep file
-                    add_header(out_file)
-                    # split vep file by protein id to speed up the 
-                    # mapping process 
-                    split('ENSG', out_file, vcf_db_dir, 'vep', args.force)
 
-            # If vep, only split
-            elif input_format == "vep":
-                # set output dir to split vep
-                vcf_db_dir = './out/pdbmapper/input/vcf_db/'
-                # split if empty dir or overwrite is True
-                if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
-                    # split vep file by protein id to speed up the 
-                    # mapping process 
-                    split('ENSG', f, vcf_db_dir, 'vep', args.force)
+        # set out dir and out file names
+        out_dir = args.out + '/pdbmapper/input/'  # created by default
+        out_file = out_dir + 'converted_vcf.vep'  # created by default
+        # set output dir to split vep
+        vcf_db_dir = out_dir + 'vcf_db/'  # created by default
+        # create output dir if it doesn't exist
+        os.makedirs(vcf_db_dir, exist_ok=True)
+        # change input format if file doesn't exists or overwrite is True
+        if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
+            # for loop in case we have multiple inputs to read
+            for f in args.vcf:
+                # check if input is a file
+                try:
+                    with open(f) as list_var_files:
+                        var_f = list_var_files.read().splitlines()
+                        # for every prot id
+                        for var_path in var_f:
 
+                            # detect the format of the vcf file(s), either .vcf or .vep
+                            input_format = detect_format(var_path)
+                            # If vcf transform into vep format and split
+                            if input_format == "vcf":
+                                # change input format if file doesn't exists or overwrite is True
+                                if os.path.isfile(out_file) is False or args.force.lower() == 'y':
+                                    # from vcf to vep
+                                    vcf_to_vep(var_path, out_dir,
+                                               out_file, args.force)
+                                    # add header to resulting vep file
+                                    add_header(out_file)
+                                    # split vep file by protein id to speed up the
+                                    # mapping process
+                                    split('ENSG', out_file, vcf_db_dir,
+                                          'vep', args.force)
+
+                            # If vep, only split
+                            elif input_format == "vep":
+                                # split if empty dir or overwrite is True
+                                if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
+                                    # split vep file by protein id to speed up the
+                                    # mapping process
+                                    split('ENSG', var_path, vcf_db_dir,
+                                          'vep', args.force)
+                            else:
+                                print('Warning: input file ' + var_path +
+                                      ' is not in vep nor vcf format.')
+                                next
+                except:
+                    # change input format if file doesn't exists or overwrite is True
+                    if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
+                        # detect the format of the vcf file(s), either .vcf or .vep
+                        input_format = detect_format(f)
+                        # If vcf transform into vep format and split
+                        if input_format == "vcf":
+                            # change input format if file doesn't exists or overwrite is True
+                            if os.path.isfile(out_file) is False or args.force.lower() == 'y':
+                                # from vcf to vep
+                                vcf_to_vep(f, out_dir, out_file, args.force)
+                                # add header to resulting vep file
+                                add_header(out_file)
+                                # split vep file by protein id to speed up the
+                                # mapping process
+                                split('ENSG', out_file, vcf_db_dir,
+                                      'vep', args.force)
+
+                        # If vep, only split
+                        elif input_format == "vep":
+                            # split if empty dir or overwrite is True
+                            if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
+                                # split vep file by protein id to speed up the
+                                # mapping process
+                                split('ENSG', f, vcf_db_dir, 'vep', args.force)
+                        else:
+                            print('Warning: input file ' + var_path +
+                                  ' is not in vep nor vcf format.')
+                            next
     # 3) varmap = use VarMap as reference annotated variants file
     elif args.varmap:
         spinner.info('Using VarMap db')
@@ -145,62 +191,64 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
 
     # run PDBmapper
     if args.protid:
-        # compute total time of running PDBmapper 
+        # compute total time of running PDBmapper
         start = timer()
         # decorator to monitor function
-        @tags(text_start   = "Runing PDBmapper...",
-              text_succeed = "Runing PDBmapper...done.",
-              text_fail    = "Runing PDBmapper...failed!",
-              emoji = DNA)
+
+        @tags(text_start="Runing PDBmapper...",
+              text_succeed="Runing PDBmapper...done.",
+              text_fail="Runing PDBmapper...failed!",
+              emoji=DNA)
         # define function to run PDBmapper with the decorator
         def f():
             # PDBmapper accepts single or multiple protein ids
-            # as input as well as prot ids stored in a file 
+            # as input as well as prot ids stored in a file
             for pid in args.protid:
-                # check if input is a file 
+                # check if input is a file
                 try:
                     with open(pid) as f:
                         lines = f.read().splitlines()
                         # for every prot id
                         for pids in lines:
-                           # get geneID 
+                           # get geneID
                             try:
                                 ensemblIDs = translate_ensembl(pids)
                                 geneID = ensemblIDs['geneID']
                                 # run PDBmapper
                                 try:
                                     PDBmapper(pids, geneID, int_db_dir,
-                                                vcf_db_dir, args.out, args.pident)
-                             # error handling       
+                                              vcf_db_dir, args.out, args.pident)
+                             # error handling
                                 except IOError:
                                     next
                             except IOError:
                                 next
-                # input is not a file but one or more protein ids 
+                # input is not a file but one or more protein ids
                 # given in command line
                 except:
-                    # for prot id get the gene id 
+                    # for prot id get the gene id
                     try:
                         ensemblIDs = translate_ensembl(pid)
                         geneID = ensemblIDs['geneID']
                         # run PDBmapper
                         try:
                             PDBmapper(pid, geneID, int_db_dir,
-                                        vcf_db_dir, args.out, args.pident)
-                    # error handling        
+                                      vcf_db_dir, args.out, args.pident)
+                    # error handling
                         except IOError:
                             next
                     except IOError:
                         next
-        # execute function 
+        # execute function
         f()
         # time execution
         end = timer()
         finish = end - start
         # print result
-        spinner.stop_and_persist(symbol = '\U0001F4CD' ,
-        text = 'Congratulations!. PDBmapper has run in ' +
-                str(finish)  + ' seconds.')
+        spinner.stop_and_persist(symbol='\U0001F4CD',
+                                 text='Congratulations!. PDBmapper has run in ' +
+                                 str(finish) + ' seconds.')
+
 
 ##########################
 # execute main function  #

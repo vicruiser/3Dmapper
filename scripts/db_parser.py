@@ -7,11 +7,13 @@ from scripts.decorator import tags
 #       text_succeed = "Parsing...done.",
 #       text_fail = "Parsing...failed!",
 #       emoji = "🦸")
+
+
 def parser(ensemblID, db_dir, sep):
     '''
     Parse input and detect whether is a VCF or VEP file. Any other format
     is invalid. 
- 
+
     Parameters
     ----------
     ensemblID : str        
@@ -20,7 +22,7 @@ def parser(ensemblID, db_dir, sep):
         directory where to find the database to parse
     sep : str
         separation of the input file (e.g., " ", "\t", ...)
-        
+
     Returns
     -------
     df 
@@ -28,14 +30,10 @@ def parser(ensemblID, db_dir, sep):
     '''
     # similar to grep. Faster than reading the
     # create empty list to store the rows
-    
     f = glob.glob(db_dir + ensemblID + '*')
-    
     if not f:
         raise IOError()
         exit(-1)
     else:
-        df = pd.read_csv(f[0], sep = sep)
+        df = pd.read_csv(f[0], sep=sep)
         return df
-        
-    
