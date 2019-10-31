@@ -3,16 +3,10 @@
 # Introduction
 
 ## Motivation
-PDB mapper is a tool to map kamsldkmalskdmaksdmalkdm because aoskdakdosakdpoaksd. 
+PDB mapper is a tool to map annotated genomic variants to protein interfaces data in 3D.
 
 ## Overview
-The PDBmaper program supports three different search methods:
-
-    Users can ssh into the instance and run stand-alone BLAST+ at the command-line.
-    The instance has a simple webpage for search submission.
-    The instance supports the NCBI-BLAST Common URL API interface.
-
-
+The PDBmaper program supports xxx different search methods:
 
 # Usage
 
@@ -23,13 +17,13 @@ python3 pdbmapper -protid ENSP00000482258 -vcf file.vcf
 ```
 ### Test
 
-More details in ./test
+<!-- More details in ./test -->
 
 ## Reference
 
-| Setup   | Command             | Notes
+<!-- | Setup   | Command             | Notes
 | :------ | :------------------ | :---------
-| install | `pip install pdbmapper`  |
+| install | `pip install pdbmapper`  | -->
 
 <!-- | Creating a CLI | Command                | Notes
 | :--------------| :--------------------- | :---------
