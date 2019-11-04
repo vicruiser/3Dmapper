@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-import argparse, os
+import argparse
+import os
+
 
 def parse_commandline():
     '''
@@ -11,23 +13,21 @@ def parse_commandline():
         arguments to give to the functions
     '''
     description = '''
+----------------------------------------- Welcome to ----------------------------------------------
 
- ----------------------------------------------- Welcome to ------------------------------------------------------- 
+   $$$$$$$\  $$$$$$$\  $$$$$$$\   
+   $$  __$$\ $$  __$$\ $$  __$$\     
+   $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
+   $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
+   $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
+   $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
+   $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
+   \__|      \_______/ \_______/ \__| \__| \__| \_______|$$  ____/ $$  ____/  \_______|\__|
+                                                         $$ |      $$ |
+                                                         $$ |      $$ |
+                                                         \__|      \__|
 
-        $$$$$$$\  $$$$$$$\  $$$$$$$\                                                                
-        $$  __$$\ $$  __$$\ $$  __$$\                                                                 
-        $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
-        $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
-        $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
-        $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |      
-        $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |      
-        \__|      \_______/ \_______/ \__| \__| \__| \_______|$$  ____/ $$  ____/  \_______|\__|      
-                                                              $$ |      $$ |                          
-                                                              $$ |      $$ |                          
-                                                              \__|      \__|   
-        
-        
-------------------------  Map annotated genomic variants to protein interfaces data in 3D. ------------------------
+---------------  Map annotated genomic variants to protein interfaces data in 3D. -----------------
 
 '''
     epilog = \
@@ -40,8 +40,8 @@ def parse_commandline():
         '''
     # innit parser
     parser = argparse.ArgumentParser(epilog=epilog,
-     formatter_class=argparse.RawDescriptionHelpFormatter, description=description)                 
-    
+                                     formatter_class=argparse.RawDescriptionHelpFormatter, description=description)
+
     # vcf file
     annovar_group = parser.add_mutually_exclusive_group()
     annovar_group.add_argument('-vcf', nargs='+', metavar="<String>", dest="vcf",
@@ -53,35 +53,39 @@ def parse_commandline():
                                help="use ClinVar db of annotated variants",
                                default="varmap")
     #parser.set_defaults(annovar = "varmap")
-    
+
     # interfaces database file
     parser.add_argument("-force", dest="force", metavar="<String>",
-                        help="Force to owerwrite? (y/n)", default = "y")
+                        help="force to owerwrite? (y/n)", default="y")
     parser.set_defaults(intdb=None)
 
     # interfaces database file
     parser.add_argument("-intdb", dest="intdb", metavar="<file>",
-                        help="Interfaces database")
+                        help="interfaces database directory")
     parser.set_defaults(intdb=None)
-    
+
     # interfaces database file
     parser.add_argument("-pident", dest="pident", metavar="<int>",
-                        help="Thershold of sequence identity (percertage).")
+                        help="threshold of sequence identity (percertage)")
     parser.set_defaults(pident=0)
 
     # protein id string
     parser.add_argument("-protid", nargs='+', metavar="<String>", dest="protid",
-                        help="Ensembl protein id", required = True)
+                        help="Ensembl protein id", required=True)
 
     # create chimera script to visualize the region of interest
     parser.add_argument("-chimera", action="store_true", dest="chimera",
                         help="generates chimeraX script")
-    
+
     # create default output directory
     parser.add_argument("-out", metavar="<String>", dest="out",
                         help="output directory")
     parser.set_defaults(out="./out")
-    
+
+    # create default output directory
+    parser.add_argument("-v", dest="verbose", action='store_true',
+                        default=False, help="Show progress of PDBmapper")
+
     # store arguments into variable
     args = parser.parse_args()
 

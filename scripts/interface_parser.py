@@ -59,10 +59,10 @@ def reshape(annoint):
                                 'Protein_position'}, inplace=True)
 
     # create region id for setID file
-    sub_annoint['region_id'] = sub_annoint['pdb_id'] + '_' + \
-        sub_annoint['ensembl_prot_id'] + '_' + \
+    sub_annoint['region_id'] = sub_annoint['pdb_id'].astype(str) + '_' + \
+        sub_annoint['ensembl_prot_id'].astype(str) + '_' + \
         sub_annoint['temp_chain'].astype(str) + '_' + \
         sub_annoint['int_chain'].astype(str) + '_' + \
-        sub_annoint['interaction']
+        sub_annoint['interaction'].astype(str)
 
     return sub_annoint

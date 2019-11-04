@@ -61,8 +61,11 @@ def PDBmapper(protID, geneID, int_db_dir, vcf_db_dir, out_dir, pident):
         annoint_pident = annoint.loc[annoint.pident >= alt_pident]
     # spread the data frame to have one amino acid position per row instead of compacted.
     annoint_reshape = reshape(annoint_pident)
+    annoint_reshape['Protein_position'] = annoint_reshape['Protein_position'].astype(
+        str)
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneID, vcf_db_dir, " ")
+    annovars['Protein_position'] = annovars['Protein_position'].astype(str)
     # Merge them both files
     mapped_variants = pd.merge(annovars, annoint_reshape,
                                # , 'Amino_acids'],
@@ -86,9 +89,9 @@ def PDBmapper(protID, geneID, int_db_dir, vcf_db_dir, out_dir, pident):
 
         # Save the merged dataframe, appending results and not
         #  reapeting headers
-        with open(out_dir + '/setID.File', 'a') as f:
+        with open(out_dir + '/setID_pident' + pident + '.File', 'a') as f:
             setID_file.to_csv(f, sep=' ', index=False,  header=f.tell() == 0)
-        with open(out_dir + '/MappedVariants.File', 'a') as f:
+        with open(out_dir + '/MappedVariants_pident' + pident + '.File', 'a') as f:
             mapped_variants.to_csv(f, sep=' ', index=False,
                                    header=f.tell() == 0)
 

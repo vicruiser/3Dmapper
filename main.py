@@ -94,9 +94,11 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
 
     # 2) vcf = an annotated variant file as input either in .vcf or .vep format.
     elif args.vcf:
+         # compute total time of splitting vcf file
+        start = timer()
 
         # set out dir and out file names
-        out_dir = args.out + '/pdbmapper/input/'  # created by default
+        out_dir = args.out + '/input/'  # created by default
         out_file = out_dir + 'converted_vcf.vep'  # created by default
         # set output dir to split vep
         vcf_db_dir = out_dir + 'vcf_db/'  # created by default
@@ -170,6 +172,13 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                             print('Warning: input file ' + var_path +
                                   ' is not in vep nor vcf format.')
                             next
+        # time execution
+        end = timer()
+        finish = end - start
+        finish = round(finish/60, 3)
+        log_finish = open(out_dir + 'results_report.txt', 'a')
+        log_finish.write('The conversion and splitting of the vcf file has taken ' +
+                         str(finish) + ' minutes.')
     # 3) varmap = use VarMap as reference annotated variants file
     elif args.varmap:
         spinner.info('Using VarMap db')
@@ -193,63 +202,62 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
 
     # run PDBmapper
     if args.protid:
+        # output dir
+        out_dir = args.out + 'results/'
         # compute total time of running PDBmapper
         start = timer()
         # decorator to monitor function
 
-        @tags(text_start="Runing PDBmapper...",
-              text_succeed="Runing PDBmapper...done.",
-              text_fail="Runing PDBmapper...failed!",
-              emoji=DNA)
+        @tags(text_start="Running PDBmapper...",
+              text_succeed=" Running PDBmapper...done.",
+              text_fail=" Running PDBmapper...failed!",
+              emoji=DNA,
+              verbose=args.verbose)
         # define function to run PDBmapper with the decorator
         def f():
             # PDBmapper accepts single or multiple protein ids
             # as input as well as prot ids stored in a file
-            for pid in args.protid:
+            for prot_ids in args.protid:
                 # check if input is a file
                 try:
-
-                    with open(pid) as f:
+                    with open(prot_ids) as f:
                         lines = f.read().splitlines()
-
+                        # set variable input as file
                         input = "file"
-                        # for every prot id
-
-                        # get geneID
-
                 except:
+                    # set variable input as not file
                     input = "not_file"
 
                 if input == "file":
-                    for pids in lines:
+                    for prot_id in lines:
                         try:
                             # for pids in lines:
-                            ensemblIDs = translate_ensembl(pids)
+                            ensemblIDs = translate_ensembl(prot_id)
                             geneID = ensemblIDs['geneID']
                             # run PDBmapper
                             try:
-                                PDBmapper(pids, geneID, int_db_dir,
-                                          vcf_db_dir, args.out, args.pident)
-
-                                # error handling
+                                PDBmapper(prot_id, geneID, int_db_dir,
+                                          vcf_db_dir, out_dir, args.pident)
+                            # error handling
                             except IOError:
-                                log = open(out_dir + '/log_ensembl.File', 'a')
-                                log.write('Warning: ' + pids +
+                                log = open(out_dir + 'log_ensembl.File', 'a')
+                                log.write('Warning: ' + prot_id +
                                           ' has no ENGS.\n')
                                 continue
                         except IOError:
                             continue
-                    # input is not a file but one or more protein ids
+                # input is not a file but one or more protein ids
                 # given in command line
                 elif input == "not_file":
-                        # for prot id get the gene id
+                    # for prot id get the gene id
+                    prot_id = prot_ids
                     try:
-                        ensemblIDs = translate_ensembl(pid)
+                        ensemblIDs = translate_ensembl(prot_id)
                         geneID = ensemblIDs['geneID']
                         # run PDBmapper
                         try:
-                            PDBmapper(pid, geneID, int_db_dir,
-                                      vcf_db_dir, args.out, args.pident)
+                            PDBmapper(prot_id, geneID, int_db_dir,
+                                      vcf_db_dir, out_dir, args.pident)
                     # error handling
                         except IOError:
                             next
@@ -262,10 +270,15 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
         # time execution
         end = timer()
         finish = end - start
+        finish = round(finish/60, 3)
         # print result
         spinner.stop_and_persist(symbol='\U0001F4CD',
                                  text='Congratulations!. PDBmapper has run in ' +
-                                 str(finish) + ' seconds.')
+                                 str(finish) + ' minutes.')
+
+        log_finish = open(out_dir + 'results_report.txt', 'a')
+        log_finish.write('Congratulations!. PDBmapper has run in ' +
+                         str(finish) + ' minutes.')
 
 
 ##########################

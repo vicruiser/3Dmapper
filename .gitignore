@@ -3,7 +3,7 @@
 .RData
 .Ruserdata
 default_input_data
-test
+test/
 .ipynb_checkpoints
 .Rproj.user
 __pycache__
