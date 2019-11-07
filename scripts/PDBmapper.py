@@ -67,16 +67,17 @@ def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pide
 
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneID, vcf_db_dir)
-    print(annovars)
+
     if variant_type is not None:
         # contains the name so we don't have to write the exact name because that is putocoñazo
         annovars[annovars['Consequence'] == variant_type]
     # for variants with high impact affecting several aminoacidic positions,
     # the protein position is a range. split the range to have each position
     # individually
-    if any(annovars['Protein_position'].str.contains('-')):
+    if any(annovars['Protein_position'].str.contains(r'[0-9]-[0-9]')):
         # subset hight impact variants
-        sub_df = annovars[annovars['Protein_position'].str.contains('-')]
+        sub_df = annovars[annovars['Protein_position'].str.contains(
+            r'[0-9]-[0-9]')]
         # subset the remaining variants to concatenate afterwards
         remaining_df = annovars.drop(sub_df.index)
         # split the range or interval
@@ -91,6 +92,7 @@ def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pide
         if any(sub_df['end'].str.contains('\?')):
             sub_df['end'] = np.where(sub_df['end'] == '?', sub_df['start'],
                                      sub_df['end'])
+        #print(sub_df[['end', 'start']])
         # create the range of numbers defined by the interval
         sub_df['Protein_position'] = sub_df.apply(lambda x: list(
             range(int(x['start']), int(x['end'])+1)), 1)

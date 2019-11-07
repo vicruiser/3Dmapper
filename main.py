@@ -251,7 +251,6 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                             continue
                         # run PDBmapper
                         try:
-                            print(prot_id, geneID)
                             PDBmapper(prot_id,
                                       geneID,
                                       int_db_dir,
