@@ -13,6 +13,7 @@ detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
 
 split_cmd = "grep -v '##' {} | \
+sed -e '1s/^#//' | \
 awk -v ci=\"{}\" \
 -v od=\"{}/\" \
 -F ' ' 'NR==1 \

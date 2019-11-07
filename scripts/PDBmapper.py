@@ -123,7 +123,7 @@ def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pide
     # save the merged dataframe as well
     else:
         setID_file = mapped_variants[['interface_id',
-                                      '#Uploaded_variation']]
+                                      'Uploaded_variation']]
         setID_file.drop_duplicates(inplace=True)
         mapped_variants.drop_duplicates(inplace=True)
 
