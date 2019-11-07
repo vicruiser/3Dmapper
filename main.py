@@ -11,6 +11,7 @@ import glob
 import subprocess
 import vcfpy
 import time
+import os.path
 
 import pandas as pd
 import numpy as np
@@ -81,27 +82,32 @@ def main():
             text=args.out + " is an existing directory. Results will be written in there.\n")
 
     # Manage all possible genomic variant input files
-    # 1) vep = run VEP
+    ####################
+    # 1) vep = run VEP #
+    ####################
     if args.vep:
         spinner.warn(text='VEP option will be available soon. Using VarMap db instead. \
 Otherwise, please provide your own vcf file with the -vcf option.\n')
         try:
             run_vep()
         except IOError:
-            vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar/'
+            vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
             spinner.info('Using VarMap db\n')
             exit(-1)
-
-    # 2) vcf = an annotated variant file as input either in .vcf or .vep format.
+    ##############################################################################
+    # 2) vcf = an annotated variant file as input either in .vcf or .vep format. #
+    ##############################################################################
     elif args.vcf:
          # compute total time of splitting vcf file
         start = timer()
 
         # set out dir and out file names
-        out_dir = args.out + '/input/'  # created by default
-        out_file = out_dir + 'converted_vcf.vep'  # created by default
+        # created by default
+        out_dir = os.path.join(args.out, 'input')
+        out_file = os.path.join(
+            out_dir, 'converted_vcf.vep')  # created by default
         # set output dir to split vep
-        vcf_db_dir = out_dir + 'vcf_db/'  # created by default
+        vcf_db_dir = os.path.join(out_dir, 'vcf_db')  # created by default
         # create output dir if it doesn't exist
         os.makedirs(vcf_db_dir, exist_ok=True)
         # change input format if file doesn't exists or overwrite is True
@@ -114,7 +120,6 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                         var_f = list_var_files.read().splitlines()
                         # for every prot id
                         for var_path in var_f:
-
                             # detect the format of the vcf file(s), either .vcf or .vep
                             input_format = detect_format(var_path)
                             # If vcf transform into vep format and split
@@ -175,26 +180,28 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
         # time execution
         end = timer()
         finish = end - start
-        finish = round(finish/60, 3)
-        log_finish = open(out_dir + 'results_report.txt', 'a')
+        log_finish = open(os.path.join(out_dir, 'results_report.txt'), 'a')
         log_finish.write('The conversion and splitting of the vcf file has taken ' +
-                         str(finish) + ' minutes.')
+                         str(finish/60) + ' minutes.')
     # 3) varmap = use VarMap as reference annotated variants file
     elif args.varmap:
         spinner.info('Using VarMap db')
-        vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar/'
+        vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
 
     # set interfacesDB_susbet:
     if args.intdb:
         # set outdir
-        int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/test/out/pdbmapper/input/interface_db/"
+        int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/test/out/pdbmapper/input/interface_db"
         # split interface db
         split('ENSP', args.intdb, int_db_dir, 'txt', args.force)
+        # set origin of input interface
+        input_intdb = 'external'
     else:
         spinner.info(text='Default interfaces DB is used.')
         # set default interfaces database
-        int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_interfaces_db/"
-
+        int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_interfaces_db"
+        # set origin of input interface
+        input_intdb = 'default'
     # create chimera scripts:
     if args.chimera is not None:
         # chimera()
@@ -203,7 +210,9 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
     # run PDBmapper
     if args.protid:
         # output dir
-        out_dir = args.out + 'results/'
+        out_dir = os.path.join(args.out, 'results')
+        # create output dir if it doesn't exist
+        os.makedirs(out_dir, exist_ok=True)
         # compute total time of running PDBmapper
         start = timer()
         # decorator to monitor function
@@ -211,8 +220,7 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
         @tags(text_start="Running PDBmapper...",
               text_succeed=" Running PDBmapper...done.",
               text_fail=" Running PDBmapper...failed!",
-              emoji=DNA,
-              verbose=args.verbose)
+              emoji=DNA)
         # define function to run PDBmapper with the decorator
         def f():
             # PDBmapper accepts single or multiple protein ids
@@ -224,6 +232,7 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                         lines = f.read().splitlines()
                         # set variable input as file
                         input = "file"
+
                 except:
                     # set variable input as not file
                     input = "not_file"
@@ -234,18 +243,27 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                             # for pids in lines:
                             ensemblIDs = translate_ensembl(prot_id)
                             geneID = ensemblIDs['geneID']
-                            # run PDBmapper
-                            try:
-                                PDBmapper(prot_id, geneID, int_db_dir,
-                                          vcf_db_dir, out_dir, args.pident)
-                            # error handling
-                            except IOError:
-                                log = open(out_dir + 'log_ensembl.File', 'a')
-                                log.write('Warning: ' + prot_id +
-                                          ' has no ENGS.\n')
-                                continue
+                        except IOError:
+                            log = open(os.path.join(
+                                out_dir, 'log_ensembl.File'), 'a')
+                            log.write('Warning: ' + prot_id +
+                                      ' has no ENGS.\n')
+                            continue
+                        # run PDBmapper
+                        try:
+                            print(prot_id, geneID)
+                            PDBmapper(prot_id,
+                                      geneID,
+                                      int_db_dir,
+                                      input_intdb,
+                                      vcf_db_dir,
+                                      out_dir,
+                                      args.pident,
+                                      args.filter_var)
+                        # error handling
                         except IOError:
                             continue
+
                 # input is not a file but one or more protein ids
                 # given in command line
                 elif input == "not_file":
@@ -256,8 +274,14 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                         geneID = ensemblIDs['geneID']
                         # run PDBmapper
                         try:
-                            PDBmapper(prot_id, geneID, int_db_dir,
-                                      vcf_db_dir, out_dir, args.pident)
+                            PDBmapper(prot_id,
+                                      geneID,
+                                      int_db_dir,
+                                      input_intdb,
+                                      vcf_db_dir,
+                                      out_dir,
+                                      args.pident,
+                                      args.filter_var)
                     # error handling
                         except IOError:
                             next
@@ -276,7 +300,7 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                                  text='Congratulations!. PDBmapper has run in ' +
                                  str(finish) + ' minutes.')
 
-        log_finish = open(out_dir + 'results_report.txt', 'a')
+        log_finish = open(os.path.join(out_dir, 'results_report.txt'), 'a')
         log_finish.write('Congratulations!. PDBmapper has run in ' +
                          str(finish) + ' minutes.')
 

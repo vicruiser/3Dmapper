@@ -54,10 +54,13 @@ def parse_commandline():
                                default="varmap")
     #parser.set_defaults(annovar = "varmap")
 
+    # filter results by type of variant
+    parser.add_argument("-f", nargs='+', dest="filter_var", metavar="<String>",
+                        help="filter by variant consequence", default=None)
+    parser.set_defaults(filter_var=None)
     # interfaces database file
     parser.add_argument("-force", dest="force", metavar="<String>",
                         help="force to owerwrite? (y/n)", default="y")
-    parser.set_defaults(intdb=None)
 
     # interfaces database file
     parser.add_argument("-intdb", dest="intdb", metavar="<file>",
@@ -67,7 +70,7 @@ def parse_commandline():
     # interfaces database file
     parser.add_argument("-pident", dest="pident", metavar="<int>",
                         help="threshold of sequence identity (percertage)")
-    parser.set_defaults(pident=0)
+    parser.set_defaults(pident=50)
 
     # protein id string
     parser.add_argument("-protid", nargs='+', metavar="<String>", dest="protid",

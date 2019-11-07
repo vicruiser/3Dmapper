@@ -7,12 +7,14 @@ import os
 import re
 import glob
 import pandas as pd
+import numpy as np
 from scripts.db_parser import parser
 from scripts.interface_parser import reshape
 from scripts.decorator import tags
+from scripts.explode import explode
 
 
-def PDBmapper(protID, geneID, int_db_dir, vcf_db_dir, out_dir, pident):
+def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pident, variant_type):
     '''
     Map interfaces and genomic anntoated variants and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
@@ -43,56 +45,92 @@ def PDBmapper(protID, geneID, int_db_dir, vcf_db_dir, out_dir, pident):
         interfaces and the variants. 
     '''
     # parse interfaces corresponding to the selected protein ID
-    annoint = parser(protID, int_db_dir, " ")
-    # filter by pident
-    pident = int(pident)  # from str to int
-    annoint_pident = annoint.loc[annoint.pident >= pident]
-    # if pident threshold is to high, the next maximum value of pident is set
-    if annoint_pident.empty:
-        # set alternative pident
-        alt_pident = annoint.loc[:, "pident"].max()
-        # register the change
-        log = open(out_dir + '/log.File', 'a')
-        log.write('Warning: for protID ' + protID +
-                  ', the variable "pident" equal to ' +
-                  pident + ' is too high.\n A threshold of ' +
-                  alt_pident + ' has been set to run PDBmapper, which is the maximum possible value.')
-        # set the new subset
-        annoint_pident = annoint.loc[annoint.pident >= alt_pident]
-    # spread the data frame to have one amino acid position per row instead of compacted.
-    annoint_reshape = reshape(annoint_pident)
-    annoint_reshape['Protein_position'] = annoint_reshape['Protein_position'].astype(
-        str)
+    annoint = parser(protID, int_db_dir)
+    # if default database is used minor modifications are needed
+    if input_intdb == "default":
+        # filter by pident
+        pident = int(pident)  # from str to int
+        annoint_pident = annoint.loc[annoint.pident >= pident]
+        # if pident threshold is to high, the next maximum value of pident is
+        # notified in log file
+        if annoint_pident.empty:
+            alt_pident = annoint.loc[:, "pident"].max()
+            log = open(os.path.join(out_dir, 'log.File'), 'a')
+            log.write('Warning: for protID ' + protID +
+                      ', the variable "pident" equal to ' +
+                      pident + ' is too high.\n A threshold lower than or equal to ' +
+                      alt_pident + ' would retrieve results.\n')
+
+            raise IOError()
+        # spread the data frame to have one amino acid position per row instead of compacted.
+        annoint = reshape(annoint_pident)
+
     # parse variants corresponding to the selected protein ID
-    annovars = parser(geneID, vcf_db_dir, " ")
+    annovars = parser(geneID, vcf_db_dir)
+    print(annovars)
+    if variant_type is not None:
+        # contains the name so we don't have to write the exact name because that is putocoñazo
+        annovars[annovars['Consequence'] == variant_type]
+    # for variants with high impact affecting several aminoacidic positions,
+    # the protein position is a range. split the range to have each position
+    # individually
+    if any(annovars['Protein_position'].str.contains('-')):
+        # subset hight impact variants
+        sub_df = annovars[annovars['Protein_position'].str.contains('-')]
+        # subset the remaining variants to concatenate afterwards
+        remaining_df = annovars.drop(sub_df.index)
+        # split the range or interval
+        sub_df[['start', 'end']] = sub_df['Protein_position'].str.split(
+            '-', expand=True)
+        # sometimes the start or the end position of the interval is a
+        # question mark. In that case, we take into account the
+        # remaining value of the interval
+        if any(sub_df['start'].str.contains('\?')):
+            sub_df['start'] = np.where(sub_df['start'] == '?', sub_df['end'],
+                                       sub_df['start'])
+        if any(sub_df['end'].str.contains('\?')):
+            sub_df['end'] = np.where(sub_df['end'] == '?', sub_df['start'],
+                                     sub_df['end'])
+        # create the range of numbers defined by the interval
+        sub_df['Protein_position'] = sub_df.apply(lambda x: list(
+            range(int(x['start']), int(x['end'])+1)), 1)
+        # spread each individual position into one row
+        sub_df = explode(sub_df, ['Protein_position'])
+        # drop unnecesary columns
+        sub_df.drop(['start', 'end'], inplace=True, axis=1)
+        # concatenate final result
+        annovars = pd.concat([remaining_df, sub_df], sort=True)
+
+    # for sucessful merge, Protein_position field must be str type
+    annoint['Protein_position'] = annoint['Protein_position'].astype(str)
     annovars['Protein_position'] = annovars['Protein_position'].astype(str)
     # Merge them both files
-    mapped_variants = pd.merge(annovars, annoint_reshape,
-                               # , 'Amino_acids'],
+    mapped_variants = pd.merge(annovars,
+                               annoint,
                                left_on=['Protein_position'],
-                               right_on=['Protein_position'])  # , 'resid_sseq'])
+                               right_on=['Protein_position'])
     # stop if there are no results
     if mapped_variants.empty:
         # report results
-        log = open(out_dir + '/log.File', 'a')
+        log = open(os.path.join(out_dir, 'log.File'), 'a')
         log.write('Warning: ' + protID +
                   ' does not map with any annotated variant.\n')
-
         raise IOError()
 
     # if merging was successful, create setID file and
     # save the merged dataframe as well
     else:
-        setID_file = mapped_variants[['region_id',
+        setID_file = mapped_variants[['interface_id',
                                       '#Uploaded_variation']]
-        setID_file = setID_file.drop_duplicates()
+        setID_file.drop_duplicates(inplace=True)
+        mapped_variants.drop_duplicates(inplace=True)
 
         # Save the merged dataframe, appending results and not
         #  reapeting headers
-        with open(out_dir + '/setID_pident' + pident + '.File', 'a') as f:
+        with open(os.path.join(out_dir, ('setID_pident' + str(pident) + '.File')), 'a') as f:
             setID_file.to_csv(f, sep=' ', index=False,  header=f.tell() == 0)
-        with open(out_dir + '/MappedVariants_pident' + pident + '.File', 'a') as f:
+        with open(os.path.join(out_dir, ('MappedVariants_pident' + str(pident) + '.File')), 'a') as f:
             mapped_variants.to_csv(f, sep=' ', index=False,
                                    header=f.tell() == 0)
 
-    del(annoint, annoint_reshape, annoint_pident, annovars)
+    del(annoint, annoint_pident, annovars)

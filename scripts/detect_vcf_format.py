@@ -4,23 +4,24 @@
 import vcfpy
 from scripts.decorator import tags
 
-# add decorator to monitor function 
-@tags(text_start = "Detect input annotated genomic variants file format...\n",
-      text_succeed = "Detect input annotated genomic variants file format...done.\n",
-      text_fail = '''Detect input annotated genomic variants file format...failed!. \n \
-Please provide a file either in VCF or VEP format. \n''',
-      emoji = "\U0001F50D ")
+# add decorator to monitor function
 
+
+@tags(text_start="Detect input annotated genomic variants file format...\n",
+      text_succeed="Detect input annotated genomic variants file format...done.\n",
+      text_fail='''Detect input annotated genomic variants file format...failed!. \n \
+Please provide a file either in VCF or VEP format. \n''',
+      emoji="\U0001F50D ")
 def detect_format(infile):
     '''
     Parse input and detect whether is a VCF or VEP file. Any other format
     is invalid. 
- 
+
     Parameters
     ----------
     infile : str        
         Path to infile.
-        
+
     Returns
     -------
     str 
@@ -34,27 +35,28 @@ def detect_format(infile):
             # input not recognized
             vcf_reader.close()
             raise IOError()
-        else: 
+        else:
             # is vcf format
             return "vcf"
     except:
-        # define the columns that must be present in the VEP file.  
+        # define the columns that must be present in the VEP file.
         vep_header = set(['#Uploaded_variation',
-                          'Location',
-                          'Allele',
+                          # 'Location',
+                          # 'Allele',
                           'Gene',
-                          'Feature',
-                          'Feature_type',
+                          # 'Feature',
+                          # 'Feature_type',
                           'Consequence',
                           'cDNA_position',
                           'CDS_position',
                           'Protein_position',
-                          'Amino_acids',
-                          'Codons',
-                          'Existing_variation'])
-        # open file to parse it     
+                          'Amino_acids'  # ,
+                          # 'Codons',
+                          # 'Existing_variation'
+                          ])
+        # open file to parse it
         vep_file = open(infile, 'r')
-        # read lines to check if header exists  
+        # read lines to check if header exists
         for line in vep_file:
             res = vep_header.issubset(set(line.split()))
             # if header found, is VEP format
