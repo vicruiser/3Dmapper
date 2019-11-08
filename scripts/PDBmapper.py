@@ -74,9 +74,9 @@ def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pide
     # for variants with high impact affecting several aminoacidic positions,
     # the protein position is a range. split the range to have each position
     # individually
-    if any(annovars['Protein_position'].str.contains(r'[0-9]-[0-9]')):
+    if any(annovars['Protein_position'].astype(str).str.contains(r'[0-9]-[0-9]')):
         # subset hight impact variants
-        sub_df = annovars[annovars['Protein_position'].str.contains(
+        sub_df = annovars[annovars['Protein_position'].astype(str).str.contains(
             r'[0-9]-[0-9]')]
         # subset the remaining variants to concatenate afterwards
         remaining_df = annovars.drop(sub_df.index)
