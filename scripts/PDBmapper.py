@@ -68,9 +68,14 @@ def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pide
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneID, vcf_db_dir)
 
+    # filter by variant type if one or more selected
     if variant_type is not None:
-        # contains the name so we don't have to write the exact name because that is putocoñazo
-        annovars[annovars['Consequence'] == variant_type]
+        annovars = annovars[annovars['Consequence'].astype(
+            str).str.contains('|'.join(variant_type))]
+        # if filter returns an empty df, raise error
+        if annovars.empty:
+            raise IOError()
+
     # for variants with high impact affecting several aminoacidic positions,
     # the protein position is a range. split the range to have each position
     # individually
@@ -103,7 +108,7 @@ def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pide
         # concatenate final result
         annovars = pd.concat([remaining_df, sub_df], sort=True)
 
-    # for sucessful merge, Protein_position field must be str type
+    # for sucessful merge, Protein_position column must be str type
     annoint['Protein_position'] = annoint['Protein_position'].astype(str)
     annovars['Protein_position'] = annovars['Protein_position'].astype(str)
     # Merge them both files

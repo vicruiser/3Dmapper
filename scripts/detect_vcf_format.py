@@ -41,26 +41,27 @@ def detect_format(infile):
     except:
         # define the columns that must be present in the VEP file.
         vep_header = set(['#Uploaded_variation',
-                          # 'Location',
-                          # 'Allele',
                           'Gene',
-                          # 'Feature',
-                          # 'Feature_type',
                           'Consequence',
-                          'cDNA_position',
-                          'CDS_position',
-                          'Protein_position',
-                          'Amino_acids'  # ,
-                          # 'Codons',
-                          # 'Existing_variation'
+                          'Protein_position'
+                          ])
+        # define the columns that must be present in an alternative variant file.
+        alt_header = set(['Uploaded_variation',
+                          'Gene',
+                          'Consequence',
+                          'Protein_position'
                           ])
         # open file to parse it
-        vep_file = open(infile, 'r')
+        variants_file = open(infile, 'r')
         # read lines to check if header exists
-        for line in vep_file:
-            res = vep_header.issubset(set(line.split()))
+        for line in variants_file:
+            isvep = vep_header.issubset(set(line.split()))
             # if header found, is VEP format
-            if res:
+            if isvep:
                 return "vep"
+            # if vep format-like
+            isalt = alt_header.issubset(set(line.split()))
+            if isalt:
+                return "alt"
         # input not recognized
         raise IOError()

@@ -49,15 +49,23 @@ def parse_commandline():
                                     multiple annotated variants files (vcf)')
     annovar_group.add_argument("-vep",   metavar="<file>",  dest="vep",
                                help="default VEP input")
+    annovar_group.add_argument("-maf",   metavar="<file>",  dest="vep",
+                               help="annotated variant file in MAF format.")
     annovar_group.add_argument("-varmap", action='store_true', dest="varmap",
                                help="use ClinVar db of annotated variants",
                                default="varmap")
     #parser.set_defaults(annovar = "varmap")
 
     # filter results by type of variant
-    parser.add_argument("-f", nargs='+', dest="filter_var", metavar="<String>",
+    parser.add_argument("-fv", nargs='+', dest="filter_var", metavar="<String>",
                         help="filter by variant consequence", default=None)
     parser.set_defaults(filter_var=None)
+
+    # filter results by isoforms
+    parser.add_argument("-fi", nargs='+', dest="filter_iso", metavar="<String>",
+                        help="filter by APPRIS isoform", default='principal1')
+    parser.set_defaults(filter_iso='principal1')
+
     # interfaces database file
     parser.add_argument("-force", dest="force", metavar="<String>",
                         help="force to owerwrite? (y/n)", default="y")

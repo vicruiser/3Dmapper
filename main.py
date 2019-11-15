@@ -137,7 +137,7 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                                           'vep', args.force)
 
                             # If vep, only split
-                            elif input_format == "vep":
+                            elif input_format == "vep" or input_format == "alt":
                                 # split if empty dir or overwrite is True
                                 if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
                                     # split vep file by protein id to speed up the
@@ -147,7 +147,7 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                             else:
                                 print('Warning: input file ' + var_path +
                                       ' is not in vep nor vcf format.')
-                                next
+                                continue
                 except:
                     # change input format if file doesn't exists or overwrite is True
                     if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
@@ -167,7 +167,7 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                                       'vep', args.force)
 
                         # If vep, only split
-                        elif input_format == "vep":
+                        elif input_format == "vep" or input_format == "alt":
                             # split if empty dir or overwrite is True
                             if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
                                 # split vep file by protein id to speed up the
@@ -176,14 +176,22 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                         else:
                             print('Warning: input file ' + var_path +
                                   ' is not in vep nor vcf format.')
-                            next
+                            continue
         # time execution
         end = timer()
         finish = end - start
         log_finish = open(os.path.join(out_dir, 'results_report.txt'), 'a')
         log_finish.write('The conversion and splitting of the vcf file has taken ' +
                          str(finish/60) + ' minutes.')
-    # 3) varmap = use VarMap as reference annotated variants file
+    ###################################################################
+    # 3) maf = input file is in Mutation Annotated File (.maf) format #
+    ###################################################################
+    elif args.maf:
+
+        pass
+    ###############################################################
+    # 4) varmap = use VarMap as reference annotated variants file #
+    ###############################################################
     elif args.varmap:
         spinner.info('Using VarMap db')
         vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
@@ -241,7 +249,8 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                     for prot_id in lines:
                         try:
                             # for pids in lines:
-                            ensemblIDs = translate_ensembl(prot_id)
+                            ensemblIDs = translate_ensembl(
+                                prot_id, args.filter_iso)
                             geneID = ensemblIDs['geneID']
                         except IOError:
                             log = open(os.path.join(
@@ -269,7 +278,8 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                     # for prot id get the gene id
                     prot_id = prot_ids
                     try:
-                        ensemblIDs = translate_ensembl(prot_id)
+                        ensemblIDs = translate_ensembl(
+                            prot_id, args.filter_iso)
                         geneID = ensemblIDs['geneID']
                         # run PDBmapper
                         try:
