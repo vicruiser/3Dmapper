@@ -14,7 +14,7 @@ from scripts.decorator import tags
 from scripts.explode import explode
 
 
-def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pident, variant_type):
+def PDBmapper(protID,  geneID, transcritpID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pident, variant_type):
     '''
     Map interfaces and genomic anntoated variants and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
@@ -67,7 +67,10 @@ def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pide
 
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneID, vcf_db_dir)
-
+    # filter by transcript ID
+    annovars = annovars[annovars['Feature'] == transcritpID]
+    if annovars.empty:
+        raise IOError()
     # filter by variant type if one or more selected
     if variant_type is not None:
         annovars = annovars[annovars['Consequence'].astype(
@@ -106,7 +109,7 @@ def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pide
         # drop unnecesary columns
         sub_df.drop(['start', 'end'], inplace=True, axis=1)
         # concatenate final result
-        annovars = pd.concat([remaining_df, sub_df], sort=True)
+        annovars = pd.concat([remaining_df, sub_df], sort=False)
 
     # for sucessful merge, Protein_position column must be str type
     annoint['Protein_position'] = annoint['Protein_position'].astype(str)
@@ -115,7 +118,8 @@ def PDBmapper(protID, geneID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pide
     mapped_variants = pd.merge(annovars,
                                annoint,
                                left_on=['Protein_position'],
-                               right_on=['Protein_position'])
+                               right_on=['Protein_position'],
+                               sort=False)
     # stop if there are no results
     if mapped_variants.empty:
         # report results

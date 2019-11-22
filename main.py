@@ -252,6 +252,7 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                             ensemblIDs = translate_ensembl(
                                 prot_id, args.filter_iso)
                             geneID = ensemblIDs['geneID']
+                            transcriptID = ensemblIDs['transcriptID']
                         except IOError:
                             log = open(os.path.join(
                                 out_dir, 'log_ensembl.File'), 'a')
@@ -262,6 +263,7 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                         try:
                             PDBmapper(prot_id,
                                       geneID,
+                                      transcriptID,
                                       int_db_dir,
                                       input_intdb,
                                       vcf_db_dir,
@@ -281,10 +283,12 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                         ensemblIDs = translate_ensembl(
                             prot_id, args.filter_iso)
                         geneID = ensemblIDs['geneID']
+                        transcriptID = ensemblIDs['transcriptID']
                         # run PDBmapper
                         try:
                             PDBmapper(prot_id,
                                       geneID,
+                                      transcriptID,
                                       int_db_dir,
                                       input_intdb,
                                       vcf_db_dir,

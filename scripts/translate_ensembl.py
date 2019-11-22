@@ -33,6 +33,7 @@ def translate_ensembl(ensid, isoform_filter):
                 # detect wether the input is protein or gene id.
                 gene_col = cols.index("Gene stable ID")
                 prot_col = cols.index("Protein stable ID\n")
+                transcript_col = cols.index("Transcript stable ID")
                 # check type of isoform
                 isoform_col = cols.index("APPRIS annotation")
                 isoform_class = line.split(",")[isoform_col].strip()
@@ -41,11 +42,13 @@ def translate_ensembl(ensid, isoform_filter):
                     if "ENSP" in ensid:
                         protID = ensid
                         geneID = line.split(",")[gene_col].strip()
-                        return {'protID': protID, 'geneID': geneID}
+                        transcriptID = line.split(",")[transcript_col].strip()
+                        return {'protID': protID, 'geneID': geneID, 'transcriptID': transcriptID}
                     elif "ENSG" in ensid:
                         protID = line.split(",")[prot_col].strip()
                         geneID = ensid
-                        return {'protID': protID, 'geneID': geneID}
+                        transcriptID = line.split(",")[transcript_col].strip()
+                        return {'protID': protID, 'geneID': geneID, 'transcriptID': transcriptID}
                     # error handling
                     else:
                         raise IOError()
