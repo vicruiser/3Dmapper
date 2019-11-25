@@ -21,15 +21,15 @@ from timeit import default_timer as timer
 from subprocess import call
 
 # import functions from scripts
-from scripts.parse_argv import parse_commandline
-from scripts.run_vep import run_vep
-from scripts.split import split
-from scripts.detect_vcf_format import detect_format
-from scripts.vcf_to_vep import vcf_to_vep
-from scripts.add_header import add_header
-from scripts.translate_ensembl import translate_ensembl
-from scripts.PDBmapper import PDBmapper
-from scripts.decorator import tags
+from parse_argv import parse_commandline
+from run_vep import run_vep
+from split import split
+from detect_vcf_format import detect_format
+from vcf_to_vep import vcf_to_vep
+from add_header import add_header
+from translate_ensembl import translate_ensembl
+from PDBmapper import PDBmapper
+from decorator import tags
 
 pd.options.mode.chained_assignment = None
 

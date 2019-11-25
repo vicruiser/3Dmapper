@@ -3,11 +3,9 @@ import subprocess
 import os
 import os.path
 import re
-import threading
-import subprocess
 import time
 from halo import Halo
-from scripts.decorator import tags
+from decorator import tags
 
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "

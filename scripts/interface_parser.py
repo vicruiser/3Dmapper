@@ -4,7 +4,7 @@ import sys
 import os
 import re
 import pandas as pd
-from scripts.explode import explode
+from explode import explode
 
 
 # Extract the info corresponding to the prot ID (Interface parse)

@@ -2,7 +2,7 @@
 import os
 import subprocess
 import sys
-from scripts.decorator import tags
+from decorator import tags
 
 
 def add_header(vep_file):

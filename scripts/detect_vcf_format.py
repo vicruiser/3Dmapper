@@ -2,7 +2,7 @@
 
 # import necessary packages
 import vcfpy
-from scripts.decorator import tags
+from decorator import tags
 
 # add decorator to monitor function
 
@@ -42,12 +42,14 @@ def detect_format(infile):
         # define the columns that must be present in the VEP file.
         vep_header = set(['#Uploaded_variation',
                           'Gene',
+                          'Feature',
                           'Consequence',
                           'Protein_position'
                           ])
         # define the columns that must be present in an alternative variant file.
         alt_header = set(['Uploaded_variation',
                           'Gene',
+                          'Feature',
                           'Consequence',
                           'Protein_position'
                           ])

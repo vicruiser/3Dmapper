@@ -8,10 +8,10 @@ import re
 import glob
 import pandas as pd
 import numpy as np
-from scripts.db_parser import parser
-from scripts.interface_parser import reshape
-from scripts.decorator import tags
-from scripts.explode import explode
+from db_parser import parser
+from interface_parser import reshape
+from decorator import tags
+from explode import explode
 
 
 def PDBmapper(protID,  geneID, transcritpID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pident, variant_type):

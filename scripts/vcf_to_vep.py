@@ -5,7 +5,7 @@ import os.path
 import time
 import subprocess
 import sys
-from scripts.decorator import tags
+from decorator import tags
 from timeit import default_timer as timer
 
 # define request function to avoid repeating code
