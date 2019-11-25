@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import glob
 import pandas as pd
 from decorator import tags

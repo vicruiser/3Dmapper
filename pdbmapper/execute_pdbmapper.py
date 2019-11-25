@@ -38,7 +38,7 @@ pd.options.mode.chained_assignment = None
 
 def main():
 
-        # aesthetics
+    # aesthetics
     description = '''
 
     ----------------------------------------- Welcome to ----------------------------------------------

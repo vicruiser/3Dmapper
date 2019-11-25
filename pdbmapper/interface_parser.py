@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Import necesary modules
 import numpy as np
 import sys
