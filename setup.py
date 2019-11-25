@@ -71,7 +71,7 @@ setup(
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
     entry_points={
-        "console_scripts": ['pdbmapper=main:main']
+        "console_scripts": ['pdbmapper=scripts.execute_pdbmapper:main']
     },
 
     # List additional URLs that are relevant to your project as a dict.

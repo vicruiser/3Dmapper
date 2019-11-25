@@ -1,0 +1,70 @@
+Metadata-Version: 1.2
+Name: PDBmapper
+Version: 0.1.0
+Summary: Map annotated genomic variants to protein interfaces data in 3D.
+Home-page: https://github.com/vicruiser/PDBmapper
+Author: Victoria Ruiz-Serra
+Author-email: victoria.ruizserra@bsc.es
+License: GPLv3
+Download-URL: https://github.com/vicruiser/PDBmapper/tarball/master
+Project-URL: Bug Reports, https://github.com/vicruiser/PDBmapper/issues
+Project-URL: Source, https://github.com/vicruiser/PDBmapper/
+Description: jeejejejejeje hola descripsion
+        Tochaco para la instalacion
+        
+        
+        asd
+        
+        
+        
+        as
+        da
+        da
+        sd
+        ad
+        as
+        da
+        da
+        sd
+        asd
+        
+        as
+        da
+        da
+        sd
+        ad
+        as
+        da
+        da
+        sd
+        asd
+        as
+        da
+        da
+        sd
+        ad
+        as
+        da
+        da
+        sd
+        asd
+        as
+        da
+        da
+        sd
+        ad
+        as
+        da
+        da
+        sd
+        asd
+        
+Keywords: pdbmapper,gene variation,protein 3D
+Platform: OS Independent
+Classifier: Development Status :: 3 - Alpha
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Requires-Python: >=3, <4
