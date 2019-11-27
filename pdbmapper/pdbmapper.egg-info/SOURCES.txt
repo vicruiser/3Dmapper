@@ -6,4 +6,3 @@ pdbmapper/pdbmapper.egg-info/dependency_links.txt
 pdbmapper/pdbmapper.egg-info/entry_points.txt
 pdbmapper/pdbmapper.egg-info/requires.txt
 pdbmapper/pdbmapper.egg-info/top_level.txt
-test/test.py

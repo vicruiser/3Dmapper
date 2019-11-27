@@ -319,5 +319,5 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
 ##########################
 # execute main function  #
 ##########################
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#    main()
