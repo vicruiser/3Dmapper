@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
 # coding: utf-8
 import subprocess
 import sys
-from decorator import tags
+from .decorator import tags
 
 # ./vep -i input.vcf -o out.txt -offline
 

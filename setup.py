@@ -43,7 +43,7 @@ setup(
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
-    package_dir={'': 'scripts'},  # Optional
+    package_dir={'': 'pdbmapper'},  # Optional
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -58,7 +58,7 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['halo', 'vcfpy'],  # Optional
+    # install_requires=['requirements.txt'],  # Optional
 
     #package_data={'PDBmapper': ['data/splitted_interfaces_db/*']},
 
@@ -71,21 +71,21 @@ setup(
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
     entry_points={
-        "console_scripts": ['pdbmapper=scripts.execute_pdbmapper:main']
+        "console_scripts": ['pdbmapper=pdbmapper.execute_pdbmapper:main']
     },
 
     # List additional URLs that are relevant to your project as a dict.
 
 
-    download_url='https://github.com/vicruiser/PDBmapper/tarball/master',
-    packages=find_packages(where='scripts'),  # Required,
+    # download_url='https://github.com/vicruiser/PDBmapper/tarball/master',
+    packages=find_packages(where='pdbmapper')  # ,  # Required,
 
-    project_urls={  # Optional
-        'Bug Reports': 'https://github.com/vicruiser/PDBmapper/issues',
-        # 'Funding': 'https://donate.pypi.org',
-        # 'Say Thanks!': 'http://saythanks.io/to/example',
-        'Source': 'https://github.com/vicruiser/PDBmapper/'
-    },
+    # project_urls={  # Optional
+    #    'Bug Reports': 'https://github.com/vicruiser/PDBmapper/issues',
+    # 'Funding': 'https://donate.pypi.org',
+    # 'Say Thanks!': 'http://saythanks.io/to/example',
+    #    'Source': 'https://github.com/vicruiser/PDBmapper/'
+    # },
     # data_files   = [(path.expanduser('~'),
     #                 ['extras/.bash_completion'])]
 )

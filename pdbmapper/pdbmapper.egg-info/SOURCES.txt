@@ -1,0 +1,9 @@
+README.rst
+setup.py
+pdbmapper/pdbmapper.egg-info/PKG-INFO
+pdbmapper/pdbmapper.egg-info/SOURCES.txt
+pdbmapper/pdbmapper.egg-info/dependency_links.txt
+pdbmapper/pdbmapper.egg-info/entry_points.txt
+pdbmapper/pdbmapper.egg-info/requires.txt
+pdbmapper/pdbmapper.egg-info/top_level.txt
+test/test.py
