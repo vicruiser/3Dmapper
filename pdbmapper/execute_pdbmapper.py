@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
 # Import necesary modules
 import sys
@@ -20,15 +20,15 @@ from timeit import default_timer as timer
 from subprocess import call
 
 # import functions from scripts
-from parse_argv import parse_commandline
-from run_vep import run_vep
-from split import split
-from detect_vcf_format import detect_format
-from vcf_to_vep import vcf_to_vep
-from add_header import add_header
-from translate_ensembl import translate_ensembl
-from PDBmapper import PDBmapper
-from decorator import tags
+from .parse_argv import parse_commandline
+from .run_vep import run_vep
+from .split import split
+from .detect_vcf_format import detect_format
+from .vcf_to_vep import vcf_to_vep
+from .add_header import add_header
+from .translate_ensembl import translate_ensembl
+from .PDBmapper import PDBmapper
+from .decorator import tags
 
 pd.options.mode.chained_assignment = None
 
@@ -319,5 +319,5 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
 ##########################
 # execute main function  #
 ##########################
-# if __name__ == '__main__':
-#    main()
+if __name__ == '__main__':
+    main()

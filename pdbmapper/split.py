@@ -5,7 +5,7 @@ import os.path
 import re
 import time
 from halo import Halo
-from decorator import tags
+from .decorator import tags
 
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "

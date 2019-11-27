@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 import glob
 import pandas as pd
-from decorator import tags
+from .decorator import tags
 import os.path
 
 # @tags(text_start = "Parsing...",

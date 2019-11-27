@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
 # import necessary packages
 import vcfpy
-from decorator import tags
+from .decorator import tags
 
 # add decorator to monitor function
 

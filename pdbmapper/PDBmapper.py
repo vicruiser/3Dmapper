@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
 # Import necesary modules
 import sys
@@ -7,10 +7,10 @@ import re
 import glob
 import pandas as pd
 import numpy as np
-from db_parser import parser
-from interface_parser import reshape
-from decorator import tags
-from explode import explode
+from .db_parser import parser
+from .interface_parser import reshape
+from .decorator import tags
+from .explode import explode
 
 
 def PDBmapper(protID,  geneID, transcritpID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pident, variant_type):

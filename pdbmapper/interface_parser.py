@@ -1,11 +1,11 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 # Import necesary modules
 import numpy as np
 import sys
 import os
 import re
 import pandas as pd
-from explode import explode
+from .explode import explode
 
 
 # Extract the info corresponding to the prot ID (Interface parse)

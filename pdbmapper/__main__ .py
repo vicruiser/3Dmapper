@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
+# coding: utf-8
 
-
-"""pdbmapper.__main__: executed when bootstrap directory is called as script."""
-
+#"""pdbmapper.__main__: executed when bootstrap directory is called as script."""
 
 from .execute_pdbmapper import main
 
-
-main()
+if __name__ == '__main__':
+    print("algo va mal")
+    main()
