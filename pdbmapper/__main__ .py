@@ -5,5 +5,4 @@
 from .execute_pdbmapper import main
 
 if __name__ == '__main__':
-    print("algo va mal")
     main()
