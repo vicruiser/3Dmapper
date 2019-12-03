@@ -22,7 +22,7 @@ def translate_ensembl(ensid, isoform_filter):
         Dictionary containing input ID and its corresponding tranlation.  
     '''
     # read reference file of ensembl ids
-    biomartdb = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/biomart_GRCh38p13_nov2019.txt'
+    biomartdb = 'data/biomart_GRCh38p13_nov2019.dat'
     with open(biomartdb) as f:
         # get col names
         cols = f.readline().split(',')

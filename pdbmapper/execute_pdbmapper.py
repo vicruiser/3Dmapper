@@ -314,10 +314,3 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
         log_finish = open(os.path.join(out_dir, 'results_report.txt'), 'a')
         log_finish.write('Congratulations!. PDBmapper has run in ' +
                          str(finish) + ' minutes.')
-
-
-##########################
-# execute main function  #
-##########################
-# if __name__ == '__main__':
-#    main()

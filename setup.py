@@ -14,8 +14,8 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 # Get the requirements of the packages
-with open('pdbmapper/requirements/requirements.txt') as f:
-    requirements = f.read().splitlines()
+# with open('pdbmapper/requirements/requirements.txt') as f:
+#    requirements = f.read().splitlines()
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
@@ -120,15 +120,14 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=['pdbmapper'],  # Required!!!!!
-    # packages=find_packages(where='pdbmapper'),  # Required
+    packages=['pdbmapper', 'makeinterfacesdb'],  # Required!!!!!
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. If you
     # do not support Python 2, you can simplify this to '>=3.5' or similar, see
     # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-    python_requires='>=3, <4',
+    python_requires='>=3, <4',  # Optional
 
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
@@ -136,8 +135,47 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=requirements,  # Optional
+    install_requires=['certifi == 2019.9.11',  # Optional
+                      'chardet == 3.0.4',
+                      'colorama == 0.4.1',
+                      'cursor == 1.3.4',
+                      'emoji == 0.5.4',
+                      'halo == 0.0.28',
+                      'idna == 2.8',
+                      'log-symbols == 0.0.14',
+                      'numpy == 1.17.4',
+                      'pandas == 0.25.3',
+                      'pkg-resources == 0.0.0',
+                      'pysam == 0.15.3',
+                      'python-dateutil == 2.8.1',
+                      'pytz == 2019.3',
+                      'requests == 2.22.0',
+                      'six == 1.13.0',
+                      'spinners == 0.0.23',
+                      'termcolor == 1.1.0',
+                      'urllib3 == 1.25.7',
+                      'vcfpy==0.12.1'
+                      ],
+    package_data={
+        # And include any *.dat files found in the 'data' subdirectory
+        # of the 'mypkg' package, also:
+        'pdbmapper': ['data/*.dat'],
+    },
 
+    # If your project depends on packages that don’t exist on PyPI, you may
+    # still be able to depend on them, as long as they are available for
+    #  download as:
+    #   an egg, in the standard distutils sdist format,
+    #   a single .py file, or
+    #   a VCS repository(Subversion, Mercurial, or Git).
+
+    # The dependency_links option takes the form of a list of URL strings. For
+    # example, this will cause a search of the specified page for eggs or
+    # source distributions, if the package’s dependencies aren’t already
+    # installed
+    # dependency_links=[                              # Optional
+    #    'https://github.com/samtools/bcftools@develop#egg=bcftools-1.8.0'
+    # ],
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # `pip` to create the appropriate form of executable for the target
@@ -146,8 +184,8 @@ setup(
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
     entry_points={
-        "console_scripts": ['pdbmapper=pdbmapper.execute_pdbmapper:main']  # ,
-        # 'makeinterfacesdb=makeinterfacesdb.test:main']  # test if it works as pdbmapper /makeinterfacesdb independently
+        "console_scripts": ['pdbmapper=pdbmapper.__main__:main',
+                            'makeinterfacesdb=makeinterfacesdb.__main__:main']
     },
 
     # List additional URLs that are relevant to your project as a dict.
