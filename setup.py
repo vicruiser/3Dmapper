@@ -185,7 +185,8 @@ setup(
     # executes the function `main` from this package when invoked:
     entry_points={
         "console_scripts": ['pdbmapper=pdbmapper.__main__:main',
-                            'makeinterfacesdb=makeinterfacesdb.__main__:main']
+                            'makeinterfacesdb=makeinterfacesdb.__main__:main',
+                            'makevariantsdb=makevariantsdb.__main__:main']
     },
 
     # List additional URLs that are relevant to your project as a dict.
