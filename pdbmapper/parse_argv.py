@@ -49,7 +49,7 @@ def parse_commandline():
                                     multiple annotated variants files (vcf)')
     annovar_group.add_argument("-vep",   metavar="<file>",  dest="vep",
                                help="default VEP input")
-    annovar_group.add_argument("-maf",   metavar="<file>",  dest="vep",
+    annovar_group.add_argument("-maf", nargs='+', metavar="<String>", dest="maf",
                                help="annotated variant file in MAF format.")
     annovar_group.add_argument("-varmap", action='store_true', dest="varmap",
                                help="use ClinVar db of annotated variants",

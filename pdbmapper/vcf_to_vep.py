@@ -44,7 +44,7 @@ def request(input_file, out_dir, out_file):
     cmd = bcftools.format(input_file, out_file)
     # write log file
     log = open(os.path.join(out_dir, 'log.txt'), 'a')
-    log.write('Using bcftools to convert vcf file to vep format...\n')
+    log.write('Using bcftools to convert VCF file to VEP format...\n')
     log.flush()
     # execute process
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=log, shell=True)
@@ -58,9 +58,9 @@ def request(input_file, out_dir, out_file):
 
 
 # add decorator to main function
-@tags(text_start="Converting vcf to vep...This might take up some time...\n",
-      text_succeed="Converting vcf to vep...done.\n",
-      text_fail="Converting vcf to vep...failed!\n",
+@tags(text_start="Converting VCF to VEP...This might take up some time...\n",
+      text_succeed="Converting VCF to VEP...done.\n",
+      text_fail="Converting VCF to VEP...failed!\n",
       emoji="\U0001F504 ")
 def vcf_to_vep(input_file, out_dir, out_file, overwrite):
     '''

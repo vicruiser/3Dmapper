@@ -62,7 +62,7 @@ def request(input_file, out_dir, out_file):
       text_succeed="Converting vcf to vep...done.\n",
       text_fail="Converting vcf to vep...failed!\n",
       emoji="\U0001F504 ")
-def vcf_to_vep(input_file, out_dir, out_file, overwrite):
+def vcf2vep(input_file, out_dir, out_file, overwrite):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 

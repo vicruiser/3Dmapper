@@ -14,8 +14,8 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 # Get the requirements of the packages
-# with open('pdbmapper/requirements/requirements.txt') as f:
-#    requirements = f.read().splitlines()
+with open('pdbmapper/dependencies/requirements.txt') as f:
+    requirements = f.read().splitlines()
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
@@ -120,7 +120,8 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=['pdbmapper', 'makeinterfacesdb'],  # Required!!!!!
+    packages=['pdbmapper', 'makeinterfacesdb',
+              'makevariantsdb'],  # Required!!!!!
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -135,27 +136,8 @@ setup(
     #
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['certifi == 2019.9.11',  # Optional
-                      'chardet == 3.0.4',
-                      'colorama == 0.4.1',
-                      'cursor == 1.3.4',
-                      'emoji == 0.5.4',
-                      'halo == 0.0.28',
-                      'idna == 2.8',
-                      'log-symbols == 0.0.14',
-                      'numpy == 1.17.4',
-                      'pandas == 0.25.3',
-                      'pkg-resources == 0.0.0',
-                      'pysam == 0.15.3',
-                      'python-dateutil == 2.8.1',
-                      'pytz == 2019.3',
-                      'requests == 2.22.0',
-                      'six == 1.13.0',
-                      'spinners == 0.0.23',
-                      'termcolor == 1.1.0',
-                      'urllib3 == 1.25.7',
-                      'vcfpy==0.12.1'
-                      ],
+    install_requires=requirements,
+
     package_data={
         # And include any *.dat files found in the 'data' subdirectory
         # of the 'mypkg' package, also:

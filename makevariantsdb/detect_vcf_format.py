@@ -64,6 +64,6 @@ def detect_format(infile):
             # if vep format-like
             isalt = alt_header.issubset(set(line.split()))
             if isalt:
-                return "alt"
+                return "vep"
         # input not recognized
         raise IOError()
