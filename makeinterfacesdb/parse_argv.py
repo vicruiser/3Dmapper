@@ -42,11 +42,6 @@ def parse_commandline():
     parser = argparse.ArgumentParser(epilog=epilog,
                                      formatter_class=argparse.RawDescriptionHelpFormatter, description=description)
 
-    # variants db
-    parser.add_argument("-vardb", dest="vardb", metavar="<String>",
-                        help='input directory containing variants db')
-    parser.set_defaults(vardb=None)
-
     # filter results by type of variant
     parser.add_argument("-fv", nargs='+', dest="filter_var", metavar="<String>",
                         help="filter by variant consequence", default=None)
@@ -70,14 +65,6 @@ def parse_commandline():
     parser.add_argument("-pident", dest="pident", metavar="<int>",
                         help="threshold of sequence identity (percertage)")
     parser.set_defaults(pident=50)
-
-    # protein id string
-    parser.add_argument("-protid", nargs='+', metavar="<String>", dest="protid",
-                        help="Ensembl protein id", required=True)
-
-    # create chimera script to visualize the region of interest
-    parser.add_argument("-chimera", action="store_true", dest="chimera",
-                        help="generates chimeraX script")
 
     # create default output directory
     parser.add_argument("-out", metavar="<String>", dest="out",
