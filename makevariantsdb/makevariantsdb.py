@@ -100,7 +100,7 @@ def main():
 
     # change input format if file doesn't exists or overwrite is True
     if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
-
+        # Manage all possible genomic variant input files
         if args.vcf is not None:
             # for loop in case we have multiple inputs to read from a list of files
             for f in args.vcf:

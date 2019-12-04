@@ -58,6 +58,8 @@ def main():
     ---------------  Map annotated genomic variants to protein interfaces data in 3D. -----------------
 
     '''
+    # print ascii art
+    print(description)
 
     # Emojis
     DNA = '\U0001F9EC'
@@ -68,9 +70,6 @@ def main():
     # parse command line options
     args = parse_commandline()
 
-    # print ascii art
-    print(description)
-
     # create output directory if it doesn't exist
     if not os.path.exists(args.out):
         os.mkdir(args.out)
@@ -79,135 +78,6 @@ def main():
         spinner.info(
             text=args.out + " is an existing directory. Results will be written in there.\n")
 
-    # Manage all possible genomic variant input files
-    ####################
-    # 1) vep = run VEP #
-    ####################
-#     if args.vep:
-#         spinner.warn(text='VEP option will be available soon. Using VarMap db instead. \
-# Otherwise, please provide your own vcf file with the -vcf option.\n')
-#         try:
-#             run_vep()
-#         except IOError:
-#             vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
-#             spinner.info('Using VarMap db\n')
-#             exit(-1)
-    ##############################################################################
-    # 2) vcf = an annotated variant file as input either in .vcf or .vep format. #
-    ##############################################################################
-    # elif args.vardb:
-    #      # compute total time of splitting vcf file
-    #     start = timer()
-
-        # # set out dir and out file names
-        # # created by default
-        # out_dir = os.path.join(args.out, 'input')
-        # out_file = os.path.join(
-        #     out_dir, 'converted_vcf.vep')  # created by default
-        # # set output dir to split vep
-        # vcf_db_dir = os.path.join(out_dir, 'vcf_db')  # created by default
-        # # create output dir if it doesn't exist
-        # os.makedirs(vcf_db_dir, exist_ok=True)
-        # # change input format if file doesn't exists or overwrite is True
-        # if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
-        #     # for loop in case we have multiple inputs to read
-        #     for f in args.vcf:
-        #         # check if input is a file
-        #         try:
-        #             with open(f) as list_var_files:
-        #                 var_f = list_var_files.read().splitlines()
-        #                 # for every prot id
-        #                 for var_path in var_f:
-        #                     # detect the format of the vcf file(s), either .vcf or .vep
-        #                     input_format = detect_format(var_path)
-        #                     # If vcf transform into vep format and split
-        #                     if input_format == "vcf":
-        #                         # change input format if file doesn't exists or overwrite is True
-        #                         if os.path.isfile(out_file) is False or args.force.lower() == 'y':
-        #                             # from vcf to vep
-        #                             vcf_to_vep(var_path, out_dir,
-        #                                        out_file, args.force)
-        #                             # add header to resulting vep file
-        #                             add_header(out_file)
-        #                             # split vep file by protein id to speed up the
-        #                             # mapping process
-        #                             split('ENSG', out_file, vcf_db_dir,
-        #                                   'vep', args.force)
-
-        #                     # If vep, only split
-        #                     elif input_format == "vep" or input_format == "alt":
-        #                         # split if empty dir or overwrite is True
-        #                         if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
-        #                             # split vep file by protein id to speed up the
-        #                             # mapping process
-        #                             split('ENSG', var_path, vcf_db_dir,
-        #                                   'vep', args.force)
-        #                     else:
-        #                         print('Warning: input file ' + var_path +
-        #                               ' is not in vep nor vcf format.')
-        #                         continue
-        #         except:
-        #             # change input format if file doesn't exists or overwrite is True
-        #             if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
-        #                 # detect the format of the vcf file(s), either .vcf or .vep
-        #                 input_format = detect_format(f)
-        #                 # If vcf transform into vep format and split
-        #                 if input_format == "vcf":
-        #                     # change input format if file doesn't exists or overwrite is True
-        #                     if os.path.isfile(out_file) is False or args.force.lower() == 'y':
-        #                         # from vcf to vep
-        #                         vcf_to_vep(f, out_dir, out_file, args.force)
-        #                         # add header to resulting vep file
-        #                         add_header(out_file)
-        #                         # split vep file by protein id to speed up the
-        #                         # mapping process
-        #                         split('ENSG', out_file, vcf_db_dir,
-        #                               'vep', args.force)
-
-        #                 # If vep, only split
-        #                 elif input_format == "vep" or input_format == "alt":
-        #                     # split if empty dir or overwrite is True
-        #                     if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
-        #                         # split vep file by protein id to speed up the
-        #                         # mapping process
-        #                         split('ENSG', f, vcf_db_dir, 'vep', args.force)
-        #                 else:
-        #                     print('Warning: input file ' + var_path +
-        #                           ' is not in vep nor vcf format.')
-        #                     continue
-        # time execution
-        # end = timer()
-        # finish = end - start
-        # log_finish = open(os.path.join(out_dir, 'results_report.txt'), 'a')
-        # log_finish.write('The conversion and splitting of the vcf file has taken ' +
-        #                  str(finish/60) + ' minutes.')
-    ###################################################################
-    # 3) maf = input file is in Mutation Annotated File (.maf) format #
-    # ###################################################################
-    # elif args.maf:
-
-    #     pass
-    # ###############################################################
-    # # 4) varmap = use VarMap as reference annotated variants file #
-    # ###############################################################
-    # elif args.varmap:
-    #     spinner.info('Using VarMap db')
-    #     vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
-
-    # set interfacesDB_susbet:
-    # if args.intdb:
-        #     # set outdir
-        #     int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/test/out/pdbmapper/input/interface_db"
-        #     # split interface db
-        #     split('ENSP', args.intdb, int_db_dir, 'txt', args.force)
-        #     # set origin of input interface
-    #    input_intdb = 'external'
-    # else:
-    #     spinner.info(text='Default interfaces DB is used.')
-    #     # set default interfaces database
-    #     int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_interfaces_db"
-    #     # set origin of input interface
-    #     input_intdb = 'default'
     # create chimera scripts:
     if args.chimera is not None:
         # chimera()
