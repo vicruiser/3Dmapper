@@ -13,7 +13,9 @@ The PDBmaper program supports xxx different search methods:
 ## Running PDBmapper
 
 ```markdown
-python3 pdbmapper -protid ENSP00000482258 -vcf file.vcf 
+makeinterfacesdb -intdb PDBmapper/pdbmapper/data/p53_ep300_intdb.dat -out ./test_pdbmapper/
+makevariantsdb -vcf PDBmapper/pdbmapper/data/p53_ep300_ExACvariants.vep -out ./test_pdbmapper/
+pdbmapper -vardb test_pdbmapper/DBs/varDB/ -intdb test_pdbmapper/DBs/intDB/ -protid ENSP00000263253 ENSP00000482258 -out test_pdbmapper/ 
 ```
 ### Test
 
