@@ -32,30 +32,30 @@ from .decorator import tags
 
 class generateVarDB:
 
-    def vcf(self, var_path, out_dir, out_file, vcf_db_dir, overwrite):
+    def vcf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite):
         # from vcf to vep
-        vcf2vep(var_path, out_dir,
+        vcf2vep(var_infile, out_dir,
                 out_file, overwrite)
         # add header to resulting vep file
         add_header(out_file)
         # split vep file by protein id to speed up the
         # mapping process
-        split('ENSG', out_file, vcf_db_dir,
+        split('ENSG', out_file, vardb_outdir,
               'vep', overwrite)
 
-    def vep(self, var_path, vcf_db_dir, overwrite):
+    def vep(self, var_infile, vardb_outdir, overwrite):
         # split vep file by protein id to speed up the
         # mapping process
-        split('ENSG', var_path, vcf_db_dir,
+        split('ENSG', var_infile, vardb_outdir,
               'vep', overwrite)
 
-    def maf(self, var_path, out_dir, out_file, vcf_db_dir, overwrite):
+    def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite):
         # from vcf to vep
-        maf2vep(var_path, out_dir,
+        maf2vep(var_infile, out_dir,
                 out_file, overwrite)
         # split vep file by protein id to speed up the
         # mapping process
-        split('ENSG', out_file, vcf_db_dir,
+        split('ENSG', out_file, vardb_outdir,
               'vep', overwrite)
 
 
@@ -92,14 +92,14 @@ def main():
     out_file = os.path.join(
         out_dir, 'variants.vep')  # created by default
     # set output dir to split vep
-    vcf_db_dir = os.path.join(out_dir, 'varDB')  # created by default
+    vardb_outdir = os.path.join(out_dir, 'varDB')  # created by default
     # create output dir if it doesn't exist
-    os.makedirs(vcf_db_dir, exist_ok=True)
+    os.makedirs(vardb_outdir, exist_ok=True)
     # initialize class
     varfile = generateVarDB()
 
     # change input format if file doesn't exists or overwrite is True
-    if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
+    if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
 
         if args.vcf is not None:
             # for loop in case we have multiple inputs to read from a list of files
@@ -109,33 +109,33 @@ def main():
                     with open(f) as list_var_files:
                         var_f = list_var_files.read().splitlines()
                         # for every prot id
-                        for var_path in var_f:
+                        for var_infile in var_f:
                             # detect the format of the vcf file(s), either .vcf or .vep
-                            input_format = detect_format(var_path)
+                            input_format = detect_format(var_infile)
                             # If vcf transform into vep format and split
                             if input_format == "vcf":
                                 # change input format if file doesn't exists or overwrite is True
                                 if os.path.isfile(out_file) is False or args.force.lower() == 'y':
                                     # split vcf file
-                                    varfile.vcf(var_path, out_dir,
-                                                out_file, vcf_db_dir, args.force)
+                                    varfile.vcf(var_infile, out_dir,
+                                                out_file, vardb_outdir, args.force)
 
                             # If vep, only split
                             elif input_format == "vep":
                                 # split if empty dir or overwrite is True
-                                if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
+                                if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
                                     # split vep file by protein id to speed up the
                                     # mapping process
                                     varfile.vep(
-                                        var_path, vcf_db_dir, args.force)
+                                        var_infile, vardb_outdir, args.force)
                             else:
-                                print('Warning: input file ' + var_path +
-                                      ' is not in vep nor vcf format.')
+                                print('Warning: input file', var_infile,
+                                      'is not in vep nor vcf format.')
                                 continue
 
                 except:
                     # change input format if file doesn't exists or overwrite is True
-                    if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
+                    if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
                         # detect the format of the vcf file(s), either .vcf or .vep
                         input_format = detect_format(f)
                         # If vcf transform into vep format and split
@@ -144,19 +144,19 @@ def main():
                             if os.path.isfile(out_file) is False or args.force.lower() == 'y':
                                 # split vcf file
                                 varfile.vcf(f, out_dir,
-                                            out_file, vcf_db_dir, args.force)
+                                            out_file, vardb_outdir, args.force)
 
                         # If vep, only split
                         elif input_format == "vep":
                             # split if empty dir or overwrite is True
-                            if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
+                            if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
                                 # split vep file by protein id to speed up the
                                 # mapping process
-                                varfile.vep(f, vcf_db_dir, args.force)
+                                varfile.vep(f, vardb_outdir, args.force)
 
                         else:
-                            print('Warning: input file ' + var_path +
-                                  ' is not in vep nor vcf format.')
+                            print('Warning: input file', var_infile,
+                                  'is not in vep nor vcf format.')
                             continue
 
         # If MAF transform into VEP format and split
@@ -168,29 +168,29 @@ def main():
                     with open(f) as list_var_files:
                         var_f = list_var_files.read().splitlines()
                         # for every prot id
-                        for var_path in var_f:
+                        for var_infile in var_f:
                             # change input format if file doesn't exists or overwrite is True
                             if os.path.isfile(out_file) is False or args.force.lower() == 'y':
                                 # split MAF file
-                                varfile.maf(var_path, out_dir,
-                                            out_file, vcf_db_dir, args.force)
+                                varfile.maf(var_infile, out_dir,
+                                            out_file, vardb_outdir, args.force)
                 except:
                     # change input format if file doesn't exists or overwrite is True
-                    if not os.listdir(vcf_db_dir) or args.force.lower() == 'y':
+                    if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
                         # split MAF file
                         varfile.maf(f, out_dir,
-                                    out_file, vcf_db_dir, args.force)
+                                    out_file, vardb_outdir, args.force)
         elif args.vep is not None:
             spinner.warn(text='VEP option will be available soon. Using VarMap db instead. \
     Otherwise, please provide your own vcf file with the -vcf option.\n')
             try:
                 run_vep()
             except IOError:
-                vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
+                vardb_outdir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
                 spinner.info('Using VarMap db\n')
                 exit(-1)
         elif args.varmap is not None:
             spinner.info('Using VarMap db')
-            vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
+            vardb_outdir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
     else:
         print('A variants database already exists.')

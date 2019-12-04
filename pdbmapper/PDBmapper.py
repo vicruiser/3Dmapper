@@ -46,7 +46,7 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, vari
     # parse interfaces corresponding to the selected protein ID
     annoint = parser(protid, intdb)
     # if default database is used minor modifications are needed
-    if pident:
+    if pident is not None:
         # filter by pident
         pident = int(pident)  # from str to int
         annoint_pident = annoint.loc[annoint.pident >= pident]
@@ -63,7 +63,6 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, vari
             raise IOError()
         # spread the data frame to have one amino acid position per row instead of compacted.
         annoint = reshape(annoint_pident)
-
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneid, vardb)
     # filter by transcript ID

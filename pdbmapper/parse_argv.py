@@ -44,7 +44,7 @@ def parse_commandline():
 
     # variants db
     parser.add_argument("-vardb", dest="vardb", metavar="<String>",
-                        help='input directory containing variants db')
+                        help='input directory containing variants db', required=True)
     parser.set_defaults(vardb=None)
 
     # filter results by type of variant
@@ -63,7 +63,7 @@ def parse_commandline():
 
     # interfaces database file
     parser.add_argument("-intdb", dest="intdb", metavar="<file>",
-                        help="interfaces database directory")
+                        help="interfaces database directory", required=True)
     parser.set_defaults(intdb=None)
 
     # interfaces database file
@@ -82,7 +82,7 @@ def parse_commandline():
     # create default output directory
     parser.add_argument("-out", metavar="<String>", dest="out",
                         help="output directory")
-    parser.set_defaults(out="./out")
+    parser.set_defaults(out="./pdbmapper_results")
 
     # create default output directory
     parser.add_argument("-v", dest="verbose", action='store_true',

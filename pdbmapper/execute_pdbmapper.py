@@ -21,11 +21,11 @@ from subprocess import call
 
 # import functions from scripts
 from .parse_argv import parse_commandline
-from .run_vep import run_vep
-from .split import split
-from .detect_vcf_format import detect_format
-from .vcf_to_vep import vcf_to_vep
-from .add_header import add_header
+#from .run_vep import run_vep
+#from .split import split
+#from .detect_vcf_format import detect_format
+#from .vcf_to_vep import vcf_to_vep
+#from .add_header import add_header
 from .translate_ensembl import translate_ensembl
 from .PDBmapper import PDBmapper
 from .decorator import tags
@@ -281,6 +281,7 @@ def main():
                             protid, args.filter_iso)
                         geneid = ensemblIDs['geneID']
                         transcriptID = ensemblIDs['transcriptID']
+                        print(ensemblIDs)
                         # run PDBmapper
                         try:
                             PDBmapper(protid,

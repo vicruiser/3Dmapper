@@ -42,34 +42,19 @@ def parse_commandline():
     parser = argparse.ArgumentParser(epilog=epilog,
                                      formatter_class=argparse.RawDescriptionHelpFormatter, description=description)
 
-    # filter results by type of variant
-    parser.add_argument("-fv", nargs='+', dest="filter_var", metavar="<String>",
-                        help="filter by variant consequence", default=None)
-    parser.set_defaults(filter_var=None)
-
-    # filter results by isoforms
-    parser.add_argument("-fi", nargs='+', dest="filter_iso", metavar="<String>",
-                        help="filter by APPRIS isoform", default='principal1')
-    parser.set_defaults(filter_iso='principal1')
-
     # interfaces database file
     parser.add_argument("-force", dest="force", metavar="<String>",
                         help="force to owerwrite? (y/n)", default="y")
 
     # interfaces database file
     parser.add_argument("-intdb", dest="intdb", metavar="<file>",
-                        help="interfaces database directory")
+                        help="interfaces database directory", required=True)
     parser.set_defaults(intdb=None)
-
-    # interfaces database file
-    parser.add_argument("-pident", dest="pident", metavar="<int>",
-                        help="threshold of sequence identity (percertage)")
-    parser.set_defaults(pident=50)
 
     # create default output directory
     parser.add_argument("-out", metavar="<String>", dest="out",
                         help="output directory")
-    parser.set_defaults(out="./out")
+    parser.set_defaults(out=".")
 
     # create default output directory
     parser.add_argument("-v", dest="verbose", action='store_true',

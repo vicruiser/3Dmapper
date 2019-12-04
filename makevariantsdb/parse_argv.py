@@ -63,7 +63,7 @@ def parse_commandline():
     # create default output directory
     parser.add_argument("-out", metavar="<String>", dest="out",
                         help="output directory")
-    parser.set_defaults(out="./pdbmapper_results")
+    parser.set_defaults(out=".")
 
     # create default output directory
     parser.add_argument("-v", dest="verbose", action='store_true',

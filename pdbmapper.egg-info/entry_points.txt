@@ -1,0 +1,5 @@
+[console_scripts]
+makeinterfacesdb = makeinterfacesdb.__main__:main
+makevariantsdb = makevariantsdb.__main__:main
+pdbmapper = pdbmapper.__main__:main
+

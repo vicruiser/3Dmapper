@@ -53,16 +53,23 @@ def main():
     # parse command line options
     args = parse_commandline()
 
-    if args.intdb:
-        # set outdir
-        int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/test/out/pdbmapper/input/interface_db"
-        # split interface db
-        split('ENSP', args.intdb, int_db_dir, 'txt', args.force)
-        # set origin of input interface
-        input_intdb = 'external'
-    else:
-        spinner.info(text='Default interfaces DB is used.')
-        # set default interfaces database
-        int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_interfaces_db"
-        # set origin of input interface
-        input_intdb = 'default'
+    # set out dir and out file names
+    # created by default
+    out_dir = os.path.join(args.out, 'DBs')
+    # out_file = os.path.join(
+    #    out_dir, 'variants.vep')  # created by default
+    # set output dir to split vep
+    intdb_outdir = os.path.join(out_dir, 'intDB')  # created by default
+    # create output dir if it doesn't exist
+    os.makedirs(intdb_outdir, exist_ok=True)
+
+    # split interface db
+    split('ENSP', args.intdb, intdb_outdir, 'txt', args.force)
+    # set origin of input interface
+    #    input_intdb = 'external'
+    # else:
+    #    spinner.info(text='Default interfaces DB is used.')
+    #    # set default interfaces database
+    #    int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_interfaces_db"
+    # set origin of input interface
+    #    input_intdb = 'default'
