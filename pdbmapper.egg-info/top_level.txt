@@ -1,3 +1,0 @@
-makeinterfacesdb
-makevariantsdb
-pdbmapper
