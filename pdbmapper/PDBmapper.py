@@ -13,7 +13,7 @@ from .decorator import tags
 from .explode import explode
 
 
-def PDBmapper(protID,  geneID, transcritpID, int_db_dir, input_intdb, vcf_db_dir, out_dir, pident, variant_type):
+def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, variant_type):
     '''
     Map interfaces and genomic anntoated variants and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
@@ -21,13 +21,13 @@ def PDBmapper(protID,  geneID, transcritpID, int_db_dir, input_intdb, vcf_db_dir
 
     Parameters
     ----------
-    protID : str
+    protid : str
         Ensembl protein ID
-    geneID : str
+    geneid : str
         Translated Ensembl protein ID
-    int_db_dir : str
+    intdb : str
         Directory where to find interface database
-    vcf_db_dir : str
+    vardb : str
         Directory where to find variants database
     out_dir : str
         Output directory
@@ -44,9 +44,9 @@ def PDBmapper(protID,  geneID, transcritpID, int_db_dir, input_intdb, vcf_db_dir
         interfaces and the variants. 
     '''
     # parse interfaces corresponding to the selected protein ID
-    annoint = parser(protID, int_db_dir)
+    annoint = parser(protid, intdb)
     # if default database is used minor modifications are needed
-    if input_intdb == "default":
+    if pident:
         # filter by pident
         pident = int(pident)  # from str to int
         annoint_pident = annoint.loc[annoint.pident >= pident]
@@ -55,7 +55,7 @@ def PDBmapper(protID,  geneID, transcritpID, int_db_dir, input_intdb, vcf_db_dir
         if annoint_pident.empty:
             alt_pident = annoint.loc[:, "pident"].max()
             log = open(os.path.join(out_dir, 'log.File'), 'a')
-            log.write('Warning: for protID ' + protID +
+            log.write('Warning: for protid ' + protid +
                       ', the variable "pident" equal to ' +
                       pident + ' is too high.\n A threshold lower than or equal to ' +
                       alt_pident + ' would retrieve results.\n')
@@ -65,7 +65,7 @@ def PDBmapper(protID,  geneID, transcritpID, int_db_dir, input_intdb, vcf_db_dir
         annoint = reshape(annoint_pident)
 
     # parse variants corresponding to the selected protein ID
-    annovars = parser(geneID, vcf_db_dir)
+    annovars = parser(geneid, vardb)
     # filter by transcript ID
     annovars = annovars[annovars['Feature'] == transcritpID]
     if annovars.empty:
@@ -123,7 +123,7 @@ def PDBmapper(protID,  geneID, transcritpID, int_db_dir, input_intdb, vcf_db_dir
     if mapped_variants.empty:
         # report results
         log = open(os.path.join(out_dir, 'log.File'), 'a')
-        log.write('Warning: ' + protID +
+        log.write('Warning: ' + protid +
                   ' does not map with any annotated variant.\n')
         raise IOError()
 

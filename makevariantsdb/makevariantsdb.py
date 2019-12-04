@@ -180,5 +180,17 @@ def main():
                         # split MAF file
                         varfile.maf(f, out_dir,
                                     out_file, vcf_db_dir, args.force)
+        elif args.vep is not None:
+            spinner.warn(text='VEP option will be available soon. Using VarMap db instead. \
+    Otherwise, please provide your own vcf file with the -vcf option.\n')
+            try:
+                run_vep()
+            except IOError:
+                vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
+                spinner.info('Using VarMap db\n')
+                exit(-1)
+        elif args.varmap is not None:
+            spinner.info('Using VarMap db')
+            vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
     else:
         print('A variants database already exists.')

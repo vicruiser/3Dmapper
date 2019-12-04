@@ -83,21 +83,21 @@ def main():
     ####################
     # 1) vep = run VEP #
     ####################
-    if args.vep:
-        spinner.warn(text='VEP option will be available soon. Using VarMap db instead. \
-Otherwise, please provide your own vcf file with the -vcf option.\n')
-        try:
-            run_vep()
-        except IOError:
-            vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
-            spinner.info('Using VarMap db\n')
-            exit(-1)
+#     if args.vep:
+#         spinner.warn(text='VEP option will be available soon. Using VarMap db instead. \
+# Otherwise, please provide your own vcf file with the -vcf option.\n')
+#         try:
+#             run_vep()
+#         except IOError:
+#             vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
+#             spinner.info('Using VarMap db\n')
+#             exit(-1)
     ##############################################################################
     # 2) vcf = an annotated variant file as input either in .vcf or .vep format. #
     ##############################################################################
-    elif args.vcf:
-         # compute total time of splitting vcf file
-        start = timer()
+    # elif args.vardb:
+    #      # compute total time of splitting vcf file
+    #     start = timer()
 
         # # set out dir and out file names
         # # created by default
@@ -176,38 +176,38 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
         #                           ' is not in vep nor vcf format.')
         #                     continue
         # time execution
-        end = timer()
-        finish = end - start
-        log_finish = open(os.path.join(out_dir, 'results_report.txt'), 'a')
-        log_finish.write('The conversion and splitting of the vcf file has taken ' +
-                         str(finish/60) + ' minutes.')
+        # end = timer()
+        # finish = end - start
+        # log_finish = open(os.path.join(out_dir, 'results_report.txt'), 'a')
+        # log_finish.write('The conversion and splitting of the vcf file has taken ' +
+        #                  str(finish/60) + ' minutes.')
     ###################################################################
     # 3) maf = input file is in Mutation Annotated File (.maf) format #
-    ###################################################################
-    elif args.maf:
+    # ###################################################################
+    # elif args.maf:
 
-        pass
-    ###############################################################
-    # 4) varmap = use VarMap as reference annotated variants file #
-    ###############################################################
-    elif args.varmap:
-        spinner.info('Using VarMap db')
-        vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
+    #     pass
+    # ###############################################################
+    # # 4) varmap = use VarMap as reference annotated variants file #
+    # ###############################################################
+    # elif args.varmap:
+    #     spinner.info('Using VarMap db')
+    #     vcf_db_dir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
 
     # set interfacesDB_susbet:
-    if args.intdb:
-        # set outdir
-        int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/test/out/pdbmapper/input/interface_db"
-        # split interface db
-        split('ENSP', args.intdb, int_db_dir, 'txt', args.force)
-        # set origin of input interface
-        input_intdb = 'external'
-    else:
-        spinner.info(text='Default interfaces DB is used.')
-        # set default interfaces database
-        int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_interfaces_db"
-        # set origin of input interface
-        input_intdb = 'default'
+    # if args.intdb:
+        #     # set outdir
+        #     int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/test/out/pdbmapper/input/interface_db"
+        #     # split interface db
+        #     split('ENSP', args.intdb, int_db_dir, 'txt', args.force)
+        #     # set origin of input interface
+    #    input_intdb = 'external'
+    # else:
+    #     spinner.info(text='Default interfaces DB is used.')
+    #     # set default interfaces database
+    #     int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_interfaces_db"
+    #     # set origin of input interface
+    #     input_intdb = 'default'
     # create chimera scripts:
     if args.chimera is not None:
         # chimera()
@@ -231,10 +231,10 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
         def f():
             # PDBmapper accepts single or multiple protein ids
             # as input as well as prot ids stored in a file
-            for prot_ids in args.protid:
+            for protids in args.protid:
                 # check if input is a file
                 try:
-                    with open(prot_ids) as f:
+                    with open(protids) as f:
                         lines = f.read().splitlines()
                         # set variable input as file
                         input = "file"
@@ -244,27 +244,26 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                     input = "not_file"
 
                 if input == "file":
-                    for prot_id in lines:
+                    for protid in lines:
                         try:
                             # for pids in lines:
                             ensemblIDs = translate_ensembl(
-                                prot_id, args.filter_iso)
-                            geneID = ensemblIDs['geneID']
+                                protid, args.filter_iso)
+                            geneid = ensemblIDs['geneID']
                             transcriptID = ensemblIDs['transcriptID']
                         except IOError:
                             log = open(os.path.join(
                                 out_dir, 'log_ensembl.File'), 'a')
-                            log.write('Warning: ' + prot_id +
+                            log.write('Warning: ' + protid +
                                       ' has no ENGS.\n')
                             continue
                         # run PDBmapper
                         try:
-                            PDBmapper(prot_id,
-                                      geneID,
+                            PDBmapper(protid,
+                                      geneid,
                                       transcriptID,
-                                      int_db_dir,
-                                      input_intdb,
-                                      vcf_db_dir,
+                                      args.intdb,
+                                      args.vardb,
                                       out_dir,
                                       args.pident,
                                       args.filter_var)
@@ -276,20 +275,19 @@ Otherwise, please provide your own vcf file with the -vcf option.\n')
                 # given in command line
                 elif input == "not_file":
                     # for prot id get the gene id
-                    prot_id = prot_ids
+                    protid = protids
                     try:
                         ensemblIDs = translate_ensembl(
-                            prot_id, args.filter_iso)
-                        geneID = ensemblIDs['geneID']
+                            protid, args.filter_iso)
+                        geneid = ensemblIDs['geneID']
                         transcriptID = ensemblIDs['transcriptID']
                         # run PDBmapper
                         try:
-                            PDBmapper(prot_id,
-                                      geneID,
+                            PDBmapper(protid,
+                                      geneid,
                                       transcriptID,
-                                      int_db_dir,
-                                      input_intdb,
-                                      vcf_db_dir,
+                                      args.intdb,
+                                      args.vardb,
                                       out_dir,
                                       args.pident,
                                       args.filter_var)
