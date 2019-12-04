@@ -1,4 +1,4 @@
-<img src= "./pics/Convoluto/LogoPDBcopy2.png" width = "600" heigh = "300">
+<img src= "./docs/LogoPDBcopy2.png" width = "600" heigh = "300">
 
 # Introduction
 
@@ -21,24 +21,24 @@ python3 pdbmapper -protid ENSP00000482258 -vcf file.vcf
 
 ## Reference
 
-<!-- | Setup   | Command             | Notes
-| :------ | :------------------ | :---------
-| install | `pip install pdbmapper`  | -->
-
-<!-- | Creating a CLI | Command                | Notes
-| :--------------| :--------------------- | :---------
-| import         | `import fire`          |
-| Call           | `fire.Fire()`          | Turns the current module into a Fire CLI.
-| Call           | `fire.Fire(component)` | Turns `component` into a Fire CLI. -->
-
-<!-- Using a CLI                                     | Command                                 | Notes
-:---------------------------------------------- | :-------------------------------------- | :----
-[Help](docs/using-cli.md#help-flag)             | `command --help` or `command -- --help` |
-[REPL](docs/using-cli.md#interactive-flag)      | `command -- --protid`                   | Protein id ensembl.
-[Separator](docs/using-cli.md#separator-flag)   | `command -- --separator=X`              | Sets the separator to `X`. The default separator is `-`.
-[Completion](docs/using-cli.md#completion-flag) | `command -- --completion [shell]`       | Generates a completion script for the CLI.
-[Trace](docs/using-cli.md#trace-flag)           | `command -- --trace`                    | Gets a Fire trace for the command.
-[Verbose](docs/using-cli.md#verbose-flag)       | `command -- --verbose`                  | -->
+| <!--    | Setup                   | Command | Notes |
+| :------ | :---------------------- | :------ |
+| install | `pip install pdbmapper` | -->     |
+<!-- 
+| <!--   | Creating a CLI         | Command                                   | Notes |
+| :----- | :--------------------- | :---------------------------------------- |
+| import | `import fire`          |
+| Call   | `fire.Fire()`          | Turns the current module into a Fire CLI. |
+| Call   | `fire.Fire(component)` | Turns `component` into a Fire CLI. -->    |
+<!-- 
+| <!-- Using a CLI                                | Command                                 | Notes                                                    |
+| :---------------------------------------------- | :-------------------------------------- | :------------------------------------------------------- |
+| [Help](docs/using-cli.md#help-flag)             | `command --help` or `command -- --help` |
+| [REPL](docs/using-cli.md#interactive-flag)      | `command -- --protid`                   | Protein id ensembl.                                      |
+| [Separator](docs/using-cli.md#separator-flag)   | `command -- --separator=X`              | Sets the separator to `X`. The default separator is `-`. |
+| [Completion](docs/using-cli.md#completion-flag) | `command -- --completion [shell]`       | Generates a completion script for the CLI.               |
+| [Trace](docs/using-cli.md#trace-flag)           | `command -- --trace`                    | Gets a Fire trace for the command.                       |
+| [Verbose](docs/using-cli.md#verbose-flag)       | `command -- --verbose`                  | -->                                                      | --> --> |
 
 ### Paralellization
 
@@ -53,7 +53,7 @@ PDBmapper is not possible to run in parallel per se. However, the easiest way to
 An already pre-computed database with a total number of **the number** proteins. Since an interface database is not an standard thing to  have, PDBmapper has been designed to manage databases of interfaces that are in a certain format. The default format is a 10 column tab-delimited file. Empty values are denoted by '-'. The output columns are: 
 
 | Column name         | Notes                                                                                                                                                                 |
-| :--------------     | :---------------------                                                                                                                                                |
+| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **pdb.id**          | Biological Assembly pdb id                                                                                                                                            |
 | **ensembl.prot.id** | Ensembl protein ID                                                                                                                                                    |
 | **temp.chain**      | Template chain (only protein)                                                                                                                                         |
