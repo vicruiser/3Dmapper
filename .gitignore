@@ -2,8 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-data
-test/
 .ipynb_checkpoints
 .Rproj.user
 __pycache__
