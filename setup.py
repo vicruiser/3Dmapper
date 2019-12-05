@@ -34,18 +34,19 @@ class git_clone_external(build_ext):
     def run(self):
         connection = self.internet_on()
         if connection is True : 
-            try: 
-                subprocess.check_call(['git', 'clone', 'git://github.com/samtools/htslib.git'])
-            except:
-                print("htslib local repo already exists")
-            try: 
+            if not os.path.exists(path.join(os.getcwd(),'htslib')):
+                p = subprocess.check_output(['git', 'clone', 'git://github.com/samtools/htslib.git'])
+                print(p)
+            else:
+                print("htslib local repo already exists.")
+            if not os.path.exists(path.join(os.getcwd(),'bcftools')): 
                 subprocess.check_call(['git', 'clone', 'git://github.com/samtools/bcftools.git'])
-            except: 
+            else: 
                 print("bcftools local repo already exists")
 
             subprocess.check_call(['make', '-C', path.join(os.getcwd(),'bcftools/')])
         else: 
-            print('No connection to internet detected, please install bcftools.')
+            print('No connection to internet detected, please install bcftools manually.')
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
