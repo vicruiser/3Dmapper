@@ -1,5 +1,6 @@
 MANIFEST.in
 README.rst
+setup.cfg
 setup.py
 makeinterfacesdb/__init__.py
 makeinterfacesdb/__main__.py
@@ -37,15 +38,3 @@ pdbmapper.egg-info/entry_points.txt
 pdbmapper.egg-info/requires.txt
 pdbmapper.egg-info/top_level.txt
 pdbmapper/data/biomart_GRCh38p13_nov2019.dat
-pdbmapper/data/list_variants_files.txt
-pdbmapper/data/p53_ep300_ExACvariants.vcf
-pdbmapper/data/p53_ep300_ExACvariants.vep
-pdbmapper/data/p53_ep300_ExACvariants.veplike
-pdbmapper/data/p53_ep300_MC3.maf
-pdbmapper/data/p53_ep300_intdb.dat
-test/input/list_variants_files.txt
-test/input/p53_ep300_ExACvariants.vcf
-test/input/p53_ep300_ExACvariants.vep
-test/input/p53_ep300_ExACvariants.veplike
-test/input/p53_ep300_MC3.maf
-test/input/p53_ep300_intdb.dat

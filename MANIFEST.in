@@ -1,7 +1,2 @@
 include data/biomart_GRCh38p13_nov2019.dat
-include test/input/list_variants_files.txt
-include test/input/p53_ep300_ExACvariants.vcf
-include test/input/p53_ep300_ExACvariants.vep
-include test/input/p53_ep300_ExACvariants.veplike
-include test/input/p53_ep300_intdb.dat
-include test/input/p53_ep300_MC3.maf
+recursive-include man_pages

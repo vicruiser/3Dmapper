@@ -5,8 +5,12 @@ https://github.com/pypa/sampleproject
 """
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages  # pylint: disable=no-name-in-module,import-error
+from setuptools.command.build_ext import build_ext
+from urllib.request import urlopen
+import subprocess
 import io
 from os import path
+import os
 
 here = path.abspath(path.dirname(__file__))
 # Get the long description from the README file
@@ -16,6 +20,32 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 # Get the requirements of the packages
 with open('pdbmapper/dependencies/requirements.txt') as f:
     requirements = f.read().splitlines()
+    
+# import and install bcftools 
+class git_clone_external(build_ext):
+
+    def internet_on(self):
+        try:
+            urlopen('http://216.58.192.142', timeout=1)
+            return True
+        except urlopen.URLError as err: 
+            return False
+        
+    def run(self):
+        connection = self.internet_on()
+        if connection is True : 
+            try: 
+                subprocess.check_call(['git', 'clone', 'git://github.com/samtools/htslib.git'])
+            except:
+                print("htslib local repo already exists")
+            try: 
+                subprocess.check_call(['git', 'clone', 'git://github.com/samtools/bcftools.git'])
+            except: 
+                print("bcftools local repo already exists")
+
+            subprocess.check_call(['make', '-C', path.join(os.getcwd(),'bcftools/')])
+        else: 
+            print('No connection to internet detected, please install bcftools.')
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
@@ -53,8 +83,12 @@ setup(
     # This should be a valid link to your project's main homepage.
     #
     # This field corresponds to the "Home-Page" metadata field:
-    url="https://github.com/vicruiser/PDBmapper",  # Optional
+    url="git@github.com:vicruiser/PDBmapper.git",  # Optional
 
+    # You have previously uploaded your project to your github repository. Now,
+    #  we create a new release version of your project on github. This release
+    #  will then be downloaded by anyone that runs the “pip install YourPackage” command.
+    # download_url='https://github.com/vicruiser/PDBmapper/archive/v_01.tar.gz',
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
     description='Map annotated genomic variants to protein interfaces data in 3D.',  # Optional
@@ -137,7 +171,10 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=requirements,
-
+    # External requirements
+    cmdclass = {'build_ext': git_clone_external},
+    
+    # Data requirements
     package_data={
         # And include any *.dat files found in the 'data' subdirectory
         # of the 'mypkg' package, also:

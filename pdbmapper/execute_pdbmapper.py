@@ -37,7 +37,7 @@ pd.options.mode.chained_assignment = None
 
 
 def main():
-
+    
     # aesthetics
     description = '''
 
@@ -85,10 +85,8 @@ def main():
 
     # run PDBmapper
     if args.protid:
-        # output dir
-        out_dir = os.path.join(args.out, 'results')
         # create output dir if it doesn't exist
-        os.makedirs(out_dir, exist_ok=True)
+        os.makedirs(args.out, exist_ok=True)
         # compute total time of running PDBmapper
         start = timer()
         # decorator to monitor function
@@ -123,7 +121,7 @@ def main():
                             transcriptID = ensemblIDs['transcriptID']
                         except IOError:
                             log = open(os.path.join(
-                                out_dir, 'log_ensembl.File'), 'a')
+                                args.out, 'log_ensembl.File'), 'a')
                             log.write('Warning: ' + protid +
                                       ' has no ENGS.\n')
                             continue
@@ -134,7 +132,7 @@ def main():
                                       transcriptID,
                                       args.intdb,
                                       args.vardb,
-                                      out_dir,
+                                      args.out,
                                       args.pident,
                                       args.filter_var)
                         # error handling
@@ -151,7 +149,6 @@ def main():
                             protid, args.filter_iso)
                         geneid = ensemblIDs['geneID']
                         transcriptID = ensemblIDs['transcriptID']
-                        print(ensemblIDs)
                         # run PDBmapper
                         try:
                             PDBmapper(protid,
@@ -159,7 +156,7 @@ def main():
                                       transcriptID,
                                       args.intdb,
                                       args.vardb,
-                                      out_dir,
+                                      args.out,
                                       args.pident,
                                       args.filter_var)
                     # error handling
@@ -180,6 +177,6 @@ def main():
                                  text='Congratulations!. PDBmapper has run in ' +
                                  str(finish) + ' minutes.')
 
-        log_finish = open(os.path.join(out_dir, 'results_report.txt'), 'a')
+        log_finish = open(os.path.join(args.out, 'results_report.txt'), 'w')
         log_finish.write('Congratulations!. PDBmapper has run in ' +
                          str(finish) + ' minutes.')

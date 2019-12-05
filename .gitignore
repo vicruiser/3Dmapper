@@ -13,4 +13,7 @@ pics/protein_logo.cxs
 pics/LogoPDB_PDBmapper_LOGO2.svg
 scripts/leftovers
 scripts/.ipynb_checkpoints
-scripts/PDBmapper.egg-info
+pdbmapper.egg-info
+test
+bcftools
+htslib

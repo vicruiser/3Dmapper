@@ -1,3 +1,0 @@
-./input/p53_ep300_ExACvariants.vcf
-./input/p53_ep300_ExACvariants.vep
-./input/p53_ep300_ExACvariants.veplike

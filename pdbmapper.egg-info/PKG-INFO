@@ -2,7 +2,7 @@ Metadata-Version: 2.1
 Name: pdbmapper
 Version: 0.1.0
 Summary: Map annotated genomic variants to protein interfaces data in 3D.
-Home-page: https://github.com/vicruiser/PDBmapper
+Home-page: git@github.com:vicruiser/PDBmapper.git
 Author: Victoria Ruiz-Serra
 Author-email: victoria.ruizserra@bsc.es
 License: UNKNOWN
@@ -23,7 +23,9 @@ Description: <img src= "./docs/LogoPDBcopy2.png" width = "600" heigh = "300">
         ## Running PDBmapper
         
         ```markdown
-        python3 pdbmapper -protid ENSP00000482258 -vcf file.vcf 
+        makeinterfacesdb -intdb PDBmapper/pdbmapper/data/p53_ep300_intdb.dat -out ./test_pdbmapper/
+        makevariantsdb -vcf PDBmapper/pdbmapper/data/p53_ep300_ExACvariants.vep -out ./test_pdbmapper/
+        pdbmapper -vardb test_pdbmapper/DBs/varDB/ -intdb test_pdbmapper/DBs/intDB/ -protid ENSP00000263253 ENSP00000482258 -out test_pdbmapper/ 
         ```
         ### Test
         

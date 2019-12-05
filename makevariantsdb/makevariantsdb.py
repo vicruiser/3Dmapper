@@ -19,6 +19,7 @@ from halo import Halo
 from timeit import default_timer as timer
 from subprocess import call
 
+
 # import functions from scripts
 from .parse_argv import parse_commandline
 from .run_vep import run_vep
@@ -32,6 +33,10 @@ from .decorator import tags
 
 class generateVarDB:
 
+    def exportBCFtools(self):
+        subprocess.check_call(['export', 'PATH='+ path.join(os.getcwd()+'bcftools/:$PATH')])
+        subprocess.check_call(['export', 'BCFTOOLS_PLUGINS='+ path.join(os.getcwd()+'bcftools/plugins/:$BCFTOOLS_PLUGINS')])
+    
     def vcf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite):
         # from vcf to vep
         vcf2vep(var_infile, out_dir,
