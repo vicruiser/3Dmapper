@@ -20,33 +20,39 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 # Get the requirements of the packages
 with open('pdbmapper/dependencies/requirements.txt') as f:
     requirements = f.read().splitlines()
-    
-# import and install bcftools 
+
+# import and install bcftools
+
+
 class git_clone_external(build_ext):
 
     def internet_on(self):
         try:
             urlopen('http://216.58.192.142', timeout=1)
             return True
-        except urlopen.URLError as err: 
+        except urlopen.URLError as err:
             return False
-        
+
     def run(self):
         connection = self.internet_on()
-        if connection is True : 
-            if not os.path.exists(path.join(os.getcwd(),'htslib')):
-                p = subprocess.check_output(['git', 'clone', 'git://github.com/samtools/htslib.git'])
-                print(p)
-            else:
-                print("htslib local repo already exists.")
-            if not os.path.exists(path.join(os.getcwd(),'bcftools')): 
-                subprocess.check_call(['git', 'clone', 'git://github.com/samtools/bcftools.git'])
-            else: 
-                print("bcftools local repo already exists")
+        # if connection is True :
+        if not os.path.exists(path.join(os.getcwd(), 'htslib')):
+            p = subprocess.check_call(
+                ['git', 'clone', 'git://github.com/samtools/htslib.git'])
+            print(p)
+        else:
+            print("htslib local repo already exists.")
+        if not os.path.exists(path.join(os.getcwd(), 'bcftools')):
+            subprocess.check_call(
+                ['git', 'clone', 'git://github.com/samtools/bcftools.git'])
+        else:
+            print("bcftools local repo already exists")
 
-            subprocess.check_call(['make', '-C', path.join(os.getcwd(),'bcftools/')])
-        else: 
-            print('No connection to internet detected, please install bcftools manually.')
+            subprocess.check_call(
+                ['make', '-C', path.join(os.getcwd(), 'bcftools/')])
+        # else:
+        #    print('No connection to internet detected, please install bcftools manually.')
+
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
 # Fields marked as "Optional" may be commented out.
@@ -173,8 +179,8 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=requirements,
     # External requirements
-    cmdclass = {'build_ext': git_clone_external},
-    
+    cmdclass={'build_ext': git_clone_external},
+
     # Data requirements
     package_data={
         # And include any *.dat files found in the 'data' subdirectory
