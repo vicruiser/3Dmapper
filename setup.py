@@ -27,72 +27,55 @@ print("HOLAAAAAAAAAAAA", setup())
 
 class git_clone_external(build_ext):
 
-    def internet_on(self):
-        try:
-            urlopen('http://216.58.192.142', timeout=1)
-            return True
-        except urlopen.URLError as err:
-            return False
+    # def internet_on(self):
+    #     try:
+    #         urlopen('http://216.58.192.142', timeout=1)
+    #         return True
+    #     except urlopen.URLError as err:
+    #         return False
 
-    def run_command(self, command):
-        import subprocess
-        # print("about to execute command `{0}`. sources = {1}"
-        # .format(command, sources))
-        proc = subprocess.Popen(command, stderr=subprocess.STDOUT, shell=True)
-        output, stderr = proc.communicate(input)
-        status = proc.wait()
-        if status:
-            raise Exception("command = {0} failed with output = {1} status {2:d}\n"
-                            .format(command, output, status))
+    # def run_command(self, command):
+    #     import subprocess
+    #     # print("about to execute command `{0}`. sources = {1}"
+    #     # .format(command, sources))
+    #     proc = subprocess.Popen(command, stderr=subprocess.STDOUT, shell=True)
+    #     output, stderr = proc.communicate(input)
+    #     status = proc.wait()
+    #     if status:
+    #         raise Exception("command = {0} failed with output = {1} status {2:d}\n"
+    #                         .format(command, output, status))
 
     def run(self):
         print("JEJEJEJEJEJEJJEJEJEJEJJEJEJEJEJEJJEJEEJE")
-        connection = self.internet_on()
+        # connection = self.internet_on()
 
-        if connection is True:
-            if not os.path.exists(path.join(os.getcwd(), 'htslib')):
-                command1 = ['git', 'clone',
-                            'git://github.com/samtools/htslib.git']
-                # subprocess.check_call()
-                proc = subprocess.Popen(
-                    command1, stderr=subprocess.STDOUT, shell=True)
-                output, stderr = proc.communicate(input)
-                status = proc.wait()
-                if status:
-                    raise Exception("command = {0} failed with output = {1} status {2:d}\n"
-                                    .format(command1, output, status))
+        # if connection is True:
+        if not os.path.exists(path.join(os.getcwd(), 'htslib')):
+            command1 = ['git', 'clone',
+                        'git://github.com/samtools/htslib.git']
+            subprocess.check_call(command1)
+
         # print(p)
-            else:
-                print("htslib local repo already exists.")
-            if not os.path.exists(path.join(os.getcwd(), 'bcftools')):
-                command2 = ['git', 'clone',
-                            'git://github.com/samtools/htslib.git']
-                proc = subprocess.Popen(
-                    command2, stderr=subprocess.STDOUT, shell=True)
-                output, stderr = proc.communicate(input)
-                status = proc.wait()
-                if status:
-                    raise Exception("command = {0} failed with output = {1} status {2:d}\n"
-                                    .format(command2, output, status))
-        # subprocess.check_call(
-        #    ['git', 'clone', 'git://github.com/samtools/bcftools.git'])
-            else:
-                print("bcftools local repo already exists")
+        else:
+            print("htslib local repo already exists.")
+        if not os.path.exists(path.join(os.getcwd(), 'bcftools')):
+            command2 = ['git', 'clone',
+                        'git://github.com/samtools/htslib.git']
 
-        command3 = (
-            ['make install', '-C', path.join(os.getcwd(), 'bcftools/')])
-        proc = subprocess.Popen(command3, stderr=subprocess.STDOUT, shell=True)
-        output, stderr = proc.communicate(input)
-        status = proc.wait()
-        if status:
-            raise Exception("command = {0} failed with output = {1} status {2:d}\n"
-                            .format(command3, output, status))
+            subprocess.check_call(command2)
+        #    ['git', 'clone', 'git://github.com/samtools/bcftools.git'])
+        else:
+            print("bcftools local repo already exists")
+        build_ext.run(self)
+        # command3 = (
+        #    ['make install', '-C', path.join(os.getcwd(), 'bcftools/')])
+
         # subprocess.check_call(
         #    ['export', 'PATH=' + path.join(os.getcwd()+'bcftools/:$PATH')])
         # subprocess.check_call(['export', 'BCFTOOLS_PLUGINS=' +
         #                       path.join(os.getcwd()+'bcftools/plugins/:$BCFTOOLS_PLUGINS')])
-        else:
-            print('No connection to internet detected, please install bcftools manually.')
+        # else:
+        #    print('No connection to internet detected, please install bcftools manually.')
 
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
