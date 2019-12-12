@@ -38,9 +38,9 @@ prepare-dev:
  	#which python3 || apt install -y python3 python3-pip
  	#which virtualenv || python3 -m pip install virtualenv
  	#make venv
-	#git clone git://github.com/samtools/htslib.git
-	#git clone git://github.com/samtools/bcftools.git
-	#@cd bcftools && make
+	git clone git://github.com/samtools/htslib.git
+	git clone git://github.com/samtools/bcftools.git
+	@cd bcftools && make
 	# The following is optional:
 	#autoheader && autoconf && ./configure --enable-libgsl --enable-perl-filters
 	#make 

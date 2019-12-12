@@ -30,7 +30,8 @@ def request(input_file, out_dir, out_file):
         Converted file.
     '''
     # export enviroment
-    #os.environ["BCFTOOLS_PLUGINS"] = "/home/vruizser/PhD/2018-2019/git/PDBmapper/required_packages/bcftools/plugins"
+    os.environ["BCFTOOLS_PLUGINS"] = "%s/bin/" % os.environ.get(
+        'VIRTUAL_ENV', '/usr/local/')
 
     # shell command to execute bcftools (bash)
     bcftools = "bcftools \

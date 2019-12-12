@@ -4,8 +4,11 @@ https://packaging.python.org/guides/distributing-packages-using-setuptools/
 https://github.com/pypa/sampleproject
 """
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages  # pylint: disable=no-name-in-module,import-error
-from setuptools.command.build_ext import build_ext
+# from distutils.core import setup, Extension
+from setuptools.command.install import install as DistutilsInstall
+from setuptools import find_packages
+from setuptools import setup  # pylint: disable=no-name-in-module,import-error
+#from setuptools.command.build_ext import build_ext
 from urllib.request import urlopen
 import subprocess
 import io
@@ -21,11 +24,8 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 with open('pdbmapper/dependencies/requirements.txt') as f:
     requirements = f.read().splitlines()
 
-# import and install bcftools
-print("HOLAAAAAAAAAAAA", setup())
 
-
-class git_clone_external(build_ext):
+class git_clone_external(DistutilsInstall):
 
     # def internet_on(self):
     #     try:
@@ -46,36 +46,37 @@ class git_clone_external(build_ext):
     #                         .format(command, output, status))
 
     def run(self):
-        print("JEJEJEJEJEJEJJEJEJEJEJJEJEJEJEJEJJEJEEJE")
+
         # connection = self.internet_on()
-
+        bcftools_dir = os.path.dirname(
+            os.path.realpath(__file__)) + "/bcftools"
+        htslib_dir = os.path.dirname(os.path.realpath(__file__))+" /htslib"
         # if connection is True:
-        if not os.path.exists(path.join(os.getcwd(), 'htslib')):
+        if not os.path.exists(htslib_dir):
             command1 = ['git', 'clone',
-                        'git://github.com/samtools/htslib.git']
-            subprocess.check_call(command1)
+                        'git://github.com/samtools/htslib.git', ]
+            subprocess.call(command1, cwd=os.path.dirname(
+                os.path.realpath(__file__)))
 
-        # print(p)
-        else:
-            print("htslib local repo already exists.")
-        if not os.path.exists(path.join(os.getcwd(), 'bcftools')):
+        if not os.path.exists(path.join(bcftools_dir, 'bcftools')):
             command2 = ['git', 'clone',
-                        'git://github.com/samtools/htslib.git']
+                        'git://github.com/samtools/bcftools.git']
 
-            subprocess.check_call(command2)
-        #    ['git', 'clone', 'git://github.com/samtools/bcftools.git'])
-        else:
-            print("bcftools local repo already exists")
-        build_ext.run(self)
-        # command3 = (
-        #    ['make install', '-C', path.join(os.getcwd(), 'bcftools/')])
+            subprocess.call(
+                command2, cwd=os.path.dirname(os.path.realpath(__file__)))
 
-        # subprocess.check_call(
-        #    ['export', 'PATH=' + path.join(os.getcwd()+'bcftools/:$PATH')])
-        # subprocess.check_call(['export', 'BCFTOOLS_PLUGINS=' +
-        #                       path.join(os.getcwd()+'bcftools/plugins/:$BCFTOOLS_PLUGINS')])
-        # else:
-        #    print('No connection to internet detected, please install bcftools manually.')
+        subprocess.call(
+            ["make", "clean"], cwd=bcftools_dir)
+
+        subprocess.call(['make'], cwd=bcftools_dir)
+
+        subprocess.call(
+            ["cp", "bcftools", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
+
+        subprocess.call(
+            ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
+
+        DistutilsInstall.run(self)
 
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
@@ -138,7 +139,8 @@ setup(
     #
     # This field corresponds to the "Description-Content-Type" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#description-content-type-optional
-    long_description_content_type='text/markdown',  # Optional (see note above)
+    # Optional (see note above)
+    long_description_content_type='text/markdown',
 
     # For a list of valid classifiers, see https://pypi.org/classifiers/
     classifiers=[  # Optional
@@ -203,8 +205,8 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=requirements,
     # External requirements
-    cmdclass={'build_ext': git_clone_external},
-
+    cmdclass={'install': git_clone_external},
+    # ext_modules=[module1],
     # Data requirements
     package_data={
         # And include any *.dat files found in the 'data' subdirectory
@@ -254,4 +256,6 @@ setup(
         # 'Say Thanks!': 'http://saythanks.io/to/example',
         'Source': 'https://github.com/vicruiser/PDBmapper/',
     },
+
+
 )
