@@ -10,7 +10,7 @@ import glob
 import subprocess
 import vcfpy
 import time
-import os.path
+import os.path as path
 
 import pandas as pd
 import numpy as np
@@ -33,11 +33,21 @@ from .decorator import tags
 
 class generateVarDB:
 
-    def exportBCFtools(self):
-        subprocess.check_call(['export', 'PATH='+ path.join(os.getcwd()+'bcftools/:$PATH')])
-        subprocess.check_call(['export', 'BCFTOOLS_PLUGINS='+ path.join(os.getcwd()+'bcftools/plugins/:$BCFTOOLS_PLUGINS')])
-    
+    # def exportBCFtools(self):
+    #     print("FUA VAYA MORAO ESKISO")
+    #     jj = "/home/vruizser/PhD/2018-2019/git/PDBmapper"
+    #     print(path.join(jj, 'bcftools/:$PATH'))
+    #     os.environ['PATH'] = path.join(jj, 'bcftools')
+    #     # subprocess.check_call(
+    #     #    ['export', 'PATH=' + path.join(os.getcwd()+'bcftools/:$PATH')])
+    #     os.environ['BCFTOOLS_PLUGINS'] = path.join(
+    #         jj, 'bcftools/plugins')
+    #     # subprocess.check_call(['export', 'BCFTOOLS_PLUGINS=' +
+    #     #                       path.join(os.getcwd()+'bcftools/plugins/:$BCFTOOLS_PLUGINS')])
+
     def vcf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite):
+        # export enviroment variables
+        # self.exportBCFtools()
         # from vcf to vep
         vcf2vep(var_infile, out_dir,
                 out_file, overwrite)
