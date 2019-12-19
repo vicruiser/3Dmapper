@@ -32,7 +32,7 @@ pd.options.mode.chained_assignment = None
 
 
 def main():
-    
+
     # aesthetics
     description = '''
 
@@ -58,12 +58,15 @@ def main():
 
     # Emojis
     DNA = '\U0001F9EC'
-    searching_girl = '\U0001F575'
 
     # spinner
     spinner = Halo(text='Loading', spinner='dots12', color="red")
+
     # parse command line options
     args = parse_commandline()
+
+    # initialize final report (.log)
+    log_file = open('')
 
     # create output directory if it doesn't exist
     if not os.path.exists(args.out):
