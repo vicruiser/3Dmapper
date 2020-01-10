@@ -4,6 +4,7 @@ import os
 import os.path
 import re
 import time
+import glob
 from halo import Halo
 from .decorator import tags
 
@@ -104,10 +105,24 @@ def split(prefix, input_file, out_dir, out_extension, overwrite):
     '''
     # create dir if it doesn't exist
     os.makedirs(out_dir, exist_ok=True)
+    # Count number of already existing files to create alternative
+    # copies instead of overwrite. This might happen when we have
+    # multiple input files of variants and a gene is called
+    # along these.
+    n_files = len(glob.glob1(outdir, prefix + '.*'))
+
     # execute request function
     if any(f.endswith("." + out_extension) for f in os.listdir(out_dir)):
 
         if overwrite.lower() == 'y':
-            request(prefix, input_file, out_dir, out_extension)
+            if n_files > 0:
+                request(prefix, input_file, out_dir,
+                        out_extension + str(n_files + 1))
+            else:
+                request(prefix, input_file, out_dir, out_extension)
     else:
-        request(prefix, input_file, out_dir, out_extension)
+        if n_files > 0:
+            request(prefix, input_file, out_dir,
+                    out_extension + str(n_files + 1))
+        else:
+            request(prefix, input_file, out_dir, out_extension)
