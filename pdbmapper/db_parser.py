@@ -32,10 +32,12 @@ def parser(ensemblID, db_dir):
 
     # similar to grep. Faster than reading the
     # create empty list to store the rows
-    f = glob.glob(os.path.join(db_dir, (ensemblID + '*')))
-    if not f:
+    all_files = glob.glob(os.path.join(db_dir, (ensemblID + '*')))
+    if not all_files:
         raise IOError()
         exit(-1)
     else:
-        df = pd.read_csv(f[0], sep=" |\t", engine='python')
+        df = pd.concat(
+            (pd.read_csv(f[0], sep=" |\t", engine='python') for f in all_files))
+        #df = pd.read_csv(f[0], sep=" |\t", engine='python')
         return df

@@ -53,6 +53,11 @@ def main():
     ---------------  Map annotated genomic variants to protein interfaces data in 3D. -----------------
 
     '''
+
+    # starting time
+    ts = time.time()
+    sttime = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H:%M:%S - ')
+
     # print ascii art
     print(description)
 
@@ -66,12 +71,14 @@ def main():
     args = parse_commandline()
 
     # initialize final report (.log)
-    log_file = open('')
+    log_file = open('pdbmapper_results.txt', 'w')
+    log_file.write(description)
 
     # create output directory if it doesn't exist
     if not os.path.exists(args.out):
         os.mkdir(args.out)
         spinner.info(text="Directory " + args.out + " created.\n")
+        log_file.write(sttime + ("Directory " + args.out + " created."))
     else:
         spinner.info(
             text=args.out + " is an existing directory. Results will be written in there.\n")
@@ -175,6 +182,6 @@ def main():
                                  text='Congratulations!. PDBmapper has run in ' +
                                  str(finish) + ' minutes.')
 
-        log_finish = open(os.path.join(args.out, 'results_report.txt'), 'w')
-        log_finish.write('Congratulations!. PDBmapper has run in ' +
-                         str(finish) + ' minutes.')
+        log_file.write(sttime + ('Congratulations!. PDBmapper has run in ',
+                                 str(finish), ' minutes.'))
+        log_file.close()
