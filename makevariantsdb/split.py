@@ -110,7 +110,7 @@ def split(prefix, input_file, out_dir, out_extension, overwrite):
     # multiple input files of variants and a gene is called
     # along these.
     n_files = len(glob.glob1(outdir, prefix + '.*'))
-
+    print("holi el numero de files que hay es " + n_files)
     # execute request function
     if any(f.endswith("." + out_extension) for f in os.listdir(out_dir)):
 
