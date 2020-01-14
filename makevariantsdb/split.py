@@ -16,11 +16,10 @@ split_cmd = "grep -v '##' {} | \
 sed -e '1s/^#//' | \
 awk -v ci=\"{}\" \
 -v od=\"{}/\" \
--F ' ' 'NR==1 \
-{{h=$0; next}} \
+-F ' ' 'NR==1 {{h=$0; next}} \
 {{f=od$ci\".{}\"}} \
 !($ci in p) {{p[$ci]}} \
-system(\"stat \" f \" >/dev/null 2>/dev/null\") != 0 {{print h > f }} \ 
+system(\" stat \" f \" > /dev/null 2> /dev/null\") != 0 {{print h > f }} \
 {{print >> f; close(f)}}'"
 
 # - grep -v '##': remove lines starting with ##
