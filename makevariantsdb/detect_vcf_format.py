@@ -7,10 +7,10 @@ from .decorator import tags
 # add decorator to monitor function
 
 
-@tags(text_start="Detect input annotated genomic variants file format...\n",
-      text_succeed="Detect input annotated genomic variants file format...done.\n",
-      text_fail='''Detect input annotated genomic variants file format...failed!. \n \
-Please provide a file either in VCF or VEP format. \n''',
+@tags(text_start="Detecting input annotated genomic variants file format...\n",
+      text_succeed="Detecting input annotated genomic variants file format...done.\n",
+      text_fail=('Detect input annotated genomic variants file format...failed!. \n',
+                 'Please provide a file either in VCF or VEP format. \n'),
       emoji="\U0001F50D ")
 def detect_format(infile):
     '''
@@ -34,7 +34,7 @@ def detect_format(infile):
         if 'CSQ' not in vcf_reader.header.info_ids():
             # input not recognized
             vcf_reader.close()
-            raise IOError()
+            #raise IOError()
         else:
             # is vcf format
             return "vcf"

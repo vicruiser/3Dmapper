@@ -8,6 +8,7 @@ import glob
 from halo import Halo
 from .decorator import tags
 
+#for all the columns, find the one that matches with the pattern ENSG
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
 
@@ -17,9 +18,22 @@ awk -v ci=\"{}\" \
 -v od=\"{}/\" \
 -F ' ' 'NR==1 \
 {{h=$0; next}} \
-{{f=od$ci\".{}\"}} !($ci in p) \
-{{p[$ci]; print h > f}} \
+{{f=od$ci\".{}\"}} \
+!($ci in p) {{p[$ci]}} \
+system(\"stat \" f \" >/dev/null 2>/dev/null\") != 0 {{print h > f }} \ 
 {{print >> f; close(f)}}'"
+
+# - grep -v '##': remove lines starting with ##
+# - sed -e '1s/^#// : remove # from header line
+# - awk 
+#       -v ci=\"{}\": set variable ci
+#       -v od=\"{}/\" : set variable od
+#       -F ' ' : file separated by ' '
+#       - 'NR==1 {{h=$0; next}} : first line is header (h)
+#       - {{f=od$ci\".{}\"}} : set variable f as output filename
+#       - !($ci in p) {{p[$ci]}} : if  number of column index in file, select it
+#       - system(\"stat \" f \" >/dev/null 2>/dev/null\") != 0 {{print h > f }} : add header to outfile only if out file doesn't exist
+#       - {{print >> f; close(f)}}'" print line to file
 
 
 def request(prefix, input_file, out_dir, out_extension):
@@ -29,23 +43,34 @@ def request(prefix, input_file, out_dir, out_extension):
     Parameters
     ----------
     prefix : str
-        Ensembl ID prefix. Either ESNG or ENSP. 
-    input_file : str        
+        Ensembl ID prefix. Either ESNG or ENSP.
+    input_file : str
         Path to infile.
-    out_dir : str        
+    out_dir : str
         Path to output.
-    out_extension : str        
-        Output filename extension 
+    out_extension : str
+        Output filename extension
 
     Returns
     -------
-    ./dir 
-        Directory containing splitted files. 
+    ./dir
+        Directory containing splitted files.
     '''
     # log file
     log1 = open(os.path.join(out_dir, 'log_find_column.txt'), 'a')
     log1.write('Find column...\n')
     log1.flush()
+
+    #
+    n_files = len(glob.glob(os.path.join(out_dir, prefix + '.*')))
+    print(out_dir)
+    print(prefix)
+    print(glob.glob(os.path.join(out_dir, prefix + '.*')))
+    print(str("holi el numero de files que hay es " + str(n_files)))
+
+    if n_files > 0:
+        out_extension = out_extension + str(n_files + 1)
+
     # First command
     cmd1 = detect_column.format(prefix, input_file)
     # execute process
@@ -105,24 +130,11 @@ def split(prefix, input_file, out_dir, out_extension, overwrite):
     '''
     # create dir if it doesn't exist
     os.makedirs(out_dir, exist_ok=True)
-    # Count number of already existing files to create alternative
-    # copies instead of overwrite. This might happen when we have
-    # multiple input files of variants and a gene is called
-    # along these.
-    n_files = len(glob.glob1(outdir, prefix + '.*'))
-    print("holi el numero de files que hay es " + n_files)
+
     # execute request function
     if any(f.endswith("." + out_extension) for f in os.listdir(out_dir)):
 
         if overwrite.lower() == 'y':
-            if n_files > 0:
-                request(prefix, input_file, out_dir,
-                        out_extension + str(n_files + 1))
-            else:
-                request(prefix, input_file, out_dir, out_extension)
-    else:
-        if n_files > 0:
-            request(prefix, input_file, out_dir,
-                    out_extension + str(n_files + 1))
-        else:
             request(prefix, input_file, out_dir, out_extension)
+    else:
+        request(prefix, input_file, out_dir, out_extension)
