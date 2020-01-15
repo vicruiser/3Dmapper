@@ -31,38 +31,63 @@ from .add_header import add_header
 from .decorator import tags
 
 
-class generateVarDB:
+# class logfile(object):
+#     # Current Day
+#     Day = time.strftime("%d-%m-%Y", time.localtime())
+#     # Current Time
+#     Time = time.strftime("%I:%M:%S %p", time.localtime())
+#     # Date and Time to display next to the message
+#     dt = '[' + Day + ']' + Time + ' '
 
-    # def exportBCFtools(self):
-    #     print("FUA VAYA MORAO ESKISO")
-    #     jj = "/home/vruizser/PhD/2018-2019/git/PDBmapper"
-    #     print(path.join(jj, 'bcftools/:$PATH'))
-    #     os.environ['PATH'] = path.join(jj, 'bcftools')
-    #     # subprocess.check_call(
-    #     #    ['export', 'PATH=' + path.join(os.getcwd()+'bcftools/:$PATH')])
-    #     os.environ['BCFTOOLS_PLUGINS'] = path.join(
-    #         jj, 'bcftools/plugins')
-    #     # subprocess.check_call(['export', 'BCFTOOLS_PLUGINS=' +
-    #     #                       path.join(os.getcwd()+'bcftools/plugins/:$BCFTOOLS_PLUGINS')])
+#     def __enter__(self, file_location):
+#         self.log_file = open(file_location, 'a+')
+#         return self
+
+#     def write(self, message):
+#         self.log_file.write(dt + message)
+
+#     def __exit__(self):
+#         self.log_file.close()
+
+
+class generateVarDB:
+    # Current Day
+    Day = time.strftime("%d-%m-%Y", time.localtime())
+    # Current Time
+    Time = time.strftime('%H:%M:%S', time.localtime())
+    # Date and Time to display next to the message
+    dt = '[' + Day + '] ' + Time + ' '
 
     def vcf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite):
-        # export enviroment variables
-        # self.exportBCFtools()
+
+        # initialize log file
+        #log = open(os.path.join(out_dir, 'makevariants.log'), 'a')
+        log.write('Transforming vcf to vep...\n')
+
         # from vcf to vep
         vcf2vep(var_infile, out_dir,
                 out_file, overwrite)
         # add header to resulting vep file
         add_header(out_file)
+
+        log.write(self.dt + ' Splitting vep file...\n')
         # split vep file by protein id to speed up the
         # mapping process
         split('ENSG', out_file, vardb_outdir,
               'vep', overwrite)
 
+        log.write(self.dt + ' Splitting vep file...done.\n')
+
     def vep(self, var_infile, vardb_outdir, overwrite):
+
+        # initialize log file
+        #log = open(os.path.join(vardb_outdir, 'makevariants.log'), 'a')
+        log.write(self.dt + ' Splitting vep file...\n')
         # split vep file by protein id to speed up the
         # mapping process
         split('ENSG', var_infile, vardb_outdir,
               'vep', overwrite)
+        log.write(self.dt + ' Splitting vep file...done.\n')
 
     def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite):
         # from vcf to vep
@@ -75,6 +100,8 @@ class generateVarDB:
 
 
 def main():
+    # parse command line options
+    args = parse_commandline()
     # aesthetics
     description = '''
 
@@ -95,12 +122,13 @@ def main():
     ---------------  Map annotated genomic variants to protein interfaces data in 3D. -----------------
 
     '''
+    # Log file
+    log = open(os.path.join(args.out, 'makevariants.log'), 'a')
+    log.write(description)
     # print ascii art
     print(description)
     # initialize spinner decorator
     spinner = Halo(text='Loading', spinner='dots12', color="red")
-    # parse command line options
-    args = parse_commandline()
     # set out dir and out file names
     # created by default
     out_dir = os.path.join(args.out, 'DBs')

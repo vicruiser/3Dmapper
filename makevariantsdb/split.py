@@ -8,7 +8,7 @@ import glob
 from halo import Halo
 from .decorator import tags
 
-#for all the columns, find the one that matches with the pattern ENSG
+# for all the columns, find the one that matches with the pattern ENSG
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
 
@@ -24,7 +24,7 @@ system(\" stat \" f \" > /dev/null 2> /dev/null\") != 0 {{print h > f }} \
 
 # - grep -v '##': remove lines starting with ##
 # - sed -e '1s/^#// : remove # from header line
-# - awk 
+# - awk
 #       -v ci=\"{}\": set variable ci
 #       -v od=\"{}/\" : set variable od
 #       -F ' ' : file separated by ' '
@@ -55,21 +55,6 @@ def request(prefix, input_file, out_dir, out_extension):
     ./dir
         Directory containing splitted files.
     '''
-    # log file
-    log1 = open(os.path.join(out_dir, 'log_find_column.txt'), 'a')
-    log1.write('Find column...\n')
-    log1.flush()
-
-    #
-    n_files = len(glob.glob(os.path.join(out_dir, prefix + '.*')))
-    print(out_dir)
-    print(prefix)
-    print(glob.glob(os.path.join(out_dir, prefix + '.*')))
-    print(str("holi el numero de files que hay es " + str(n_files)))
-
-    if n_files > 0:
-        out_extension = out_extension + str(n_files + 1)
-
     # First command
     cmd1 = detect_column.format(prefix, input_file)
     # execute process
@@ -81,16 +66,11 @@ def request(prefix, input_file, out_dir, out_extension):
     col_index = re.findall('\d+', out1.decode('utf8'))[0]
     # stop if no ENSP id detected
     if col_index != '':
-        # write log file
-        log2 = open(os.path.join(out_dir, 'log_split_files.txt'), 'a')
-        log2.write('Splitting file...\n')
-        log2.flush()
         # Second command
         cmd2 = split_cmd.format(input_file, col_index, out_dir, out_extension)
         # register process
         p2 = subprocess.Popen(cmd2,
                               stdout=subprocess.PIPE,
-                              stderr=log2,
                               shell=True)
         # error handling
         out2, err2 = p2.communicate()
