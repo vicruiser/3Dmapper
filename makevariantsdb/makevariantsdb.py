@@ -10,15 +10,15 @@ import glob
 import subprocess
 import vcfpy
 import time
-import os.path as path
+import logging
 
+import os.path as path
 import pandas as pd
 import numpy as np
 
 from halo import Halo
 from timeit import default_timer as timer
 from subprocess import call
-
 
 # import functions from scripts
 from .parse_argv import parse_commandline
@@ -29,40 +29,12 @@ from .vcf2vep import vcf2vep
 from .maf2vep import maf2vep
 from .add_header import add_header
 from .decorator import tags
-
-
-# class logfile(object):
-#     # Current Day
-#     Day = time.strftime("%d-%m-%Y", time.localtime())
-#     # Current Time
-#     Time = time.strftime("%I:%M:%S %p", time.localtime())
-#     # Date and Time to display next to the message
-#     dt = '[' + Day + ']' + Time + ' '
-
-#     def __enter__(self, file_location):
-#         self.log_file = open(file_location, 'a+')
-#         return self
-
-#     def write(self, message):
-#         self.log_file.write(dt + message)
-
-#     def __exit__(self):
-#         self.log_file.close()
+#from .logger import get_logger
 
 
 class generateVarDB:
-    # Current Day
-    Day = time.strftime("%d-%m-%Y", time.localtime())
-    # Current Time
-    Time = time.strftime('%H:%M:%S', time.localtime())
-    # Date and Time to display next to the message
-    dt = '[' + Day + '] ' + Time + ' '
 
     def vcf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite):
-
-        # initialize log file
-        #log = open(os.path.join(out_dir, 'makevariants.log'), 'a')
-        log.write('Transforming vcf to vep...\n')
 
         # from vcf to vep
         vcf2vep(var_infile, out_dir,
@@ -70,24 +42,17 @@ class generateVarDB:
         # add header to resulting vep file
         add_header(out_file)
 
-        log.write(self.dt + ' Splitting vep file...\n')
         # split vep file by protein id to speed up the
         # mapping process
         split('ENSG', out_file, vardb_outdir,
               'vep', overwrite)
 
-        log.write(self.dt + ' Splitting vep file...done.\n')
-
     def vep(self, var_infile, vardb_outdir, overwrite):
 
-        # initialize log file
-        #log = open(os.path.join(vardb_outdir, 'makevariants.log'), 'a')
-        log.write(self.dt + ' Splitting vep file...\n')
         # split vep file by protein id to speed up the
         # mapping process
         split('ENSG', var_infile, vardb_outdir,
               'vep', overwrite)
-        log.write(self.dt + ' Splitting vep file...done.\n')
 
     def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite):
         # from vcf to vep
@@ -121,12 +86,20 @@ def main():
 
     ---------------  Map annotated genomic variants to protein interfaces data in 3D. -----------------
 
-    '''
-    # Log file
-    log = open(os.path.join(args.out, 'makevariants.log'), 'a')
-    log.write(description)
+    \n'''
+
+    epilog = \
+        '''
+          -------------------------------------------------------------------------        
+         |  Copyright (c) 2019 Victoria Ruiz --                                    |  
+         |  vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
+          -------------------------------------------------------------------------
+
+        '''
     # print ascii art
     print(description)
+    print(epilog)
+
     # initialize spinner decorator
     spinner = Halo(text='Loading', spinner='dots12', color="red")
     # set out dir and out file names
@@ -141,10 +114,18 @@ def main():
     # initialize class
     varfile = generateVarDB()
 
+    # set up the logging
+    logger = open(os.path.join(out_dir, 'makevariantsdb.log'), 'w')
+    logger.write(description)
+    logger.write('Input command line: \n')
+    logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    time_format = '[' + time.ctime(time.time()) + '] '
+
     # change input format if file doesn't exists or overwrite is True
     if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
         # Manage all possible genomic variant input files
         if args.vcf is not None:
+            logger.write(time_format + 'Reading and splitting input file. \n')
             # for loop in case we have multiple inputs to read from a list of files
             for f in args.vcf:
                 # check if input is a file
@@ -162,7 +143,8 @@ def main():
                                     # split vcf file
                                     varfile.vcf(var_infile, out_dir,
                                                 out_file, vardb_outdir, args.force)
-
+                                    logger.write(
+                                        time_format + 'Input file is in .vcf format. Splitting process done.\n')
                             # If vep, only split
                             elif input_format == "vep":
                                 # split if empty dir or overwrite is True
@@ -171,6 +153,8 @@ def main():
                                     # mapping process
                                     varfile.vep(
                                         var_infile, vardb_outdir, args.force)
+                                    logger.write(
+                                        time_format + 'Input file is in .vep format. Splitting process done.\n')
                             else:
                                 print('Warning: input file', var_infile,
                                       'is not in vep nor vcf format.')
@@ -188,6 +172,8 @@ def main():
                                 # split vcf file
                                 varfile.vcf(f, out_dir,
                                             out_file, vardb_outdir, args.force)
+                                logger.write(
+                                    time_format + 'Input file is in .vcf format. Splitting process done.\n')
 
                         # If vep, only split
                         elif input_format == "vep":
@@ -196,6 +182,8 @@ def main():
                                 # split vep file by protein id to speed up the
                                 # mapping process
                                 varfile.vep(f, vardb_outdir, args.force)
+                                logger.write(
+                                    time_format + 'Input file is in .vep format. Splitting process done.\n')
 
                         else:
                             print('Warning: input file', var_infile,
@@ -217,12 +205,16 @@ def main():
                                 # split MAF file
                                 varfile.maf(var_infile, out_dir,
                                             out_file, vardb_outdir, args.force)
+                                logger.write(
+                                    time_format + 'Input file is in .maf format. Splitting process done.\n')
                 except:
                     # change input format if file doesn't exists or overwrite is True
                     if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
                         # split MAF file
                         varfile.maf(f, out_dir,
                                     out_file, vardb_outdir, args.force)
+                        logger.write(
+                            time_format + 'Input file is in .maf format. Splitting process done.\n')
         elif args.vep is not None:
             spinner.warn(text='VEP option will be available soon. Using VarMap db instead. \
     Otherwise, please provide your own vcf file with the -vcf option.\n')
@@ -237,3 +229,7 @@ def main():
             vardb_outdir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
     else:
         print('A variants database already exists.')
+
+    logger.write(
+        time_format + 'Genomic variants DB generated successfully in ' + vardb_outdir + '\n')
+    logger.close()

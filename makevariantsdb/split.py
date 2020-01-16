@@ -7,7 +7,8 @@ import time
 import glob
 from halo import Halo
 from .decorator import tags
-
+from .logger import get_logger
+from .parse_argv import parse_commandline
 # for all the columns, find the one that matches with the pattern ENSG
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
@@ -74,6 +75,7 @@ def request(prefix, input_file, out_dir, out_extension):
                               shell=True)
         # error handling
         out2, err2 = p2.communicate()
+
         if err2 is not None:
             raise IOError()
     else:
