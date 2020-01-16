@@ -120,7 +120,7 @@ def main():
     logger.write('''
                  Command line input: 
                  -------------------
-                 \n'''')
+                 \n''')
     logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
     time_format = '[' + time.ctime(time.time()) + '] '
 
