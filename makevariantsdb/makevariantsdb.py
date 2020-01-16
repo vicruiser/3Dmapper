@@ -117,7 +117,10 @@ def main():
     # set up the logging
     logger = open(os.path.join(out_dir, 'makevariantsdb.log'), 'w')
     logger.write(description)
-    logger.write('Input command line: \n')
+    logger.write('''
+                 Command line input: 
+                 -------------------
+                 \n'''')
     logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
     time_format = '[' + time.ctime(time.time()) + '] '
 
