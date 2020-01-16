@@ -45,9 +45,19 @@ def main():
 
     ---------------  Map annotated genomic variants to protein interfaces data in 3D. -----------------
 
-    '''
+    \n'''
+
+    epilog = \
+        '''
+          -------------------------------------------------------------------------        
+         |  Copyright (c) 2019 Victoria Ruiz --                                    |  
+         |  vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
+          -------------------------------------------------------------------------
+
+        '''
     # print ascii art
     print(description)
+    print(epilog)
     # initialize spinner decorator
     spinner = Halo(text='Loading', spinner='dots12', color="red")
     # parse command line options
@@ -63,8 +73,25 @@ def main():
     # create output dir if it doesn't exist
     os.makedirs(intdb_outdir, exist_ok=True)
 
+    # set up the logging
+    logger = open(os.path.join(out_dir, 'makeinterfacesdb.log'), 'w')
+    logger.write(description)
+    logger.write(epilog)
+    logger.write('''
+    Command line input: 
+    -------------------
+    \n''')
+    logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    time_format = '[' + time.ctime(time.time()) + '] '
+
+    logger.write(time_format + 'Reading and splitting input file. \n')
     # split interface db
     split('ENSP', args.intdb, intdb_outdir, 'txt', args.force)
+
+    logger.write(time_format + 'Reading and splitting input file...done. \n')
+    logger.write(
+        time_format + 'Interfaces DB generated successfully in ' + intdb_outdir + '\n')
+    logger.close()
     # set origin of input interface
     #    input_intdb = 'external'
     # else:

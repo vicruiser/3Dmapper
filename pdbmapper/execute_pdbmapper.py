@@ -54,13 +54,22 @@ def main():
 
     '''
 
+    epilog = \
+        '''
+          -------------------------------------------------------------------------        
+         |  Copyright (c) 2019 Victoria Ruiz --                                    |  
+         |  vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
+          -------------------------------------------------------------------------
+
+        '''
+
     # starting time
     ts = time.time()
     sttime = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H:%M:%S - ')
 
     # print ascii art
     print(description)
-
+    print(epilog)
     # Emojis
     DNA = '\U0001F9EC'
 
@@ -70,19 +79,25 @@ def main():
     # parse command line options
     args = parse_commandline()
 
-    # initialize final report (.log)
-    log_file = open('pdbmapper_results.txt', 'w')
-    log_file.write(description)
-
+    # set up the logging
+    logger = open(os.path.join(args.out, 'pdbmapper.log'), 'w')
+    logger.write(description)
+    logger.write(epilog)
+    logger.write('''
+    Command line input: 
+    -------------------
+    \n''')
+    logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    time_format = '[' + time.ctime(time.time()) + '] '
     # create output directory if it doesn't exist
     if not os.path.exists(args.out):
         os.mkdir(args.out)
         spinner.info(text="Directory " + args.out + " created.\n")
-        log_file.write(sttime + ("Directory " + args.out + " created."))
+        logger.write(time_format + "Directory " + args.out + ' created. \n')
     else:
         spinner.info(
             text=args.out + " is an existing directory. Results will be written in there.\n")
-
+        logger.write(time_format + args.out + " is an existing directory. Results will be written in there. \n')
     # create chimera scripts:
     if args.chimera is not None:
         # chimera()
