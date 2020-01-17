@@ -198,9 +198,9 @@ def main():
 
         logger.write(time_format + 'Done.\n')
         log_file.write(sttime + ('Congratulations!. PDBmapper has run in ' +
-                                 str(end-start: .2f) + 's.')
+                                 str(round(end-start, 2)) + 's.')
         loger.close()
         # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',
                                  text='Congratulations!. PDBmapper has run in ' +
-                                 str(end-start: .2f) + 's.')
+                                 str(round(end-start, 2)) + 's.')
