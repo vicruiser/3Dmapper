@@ -32,7 +32,7 @@ from .add_header import add_header
 from .decorator import tags
 from .logger import get_logger
 
-num_cpus = psutil.cpu_count(logical=False)
+#num_cpus = psutil.cpu_count(logical=False)
 
 
 class generateVarDB:
