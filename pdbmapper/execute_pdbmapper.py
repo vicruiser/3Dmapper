@@ -75,6 +75,9 @@ def main():
     # parse command line options
     args = parse_commandline()
 
+    # time message
+    time_format = '[' + time.ctime(time.time()) + '] '
+
     # create output directory if it doesn't exist
     if not os.path.exists(args.out):
         os.mkdir(args.out)
@@ -95,7 +98,6 @@ def main():
                   '-------------------\n',
                   '\n'))
     logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
-    time_format = '[' + time.ctime(time.time()) + '] '
     logger.write(out_dir_logmessage)
 
     # create chimera scripts:
