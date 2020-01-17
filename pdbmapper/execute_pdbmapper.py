@@ -63,10 +63,6 @@ def main():
 
         '''
 
-    # starting time
-    ts = time.time()
-    sttime = datetime.datetime.fromtimestamp(ts).strftime('%Y%m%d_%H:%M:%S - ')
-
     # print ascii art
     print(description)
     print(epilog)
@@ -97,7 +93,8 @@ def main():
     else:
         spinner.info(
             text=args.out + " is an existing directory. Results will be written in there.\n")
-        logger.write(time_format + args.out + " is an existing directory. Results will be written in there. \n')
+        logger.write(time_format + args.out +
+                     'is an existing directory. Results will be written in there. \n')
     # create chimera scripts:
     if args.chimera is not None:
         # chimera()
