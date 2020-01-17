@@ -94,9 +94,9 @@ def main():
     logger = open(os.path.join(args.out, 'pdbmapper.log'), 'w')
     logger.write(description)
     logger.write(epilog)
-    logger.write((' Command line input:\n',
-                  '-------------------\n',
-                  '\n'))
+    logger.write(str(' Command line input:\n',
+                     '-------------------\n',
+                     '\n'))
     logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
     logger.write(out_dir_logmessage)
 
@@ -188,17 +188,19 @@ def main():
                         next
                 else:
                     print("wrong input!!")
-        # execute function
+
+        # execute main function and compute executiong time
+        logger.write(time_format + 'Running PDBmapper... \n')
+
+        start = time.time()
         f()
-        # time execution
-        end = timer()
-        finish = end - start
-        finish = round(finish/60, 3)
-        # print result
+        end = time.time()
+
+        logger.write(time_format + 'Done.\n')
+        log_file.write(sttime + ('Congratulations!. PDBmapper has run in ' +
+                                 str(end-start: .2f) + 's.')
+        loger.close()
+        # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',
                                  text='Congratulations!. PDBmapper has run in ' +
-                                 str(finish) + ' minutes.')
-
-        log_file.write(sttime + ('Congratulations!. PDBmapper has run in ',
-                                 str(finish), ' minutes.'))
-        log_file.close()
+                                 str(end-start: .2f) + 's.')
