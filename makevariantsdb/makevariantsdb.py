@@ -30,7 +30,7 @@ from .vcf2vep import vcf2vep
 from .maf2vep import maf2vep
 from .add_header import add_header
 from .decorator import tags
-#from .logger import get_logger
+from .logger import get_logger
 
 #num_cpus = psutil.cpu_count(logical=False)
 
