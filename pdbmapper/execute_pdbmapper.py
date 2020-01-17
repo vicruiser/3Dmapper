@@ -94,9 +94,9 @@ def main():
     logger = open(os.path.join(args.out, 'pdbmapper.log'), 'w')
     logger.write(description)
     logger.write(epilog)
-    logger.write(str(' Command line input:\n',
-                     '-------------------\n',
-                     '\n'))
+    logger.write('Command line input:\n' +
+                 '-------------------\n' +
+                 '\n')
     logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
     logger.write(out_dir_logmessage)
 
