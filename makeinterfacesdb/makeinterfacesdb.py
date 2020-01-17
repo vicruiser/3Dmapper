@@ -23,6 +23,7 @@ from subprocess import call
 from .parse_argv import parse_commandline
 from .split import split
 from .decorator import tags
+from .logger import get_logger
 
 
 def main():
@@ -73,25 +74,38 @@ def main():
     # create output dir if it doesn't exist
     os.makedirs(intdb_outdir, exist_ok=True)
 
-    # set up the logging
-    logger = open(os.path.join(out_dir, 'makeinterfacesdb.log'), 'w')
-    logger.write(description)
-    logger.write(epilog)
-    logger.write('''
+    # set up the report
+    report = open(os.path.join(out_dir, 'makeinterfacesdb.report'), 'w')
+    report.write(description)
+    report.write(epilog)
+    report.write('''
     Command line input: 
     -------------------
     \n''')
-    logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    report.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
     time_format = '[' + time.ctime(time.time()) + '] '
+    start = time.time()
 
-    logger.write(time_format + 'Reading and splitting input file. \n')
+    # set up a log file
+    logger = get_logger('main', out_dir)
+    log_dir = out_dir
+    logger.info('Reading and splitting input file.')
+
+    # report info
+    report.write(time_format + 'Reading and splitting input file. \n')
     # split interface db
-    split('ENSP', args.intdb, intdb_outdir, 'txt', args.force)
+    split('ENSP', args.intdb, intdb_outdir, 'txt', args.force, log_dir)
 
-    logger.write(time_format + 'Reading and splitting input file...done. \n')
-    logger.write(
-        time_format + 'Interfaces DB generated successfully in ' + intdb_outdir + '\n')
-    logger.close()
+    # log info
+    logger.info(
+        args.intdb + ' has been splitted successfully.')
+
+    # finish report
+    end = time.time()
+    report.write(time_format + 'Reading and splitting input file...done. \n')
+    report.write(
+        time_format + 'Generation of interfaces DB in ' + intdb_outdir + ' took ' + str(round(end-start, 2)) + 's\n')
+    report.close()
     # set origin of input interface
     #    input_intdb = 'external'
     # else:
