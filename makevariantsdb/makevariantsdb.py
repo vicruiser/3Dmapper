@@ -30,14 +30,14 @@ from .vcf2vep import vcf2vep
 from .maf2vep import maf2vep
 from .add_header import add_header
 from .decorator import tags
-#from .logger import get_logger
+from .logger import get_logger
 
 num_cpus = psutil.cpu_count(logical=False)
 
 
 class generateVarDB:
 
-    def vcf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite):
+    def vcf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir):
 
         # from vcf to vep
         vcf2vep(var_infile, out_dir,
@@ -48,23 +48,23 @@ class generateVarDB:
         # split vep file by protein id to speed up the
         # mapping process
         split('ENSG', out_file, vardb_outdir,
-              'vep', overwrite)
+              'vep', overwrite, log_dir)
 
-    def vep(self, var_infile, vardb_outdir, overwrite):
+    def vep(self, var_infile, vardb_outdir, overwrite, log_dir):
 
         # split vep file by protein id to speed up the
         # mapping process
         split('ENSG', var_infile, vardb_outdir,
-              'vep', overwrite)
+              'vep', overwrite, log_dir)
 
-    def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite):
+    def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir):
         # from vcf to vep
         maf2vep(var_infile, out_dir,
                 out_file, overwrite)
         # split vep file by protein id to speed up the
         # mapping process
         split('ENSG', out_file, vardb_outdir,
-              'vep', overwrite)
+              'vep', overwrite, log_dir)
 
 
 def main():

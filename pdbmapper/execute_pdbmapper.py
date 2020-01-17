@@ -197,8 +197,8 @@ def main():
         end = time.time()
 
         logger.write(time_format + 'Done.\n')
-        logger.write(sttime + ('Congratulations!. PDBmapper has run in ' +
-                               str(round(end-start, 2)) + 's.'))
+        logger.write(time_format + ('Congratulations!. PDBmapper has run in ' +
+                                    str(round(end-start, 2)) + 's.'))
         logger.close()
         # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',

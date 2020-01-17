@@ -36,7 +36,7 @@ system(\" stat \" f \" > /dev/null 2> /dev/null\") != 0 {{print h > f }} \
 #       - {{print >> f; close(f)}}'" print line to file
 
 
-def request(prefix, input_file, out_dir, out_extension):
+def request(prefix, input_file, out_dir, out_extension, log_dir):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -87,7 +87,7 @@ def request(prefix, input_file, out_dir, out_extension):
       text_succeed="Split file by selected ensembl id...done.",
       text_fail="Split file by selected ensembl id...failed!",
       emoji="\U00002702")
-def split(prefix, input_file, out_dir, out_extension, overwrite):
+def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
