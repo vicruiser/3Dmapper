@@ -38,10 +38,10 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\   
-    $$  __$$\ $$  __$$\ $$  __$$\     
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
+    $$$$$$$\  $$$$$$$\  $$$$$$$\
+    $$  __$$\ $$  __$$\ $$  __$$\
+    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -56,8 +56,8 @@ def main():
 
     epilog = \
         '''
-          -------------------------------------------------------------------------        
-         |  Copyright (c) 2019 Victoria Ruiz --                                    |  
+          -------------------------------------------------------------------------
+         |  Copyright (c) 2019 Victoria Ruiz --                                    |
          |  vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
           -------------------------------------------------------------------------
 
@@ -75,26 +75,29 @@ def main():
     # parse command line options
     args = parse_commandline()
 
-    # set up the logging
-    logger = open(os.path.join(args.out, 'pdbmapper.log'), 'w')
-    logger.write(description)
-    logger.write(epilog)
-    logger.write('''
-    Command line input: 
-    -------------------
-    \n''')
-    logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
-    time_format = '[' + time.ctime(time.time()) + '] '
     # create output directory if it doesn't exist
     if not os.path.exists(args.out):
         os.mkdir(args.out)
         spinner.info(text="Directory " + args.out + " created.\n")
-        logger.write(time_format + "Directory " + args.out + ' created. \n')
+        out_dir_logmessage = (time_format + "Directory " +
+                              args.out + ' created. \n')
     else:
         spinner.info(
             text=args.out + " is an existing directory. Results will be written in there.\n")
-        logger.write(time_format + args.out +
-                     'is an existing directory. Results will be written in there. \n')
+        out_dir_logmessage = (time_format + args.out +
+                              'is an existing directory. Results will be written in there. \n')
+
+    # set up the logging
+    logger = open(os.path.join(args.out, 'pdbmapper.log'), 'w')
+    logger.write(description)
+    logger.write(epilog)
+    logger.write((' Command line input:\n',
+                  '-------------------\n',
+                  '\n'))
+    logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    time_format = '[' + time.ctime(time.time()) + '] '
+    logger.write(out_dir_logmessage)
+
     # create chimera scripts:
     if args.chimera is not None:
         # chimera()

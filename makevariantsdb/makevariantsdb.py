@@ -19,6 +19,7 @@ import numpy as np
 from halo import Halo
 from timeit import default_timer as timer
 from subprocess import call
+from multiprocessing import Pool
 
 # import functions from scripts
 from .parse_argv import parse_commandline
@@ -30,6 +31,8 @@ from .maf2vep import maf2vep
 from .add_header import add_header
 from .decorator import tags
 #from .logger import get_logger
+
+num_cpus = psutil.cpu_count(logical=False)
 
 
 class generateVarDB:
