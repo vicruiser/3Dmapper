@@ -7,11 +7,11 @@ import subprocess
 import sys
 from .decorator import tags
 from timeit import default_timer as timer
+from .logger import get_logger
+
 
 # define request function to avoid repeating code
-
-
-def request(input_file, out_dir, out_file):
+def request(input_file, out_dir, out_file, log_dir):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -43,18 +43,23 @@ def request(input_file, out_dir, out_file):
 -A tab -d"
     # add input variables to command line
     cmd = bcftools.format(input_file, out_file)
-    # write log file
-    log = open(os.path.join(out_dir, 'log.txt'), 'a')
-    log.write('Using bcftools to convert vcf file to vep format...\n')
-    log.flush()
-    # execute process
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=log, shell=True)
+    # log file
+    logger = get_logger('vcf2vep', log_dir)
+    logger.info('Using bcftools to convert vcf file to vep format.')
+
+    # execute subprocess
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT, shell=True)
     # output from process
     out, err = p.communicate()
+
     # raise error if process failed
     if err is None:
-        pass
+        logger.info('File in vcf format converted successfully to vep format.')
     else:
+        logger.error(err)
+        logger.error(
+            'Something went wrong converting the vcf file into vep format.')
         raise IOError()
 
 
@@ -63,7 +68,7 @@ def request(input_file, out_dir, out_file):
       text_succeed="Converting vcf to vep...done.\n",
       text_fail="Converting vcf to vep...failed!\n",
       emoji="\U0001F504 ")
-def vcf2vep(input_file, out_dir, out_file, overwrite):
+def vcf2vep(input_file, out_dir, out_file, overwrite, log_dir):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -89,6 +94,6 @@ def vcf2vep(input_file, out_dir, out_file, overwrite):
     # execute function
     if os.path.isfile(out_file):
         if overwrite.lower() == 'y':
-            request(input_file, out_dir, out_file)
+            request(input_file, out_dir, out_file, log_dir)
     else:
-        request(input_file, out_dir, out_file)
+        request(input_file, out_dir, out_file, log_dir)

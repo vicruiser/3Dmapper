@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 
 from .decorator import tags
+from .logger import get_logger
 # define request function to avoid repeating code
 #maf = "/home/vruizser/head_mc3.maf"
 #maf = '/home/vruizser/PhD/2018-2019/Immunity_interfaces_analysis/raw_data/mc3.v0.2.8.PUBLIC.maf'
@@ -23,7 +24,10 @@ from .decorator import tags
       text_succeed="Converting MAF to VEP...done.\n",
       text_fail="Converting MAF to VEP...failed!\n",
       emoji="\U0001F504 ")
-def maf2vep(input_file, out_dir, out_file, overwrite):
+def maf2vep(input_file, out_dir, out_file, overwrite, log_dir):
+    # log file
+    logger = get_logger('maf2vep', log_dir)
+    logger.info('Converting maf file to vep format.\n')
     # set the name of 'uploaded_variants'
     upvar_cols = ["Chromosome", "Start_Position", "Reference_Allele", "Allele"]
     # set the name of 'location'
@@ -71,3 +75,5 @@ def maf2vep(input_file, out_dir, out_file, overwrite):
                            Uploaded_variation[-1]] + [':'.join(Location)] + rest.tolist()
                 # save results
                 writer.writerow(to_save)
+
+    logger.info('Conversion done successfully.\n')
