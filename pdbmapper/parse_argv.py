@@ -71,9 +71,19 @@ def parse_commandline():
                         help="threshold of sequence identity (percertage)")
     parser.set_defaults(pident=50)
 
-    # protein id string
-    parser.add_argument("-protid", nargs='+', metavar="<String>", dest="protid",
-                        help="Ensembl protein id", required=True)
+    # protein id, gene id or variant id
+    annovar_group = parser.add_mutually_exclusive_group(required=True)
+    annovar_group.add_argument('-protid', nargs='+', metavar="<String>", dest="ensemblid",
+                               help='single or multiple Ensemble protein ids provided \
+                                    in command line or file.')
+    annovar_group.add_argument('-geneid', nargs='+', metavar="<String>", dest="ensemblid",
+                               help='single or multiple Ensemble gene ids provided \
+                                    in command line or file.')
+    annovar_group.add_argument('-varid', nargs='+', metavar="<String>", dest="varid",
+                               help='single or multiple Ensemble protein ids provided \
+                                    in command line or file.')
+    #parser.add_argument("-protid", nargs='+', metavar="<String>", dest="protid",
+    #                    help="Ensembl protein id", required=True)
 
     # create chimera script to visualize the region of interest
     parser.add_argument("-chimera", action="store_true", dest="chimera",

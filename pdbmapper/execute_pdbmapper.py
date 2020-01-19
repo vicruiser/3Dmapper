@@ -24,6 +24,7 @@ from .parse_argv import parse_commandline
 from .translate_ensembl import translate_ensembl
 from .PDBmapper import PDBmapper
 from .decorator import tags
+from .logger import get_logger
 
 pd.options.mode.chained_assignment = None
 
@@ -106,13 +107,13 @@ def main():
         pass
 
     # run PDBmapper
-    if args.protid:
+    if args.ensemblid:
         # create output dir if it doesn't exist
         os.makedirs(args.out, exist_ok=True)
         # compute total time of running PDBmapper
         start = timer()
+              
         # decorator to monitor function
-
         @tags(text_start="Running PDBmapper...",
               text_succeed=" Running PDBmapper...done.",
               text_fail=" Running PDBmapper...failed!",
@@ -121,31 +122,30 @@ def main():
         def f():
             # PDBmapper accepts single or multiple protein ids
             # as input as well as prot ids stored in a file
-            for protids in args.protid:
+            for ids in args.ensemblid:
                 # check if input is a file
                 try:
-                    with open(protids) as f:
+                    with open(ids) as f:
                         lines = f.read().splitlines()
                         # set variable input as file
                         input = "file"
-
+                        
                 except:
                     # set variable input as not file
                     input = "not_file"
 
                 if input == "file":
-                    for protid in lines:
+                    for ensemblid in lines:
                         try:
                             # for pids in lines:
                             ensemblIDs = translate_ensembl(
-                                protid, args.filter_iso)
+                                ensemblid, args.filter_iso)
                             geneid = ensemblIDs['geneID']
+                            protid = ensemblIDs['proteinID']
                             transcriptID = ensemblIDs['transcriptID']
                         except IOError:
-                            log = open(os.path.join(
-                                args.out, 'log_ensembl.File'), 'a')
-                            log.write('Warning: ' + protid +
-                                      ' has no ENGS.\n')
+                            logger.error('Warning: ' + ensemblid +
+                                      ' has no corresponding translation.')
                             continue
                         # run PDBmapper
                         try:
@@ -159,17 +159,20 @@ def main():
                                       args.filter_var)
                         # error handling
                         except IOError:
+                            logger.error('Warning: ' + protid +
+                                      ' has no mapping variants.\n')
                             continue
 
                 # input is not a file but one or more protein ids
                 # given in command line
                 elif input == "not_file":
                     # for prot id get the gene id
-                    protid = protids
+                    ensemblid = ids
                     try:
                         ensemblIDs = translate_ensembl(
-                            protid, args.filter_iso)
+                            ensemblid args.filter_iso)
                         geneid = ensemblIDs['geneID']
+                        protid = ensemblIDs['proteinID']
                         transcriptID = ensemblIDs['transcriptID']
                         # run PDBmapper
                         try:
@@ -183,23 +186,27 @@ def main():
                                       args.filter_var)
                     # error handling
                         except IOError:
+                            logger.error('Warning: ' + protid +
+                                      ' has no mapping variants.\n')
                             next
                     except IOError:
+                        logger.error('Warning: ' + ensemblid +
+                                      ' has no corresponding translation.')
                         next
                 else:
-                    print("wrong input!!")
+                    logger.error('Wrong input!.')
 
         # execute main function and compute executiong time
-        logger.write(time_format + 'Running PDBmapper... \n')
+        logger.info('Running PDBmapper...')
 
         start = time.time()
         f()
         end = time.time()
 
-        logger.write(time_format + 'Done.\n')
-        logger.write(time_format + ('Congratulations!. PDBmapper has run in ' +
+        logger.info('Done.')
+        logger.info(()'Congratulations!. PDBmapper has run in ' +
                                     str(round(end-start, 2)) + 's.'))
-        logger.close()
+
         # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',
                                  text='Congratulations!. PDBmapper has run in ' +

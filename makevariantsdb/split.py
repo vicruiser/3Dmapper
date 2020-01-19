@@ -9,6 +9,9 @@ from halo import Halo
 from .decorator import tags
 from .logger import get_logger
 from .parse_argv import parse_commandline
+#from .create_var_index import index
+
+
 # for all the columns, find the one that matches with the pattern ENSG
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
@@ -22,6 +25,8 @@ awk -v ci=\"{}\" \
 !($ci in p) {{p[$ci]}} \
 system(\" stat \" f \" > /dev/null 2> /dev/null\") != 0 {{print h > f }} \
 {{print >> f; close(f)}}'"
+
+index_file = "awk -F ' ' 'NR>2{{print ${}, ${}, ${}}}' {} | uniq >> {}  "
 
 # - grep -v '##': remove lines starting with ##
 # - sed -e '1s/^#// : remove # from header line
@@ -75,26 +80,84 @@ def request(prefix, input_file, out_dir, out_extension, log_dir):
         logger.error(err1)
         logger.error('This file could not be splitted')
         raise IOError()
+    
+    # First command
+    cmd2 = detect_column.format('Uploaded_variation', input_file)
+    # execute process
+    p2 = subprocess.Popen(cmd2,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT,
+                          shell=True)
+    # get output
+    out2, err2 = p2.communicate()
+    # error handling
+    if err2 is None:
+        logger.info('Indexing variants file.')
+    else:
+        logger.error(err2)
+        logger.error('This file cannot be indexed. \
+            Does not contain a column with variants ids.')
+        raise IOError()
+    
+    # First command
+    cmd3 = detect_column.format('Existing_variation', input_file)
+    # execute process
+    p3 = subprocess.Popen(cmd3,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT,
+                          shell=True)
+    # get output
+    out3, err3 = p3.communicate()
+    # error handling
+    if err3 is None:
+        logger.info('Indexing variants file.')
+    else:
+        logger.error(err3)
+        logger.error('This file cannot be indexed. \
+            Does not contain a column with variants ids.')
+        raise IOError()
 
     # detect if there is output
-    col_index = re.findall('\d+', out1.decode('utf8'))[0]
+    col_index_geneid = re.findall('\d+', out1.decode('utf8'))[0]
+    col_index_varid = re.findall('\d+', out2.decode('utf8'))[0]
+    col_index_namevarid = re.findall('\d+', out3.decode('utf8'))[0]
     # stop if no ENSG id detected
-    if col_index != '':
+    if col_index_geneid != '':
         # Second command
-        cmd2 = split_cmd.format(input_file, col_index, out_dir, out_extension)
+        cmd4 = split_cmd.format(input_file, col_index_geneid, out_dir, out_extension)
         # register process
-        p2 = subprocess.Popen(cmd2,
+        p4 = subprocess.Popen(cmd4,
                               stdout=subprocess.PIPE,
                               stderr=subprocess.STDOUT,
                               shell=True)
         # error handling
-        out2, err2 = p2.communicate()
+        out4, err4 = p4.communicate()
 
-        if err2 is None:
+        if err4 is None:
             logger.info('This file was splitted successfully')
         else:
-            logger(err2)
+            logger. error(err4)
             logger.error('This file could not be splitted')
+            raise IOError()
+        
+        cmd5=index_file.format(col_index_varid,
+                               col_index_geneid,
+                               col_index_namevarid,
+                               input_file,
+                               os.path.join(out_dir,'variants.index'))
+        # register process
+        p5 = subprocess.Popen(cmd5,
+                              stdout=subprocess.PIPE,
+                              stderr=subprocess.STDOUT,
+                              shell=True)
+        # error handling
+        out5, err5 = p5.communicate()
+
+        if err5 is None:
+            logger.info('This file was indexed.')
+        else:
+            logger.error(err5)
+            logger.error('This file could not be indexed')
             raise IOError()
     else:
         logger.error('The input file has zero gene entries.')
@@ -136,5 +199,7 @@ def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir):
 
         if overwrite.lower() == 'y':
             request(prefix, input_file, out_dir, out_extension, log_dir)
+            
     else:
         request(prefix, input_file, out_dir, out_extension, log_dir)
+        
