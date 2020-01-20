@@ -86,31 +86,47 @@ def main():
     time_format = '[' + time.ctime(time.time()) + '] '
     start = time.time()
 
-    # set up a log file
-    logger = get_logger('main', out_dir)
-    log_dir = out_dir
-    logger.info('Reading and splitting input file.')
+    if args.intdb is not None:
+        # set up a log file
+        logger = get_logger('main', out_dir)
+        log_dir = out_dir
+        logger.info('Reading and splitting input file.')
 
-    # report info
-    report.write(time_format + 'Reading and splitting input file. \n')
-    # split interface db
-    split('ENSP', args.intdb, intdb_outdir, 'txt', args.force, log_dir)
+        # report info
+        report.write(time_format + 'Reading and splitting input file. \n')
+        # for loop in case we have multiple inputs to read from a list of files
+        for f in args.intdb:
+            # check if input is a file
+            if isfile(f) == 'list_files':
+                with open(f) as list_int_files:
+                    int_f = list_int_files.read().splitlines()
+                    logger.info(
+                        'Input interfaces file contains a list of variants files to process.')
+                    # for every prot id
+                    for int_infile in int_f:
+                        # split interface db
+                        split('ENSP', int_infile, intdb_outdir,
+                              'txt', args.force, log_dir)
+                        # log info
+                        logger.info(
+                            int_infile + ' has been splitted successfully.')
 
-    # log info
-    logger.info(
-        args.intdb + ' has been splitted successfully.')
+            elif isfile(f) == 'is_file':
+                # split interface db
+                split('ENSP', f, intdb_outdir,
+                      'txt', args.force, log_dir)
+                # log info
+                logger.info(
+                    f + ' has been splitted successfully.')
+            else:
+                logger.error(
+                    'Error: Interfaces file input could not be found.')
+                raise IOError
 
-    # finish report
-    end = time.time()
-    report.write(time_format + 'Reading and splitting input file...done. \n')
-    report.write(
-        time_format + 'Generation of interfaces DB in ' + intdb_outdir + ' took ' + str(round(end-start, 2)) + 's\n')
-    report.close()
-    # set origin of input interface
-    #    input_intdb = 'external'
-    # else:
-    #    spinner.info(text='Default interfaces DB is used.')
-    #    # set default interfaces database
-    #    int_db_dir = "/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_interfaces_db"
-    # set origin of input interface
-    #    input_intdb = 'default'
+            # finish report
+            end = time.time()
+            report.write(
+                time_format + 'Reading and splitting input file...done. \n')
+            report.write(
+                time_format + 'Generation of interfaces DB in ' + intdb_outdir + ' took ' + str(round(end-start, 2)) + 's\n')
+            report.close()

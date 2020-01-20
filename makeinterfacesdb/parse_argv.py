@@ -47,7 +47,7 @@ def parse_commandline():
                         help="force to owerwrite? (y/n)", default="y")
 
     # interfaces database file
-    parser.add_argument("-intdb", dest="intdb", metavar="<file>",
+    parser.add_argument("-intdb", nargs='+', metavar="<String>",
                         help="interfaces database directory", required=True)
     parser.set_defaults(intdb=None)
 
