@@ -39,10 +39,10 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\ 
-    $$  __$$\ $$  __$$\ $$  __$$\ 
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
+    $$$$$$$\  $$$$$$$\  $$$$$$$\
+    $$  __$$\ $$  __$$\ $$  __$$\
+    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -83,24 +83,26 @@ def main():
     if not os.path.exists(args.out):
         os.mkdir(args.out)
         spinner.info(text="Directory " + args.out + " created.\n")
-        out_dir_logmessage = (time_format + "Directory " +
-                              args.out + ' created. \n')
+        out_message = "Directory " + args.out + ' created.'
+
     else:
         spinner.info(
             text=args.out + " is an existing directory. Results will be written in there.\n")
-        out_dir_logmessage = (time_format + args.out +
-                              'is an existing directory. Results will be written in there. \n')
+        out_message = args.out + ' is an existing directory. Results will be written in there.'
 
-    # set up the logging
-    logger = open(os.path.join(args.out, 'pdbmapper.log'), 'w')
-    logger.write(description)
-    logger.write(epilog)
-    logger.write('Command line input:\n' +
+  # set up the logging
+    logger = get_logger('main', args.out)
+    logger.info(out_message)
+
+    # set up the results report
+    report = open(os.path.join(args.out, 'pdbmapper.report'), 'w')
+    report.write(description)
+    report.write(epilog)
+    report.write('Command line input:\n' +
                  '-------------------\n' +
                  '\n')
-    logger.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
-    logger.write(out_dir_logmessage)
-
+    report.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    report.write(time_format + out_message + '\n')
     # create chimera scripts:
     if args.chimera is not None:
         # chimera()
@@ -108,10 +110,6 @@ def main():
 
     # run PDBmapper
     if args.ensemblid:
-        # create output dir if it doesn't exist
-        os.makedirs(args.out, exist_ok=True)
-        # compute total time of running PDBmapper
-        start = timer()
 
         # decorator to monitor function
         @tags(text_start="Running PDBmapper...",
@@ -138,7 +136,7 @@ def main():
                         try:
                             # for pids in lines:
                             ensemblIDs = translate_ensembl(
-                                ensemblid, args.filter_iso)
+                                ensemblid, args.filter_iso, args.out)
                             geneid = ensemblIDs['geneID']
                             protid = ensemblIDs['proteinID']
                             transcriptID = ensemblIDs['transcriptID']
@@ -167,9 +165,14 @@ def main():
                 elif input == "not_file":
                     # for prot id get the gene id
                     ensemblid = ids
+                    # print(ensemblid)
+                    ensemblIDs = translate_ensembl(
+                        ensemblid, args.filter_iso, args.out)
+                    print(ensemblIDs)
                     try:
                         ensemblIDs = translate_ensembl(
                             ensemblid, args.filter_iso)
+                        print(ensemblIDs)
                         geneid = ensemblIDs['geneID']
                         protid = ensemblIDs['proteinID']
                         transcriptID = ensemblIDs['transcriptID']
@@ -197,14 +200,15 @@ def main():
 
         # execute main function and compute executiong time
         logger.info('Running PDBmapper...')
+        report.write(time_format + 'Running PDBmapper...')
 
         start = time.time()
         f()
         end = time.time()
 
         logger.info('Done.')
-        logger.info('Congratulations!. PDBmapper has run in ' +
-                    str(round(end-start, 2)) + 's.')
+        report.write(time_format + 'Congratulations!. PDBmapper has run in ' +
+                     str(round(end-start, 2)) + 's.')
 
         # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',

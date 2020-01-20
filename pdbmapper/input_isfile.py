@@ -22,3 +22,12 @@ def isfile(infile):
             return 'is_file'
         else:
             raise IOError()
+
+
+with open(ids) as f:
+                        lines = f.read().splitlines()
+                        # set variable input as file
+                        input = "file"
+                except:
+                    # set variable input as not file
+                    input = "not_file"
