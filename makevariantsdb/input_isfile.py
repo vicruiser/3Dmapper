@@ -13,7 +13,7 @@ def isfile(infile):
             if any(list(map(os.path.isfile, abspath))) is True:
                 return 'list_files'
             else:
-                raise IOError()
+                raise IOError
     # check if infile is a txt file
     except:
         normpath = os.path.normpath(infile)

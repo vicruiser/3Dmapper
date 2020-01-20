@@ -16,9 +16,9 @@ def isfile(infile):
                 raise IOError()
     # check if infile is a txt file
     except:
-        normpath = map(os.path.normpath, infile)
-        abspath = map(os.path.abspath, normpath)
-        if any(list(map(os.path.isfile, abspath))) is True:
+        normpath = os.path.normpath(infile)
+        abspath = os.path.abspath(normpath)
+        if os.path.isfile(abspath) is True:
             return 'is_file'
         else:
             raise IOError()

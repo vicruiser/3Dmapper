@@ -24,6 +24,7 @@ from .parse_argv import parse_commandline
 from .split import split
 from .decorator import tags
 from .logger import get_logger
+from .input_isfile import isfile
 
 
 def main():
