@@ -27,7 +27,7 @@ from .logger import get_logger
 def maf2vep(input_file, out_dir, out_file, overwrite, log_dir):
     # log file
     logger = get_logger('maf2vep', log_dir)
-    logger.info('Converting maf file to vep format.\n')
+    logger.info('Converting maf file to vep format.')
     # set the name of 'uploaded_variants'
     upvar_cols = ["Chromosome", "Start_Position", "Reference_Allele", "Allele"]
     # set the name of 'location'
@@ -76,4 +76,4 @@ def maf2vep(input_file, out_dir, out_file, overwrite, log_dir):
                 # save results
                 writer.writerow(to_save)
 
-    logger.info('Conversion done successfully.\n')
+    logger.info('Conversion done successfully.')

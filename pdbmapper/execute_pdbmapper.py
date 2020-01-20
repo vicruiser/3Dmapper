@@ -112,7 +112,7 @@ def main():
         os.makedirs(args.out, exist_ok=True)
         # compute total time of running PDBmapper
         start = timer()
-              
+
         # decorator to monitor function
         @tags(text_start="Running PDBmapper...",
               text_succeed=" Running PDBmapper...done.",
@@ -129,7 +129,6 @@ def main():
                         lines = f.read().splitlines()
                         # set variable input as file
                         input = "file"
-                        
                 except:
                     # set variable input as not file
                     input = "not_file"
@@ -145,7 +144,7 @@ def main():
                             transcriptID = ensemblIDs['transcriptID']
                         except IOError:
                             logger.error('Warning: ' + ensemblid +
-                                      ' has no corresponding translation.')
+                                         ' has no corresponding translation.')
                             continue
                         # run PDBmapper
                         try:
@@ -160,7 +159,7 @@ def main():
                         # error handling
                         except IOError:
                             logger.error('Warning: ' + protid +
-                                      ' has no mapping variants.\n')
+                                         ' has no mapping variants.\n')
                             continue
 
                 # input is not a file but one or more protein ids
@@ -170,7 +169,7 @@ def main():
                     ensemblid = ids
                     try:
                         ensemblIDs = translate_ensembl(
-                            ensemblid args.filter_iso)
+                            ensemblid, args.filter_iso)
                         geneid = ensemblIDs['geneID']
                         protid = ensemblIDs['proteinID']
                         transcriptID = ensemblIDs['transcriptID']
@@ -187,11 +186,11 @@ def main():
                     # error handling
                         except IOError:
                             logger.error('Warning: ' + protid +
-                                      ' has no mapping variants.\n')
+                                         ' has no mapping variants.\n')
                             next
                     except IOError:
                         logger.error('Warning: ' + ensemblid +
-                                      ' has no corresponding translation.')
+                                     ' has no corresponding translation.')
                         next
                 else:
                     logger.error('Wrong input!.')
@@ -204,8 +203,8 @@ def main():
         end = time.time()
 
         logger.info('Done.')
-        logger.info(()'Congratulations!. PDBmapper has run in ' +
-                                    str(round(end-start, 2)) + 's.'))
+        logger.info('Congratulations!. PDBmapper has run in ' +
+                    str(round(end-start, 2)) + 's.')
 
         # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',

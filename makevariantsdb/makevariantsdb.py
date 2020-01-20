@@ -31,6 +31,7 @@ from .maf2vep import maf2vep
 from .add_header import add_header
 from .decorator import tags
 from .logger import get_logger
+from .input_isfile import isfile
 
 # num_cpus = psutil.cpu_count(logical=False)
 
@@ -142,7 +143,7 @@ def main():
             # for loop in case we have multiple inputs to read from a list of files
             for f in args.vcf:
                 # check if input is a file
-                try:
+                if isfile(f) == 'list_files':
                     with open(f) as list_var_files:
                         var_f = list_var_files.read().splitlines()
                         logger.info(
@@ -188,7 +189,8 @@ def main():
 
                         report.write(
                             time_format + 'Splitting process done.\n')
-                except:
+
+                elif isfile(f) == 'is_file':
                     # change input format if file doesn't exists or overwrite is True
                     if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
                         logger.info(
@@ -202,11 +204,9 @@ def main():
                                 # log info
                                 logger.info('Input file' + f +
                                             ' is in .vcf format.')
-
                                 # split vcf file
                                 varfile.vcf(f, out_dir,
                                             out_file, vardb_outdir, args.force, log_dir)
-
                                 # log info
                                 logger.info(
                                     f + ' has been splitted.')
@@ -234,10 +234,15 @@ def main():
                             # log info
                             spinner.warn('Warning: input file', var_infile,
                                          'is neither in vep nor vcf format.')
-                            logger.warning(' Iinput file', var_infile,
+                            logger.warning('Input file', var_infile,
                                            'is not in vep nor vcf format.')
 
                             continue
+                else:
+                    spinner.warn(
+                        'The input is neither a file(s) or a file containing a list of files')
+                    logger.error(
+                        'The input is neither a file(s) or a file containing a list of files')
 
         # If MAF transform into VEP format and split
         elif args.maf is not None:
@@ -246,7 +251,8 @@ def main():
             # for loop in case we have multiple inputs to read from a list of files
             for f in args.maf:
              # check if input is a file
-                try:
+                if isfile(f) == 'list_files':
+                    # try:
                     with open(f) as list_var_files:
                         var_f = list_var_files.read().splitlines()
                         logger.info(
@@ -255,38 +261,44 @@ def main():
                         for var_infile in var_f:
                             # change input format if file doesn't exists or overwrite is True
                             if os.path.isfile(out_file) is False or args.force.lower() == 'y':
-                                # log info
-                                logger.info('Input file' +
-                                            var_infile + ' is in .maf format.')
                                 # split MAF file
                                 varfile.maf(var_infile, out_dir,
                                             out_file, vardb_outdir, args.force, log_dir)
                                 # log info
-                                logger.info(
-                                    var_infile + ' has been splitted.')
-                        report.write(
-                            time_format + 'Splitting process done.\n')
-                except:
+                                logger.info('File has been splitted.')
+                                report.write(
+                                    time_format + 'Splitting process done.\n')
+
+                            else:
+                                logger.warning(
+                                    vardb_outdir + ' already exists and force overwrite option is not active.')
+
+                elif isfile(f) == 'is_file':
                     # change input format if file doesn't exists or overwrite is True
                     if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
-                        # log info
-                        logger.info('Input file' + var_infile +
-                                    ' is in .maf format.')
-
                         # split MAF file
                         varfile.maf(f, out_dir,
                                     out_file, vardb_outdir, args.force, log_dir)
                         # log info
-                        logger.info(
-                            var_infile + ' has been splitted.')
+                        logger.info('File has been splitted.')
                         report.write(
                             time_format + 'Input file is in .maf format. Splitting process done.\n')
+                    else:
+                        logger.warning(
+                            vardb_outdir + ' already exists and force overwrite option is not active.')
+
+                else:
+                    spinner.warn(
+                        'The input is neither a file(s) or a file containing a list of files')
+                    logger.error(
+                        'The input is neither a file(s) or a file containing a list of files')
+
         elif args.vep is not None:
             spinner.warn(text='VEP option will be available soon. Using VarMap db instead. \
     Otherwise, please provide your own vcf file with the -vcf option.\n')
             try:
                 run_vep()
-            except IOError:
+            except:
                 vardb_outdir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
                 spinner.info('Using VarMap db\n')
                 exit(-1)
@@ -296,7 +308,9 @@ def main():
     else:
         print('A variants database already exists.')
 
+    # record total time of execution in report file
     end = time.time()
     report.write(
-        time_format + 'Generation of genomic variants DB in ' + vardb_outdir + ' took ' + str(round(end-start, 2)) + 's\n')
+        time_format + 'Generation of genomic variants DB in ' +
+        vardb_outdir + ' took ' + str(round(end-start, 2)) + 's\n')
     report.close()
