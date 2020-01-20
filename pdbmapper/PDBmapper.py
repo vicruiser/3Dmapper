@@ -13,6 +13,7 @@ from .decorator import tags
 from .explode import explode
 from .logger import get_logger
 
+
 def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, variant_type):
     '''
     Map interfaces and genomic anntoated variants and returns a
@@ -44,13 +45,14 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, vari
         interfaces and the variants. 
     '''
     # log file
-    logger = get_logger('PDBmapper', log_dir)
+    logger = get_logger(' PDBmapper', out_dir)
     # parse interfaces corresponding to the selected protein ID
     annoint = parser(protid, intdb)
+
     logger.info('Interfaces of protein ' + protid + 'parsed.')
     # if default database is used minor modifications are needed
     if pident is not None:
-        logger.info('Filtering interfaces by pident = ' + pident + '\%.')
+        logger.info('Filtering interfaces by pident = ' + str(pident) + '%.')
         # filter by pident
         pident = int(pident)  # from str to int
         annoint_pident = annoint.loc[annoint.pident >= pident]
@@ -58,15 +60,15 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, vari
         # notified in log file
         if annoint_pident.empty:
             alt_pident = annoint.loc[:, "pident"].max()
-            logger.error('Warning: for protid ' + protid +
-                      ', the variable "pident" equal to ' +
-                      pident + ' is too high.\n A threshold lower than or equal to ' +
-                      alt_pident + ' would retrieve results.')
+            logger.error('Warning: for protid ' + str(pident) +
+                         ', the variable "pident" equal to ' +
+                         str(pident) + ' is too high.\n A threshold lower than or equal to ' +
+                         str(alt_pident) + ' would retrieve results.')
 
             raise IOError()
         # spread the data frame to have one amino acid position per row instead of compacted.
         annoint = reshape(annoint_pident)
-        
+
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneid, vardb)
     logger.info('Variants file from gene id ' + geneid + 'parsed.')
@@ -81,9 +83,9 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, vari
         logger.info('Filter of variants = ' + variant_type)
         # if filter returns an empty df, raise error
         if annovars.empty:
-            logger.error('Variants could not be filtered by variant type = ' + variant_type)
+            logger.error(
+                'Variants could not be filtered by variant type = ' + variant_type)
             raise IOError()
-        
 
     # for variants with high impact affecting several aminoacidic positions,
     # the protein position is a range. split the range to have each position
@@ -126,11 +128,12 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, vari
                                left_on=['Protein_position'],
                                right_on=['Protein_position'],
                                sort=False)
+
     # stop if there are no results
     if mapped_variants.empty:
         # report results
         logger.warning('Warning: ' + protid +
-                  ' does not map with any annotated variant.\n')
+                       ' does not map with any annotated variant.\n')
         raise IOError()
 
     # if merging was successful, create setID file and

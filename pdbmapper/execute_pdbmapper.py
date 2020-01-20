@@ -25,7 +25,8 @@ from .translate_ensembl import translate_ensembl
 from .PDBmapper import PDBmapper
 from .decorator import tags
 from .logger import get_logger
-
+from .input_isfile import isfile
+from .run_subprocess import call_subprocess
 pd.options.mode.chained_assignment = None
 
 
@@ -39,10 +40,10 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\
-    $$  __$$\ $$  __$$\ $$  __$$\
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\
+    $$$$$$$\  $$$$$$$\  $$$$$$$\ 
+    $$  __$$\ $$  __$$\ $$  __$$\ 
+    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -109,6 +110,28 @@ def main():
         pass
 
     # run PDBmapper
+    if args.varid:
+        print(args.vardb)
+        index_file = glob.glob(os.path.join(args.vardb, '*.index'))[0]
+        print(index_file)
+        for ids in args.varid:
+            # run PDBmapper
+            if isfile(ids) == 'yes':
+                for id in ids:
+
+                    cmd = 'grep \'' + id + '\' ' + index_file
+                    out, err = call_subprocess(cmd)
+                    toprocess = out.decode('utf-8')
+            elif isfile(ids) == 'no':
+                print(ids)
+                cmd = 'grep \'' + ids + '\' ' + index_file
+                out, err = call_subprocess(cmd)
+                toprocess = out.decode('utf-8')
+                geneID = toprocess.split(" ")[1].strip()
+                print(j)
+            else:
+                print("wrong input")
+
     if args.ensemblid:
 
         # decorator to monitor function
@@ -122,23 +145,14 @@ def main():
             # as input as well as prot ids stored in a file
             for ids in args.ensemblid:
                 # check if input is a file
-                try:
-                    with open(ids) as f:
-                        lines = f.read().splitlines()
-                        # set variable input as file
-                        input = "file"
-                except:
-                    # set variable input as not file
-                    input = "not_file"
-
-                if input == "file":
+                if isfile(ids) == "yes":
                     for ensemblid in lines:
                         try:
                             # for pids in lines:
                             ensemblIDs = translate_ensembl(
                                 ensemblid, args.filter_iso, args.out)
                             geneid = ensemblIDs['geneID']
-                            protid = ensemblIDs['proteinID']
+                            protid = ensemblIDs['protID']
                             transcriptID = ensemblIDs['transcriptID']
                         except IOError:
                             logger.error('Warning: ' + ensemblid +
@@ -156,25 +170,20 @@ def main():
                                       args.filter_var)
                         # error handling
                         except IOError:
-                            logger.error('Warning: ' + protid +
-                                         ' has no mapping variants.\n')
+                            logger.error('Warning: ' + ensemblid +
+                                         ' has no mapping variants.')
                             continue
 
                 # input is not a file but one or more protein ids
                 # given in command line
-                elif input == "not_file":
+                elif isfile(ids) == "no":
                     # for prot id get the gene id
                     ensemblid = ids
-                    # print(ensemblid)
-                    ensemblIDs = translate_ensembl(
-                        ensemblid, args.filter_iso, args.out)
-                    print(ensemblIDs)
                     try:
                         ensemblIDs = translate_ensembl(
-                            ensemblid, args.filter_iso)
-                        print(ensemblIDs)
+                            ensemblid, args.filter_iso, args.out)
                         geneid = ensemblIDs['geneID']
-                        protid = ensemblIDs['proteinID']
+                        protid = ensemblIDs['protID']
                         transcriptID = ensemblIDs['transcriptID']
                         # run PDBmapper
                         try:
@@ -188,8 +197,8 @@ def main():
                                       args.filter_var)
                     # error handling
                         except IOError:
-                            logger.error('Warning: ' + protid +
-                                         ' has no mapping variants.\n')
+                            logger.error('Warning: ' + ensemblid +
+                                         ' has no mapping variants.')
                             next
                     except IOError:
                         logger.error('Warning: ' + ensemblid +
@@ -200,7 +209,7 @@ def main():
 
         # execute main function and compute executiong time
         logger.info('Running PDBmapper...')
-        report.write(time_format + 'Running PDBmapper...')
+        report.write(time_format + 'Running PDBmapper...\n')
 
         start = time.time()
         f()
