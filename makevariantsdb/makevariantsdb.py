@@ -232,9 +232,9 @@ def main():
 
                         else:
                             # log info
-                            spinner.warn('Warning: input file', var_infile,
+                            spinner.warn('Warning: input file', f,
                                          'is neither in vep nor vcf format.')
-                            logger.warning('Input file', var_infile,
+                            logger.warning('Input file', f,
                                            'is not in vep nor vcf format.')
 
                             continue
