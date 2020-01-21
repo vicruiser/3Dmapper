@@ -26,7 +26,8 @@ awk -v ci=\"{}\" \
 system(\" stat \" f \" > /dev/null 2> /dev/null\") != 0 {{print h > f }} \
 {{print >> f; close(f)}}'"
 
-index_file = "awk -F ' ' 'NR>2{{print ${}, ${} {}}}' {} | uniq >> {}  "
+index_file = "awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' {} >> {}  "
+#index_file = "awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' {} | uniq >> {}  "
 
 # - grep -v '##': remove lines starting with ##
 # - sed -e '1s/^#// : remove # from header line
@@ -78,6 +79,18 @@ def request(prefix, input_file, out_dir, out_extension, log_dir):
         raise IOError()
 
     # command
+    cmd1_b = detect_column.format('ENST', input_file)
+    # execute subprocess
+    out1_b, err1_b = call_subprocess(cmd1_b)
+    # error handling
+    if err1_b is None and out1_b != b'':
+        col_index_transcriptid = re.findall('\d+', out1_b.decode('utf8'))[0]
+        logger.info('This file contains gene ids')
+    else:
+        logger.error('This file could not be splitted')
+        raise IOError()
+
+    # command
     cmd2 = detect_column.format('Uploaded_variation', input_file)
     # execute subprocess
     out2, err2 = call_subprocess(cmd2)
@@ -123,6 +136,7 @@ def request(prefix, input_file, out_dir, out_extension, log_dir):
         # create index file
         cmd5 = index_file.format(col_index_varid,
                                  col_index_geneid,
+                                 col_index_transcriptid,
                                  col_index_namevarid,
                                  input_file,
                                  os.path.join(out_dir, 'variants.index'))

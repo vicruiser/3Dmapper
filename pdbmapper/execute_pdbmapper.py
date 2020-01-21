@@ -27,6 +27,8 @@ from .decorator import tags
 from .logger import get_logger
 from .input_isfile import isfile
 from .run_subprocess import call_subprocess
+from .pdbmapper_wrapper import wrapper
+
 pd.options.mode.chained_assignment = None
 
 
@@ -65,18 +67,16 @@ def main():
 
         '''
 
-    # print ascii art
-    print(description)
-    print(epilog)
     # Emojis
     DNA = '\U0001F9EC'
-
     # spinner
     spinner = Halo(text='Loading', spinner='dots12', color="red")
-
     # parse command line options
     args = parse_commandline()
 
+    # print ascii art
+    print(description)
+    print(epilog)
     # time message
     time_format = '[' + time.ctime(time.time()) + '] '
 
@@ -104,121 +104,140 @@ def main():
                  '\n')
     report.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
     report.write(time_format + out_message + '\n')
-    # create chimera scripts:
-    if args.chimera is not None:
-        # chimera()
-        pass
+
+    # # create chimera scripts:
+    # if args.chimera is not None:
+    #     # chimera()
+    #     pass
 
     # run PDBmapper
     if args.varid:
-        print(args.vardb)
+        # execute main function and compute executiong time
+        start = time.time()
+        logger.info('Running PDBmapper...')
+        report.write(time_format + 'Running PDBmapper...\n')
+        spinner.start(text=' Running PDBmapper...')
+        # find variants index file
         index_file = glob.glob(os.path.join(args.vardb, '*.index'))[0]
-        print(index_file)
+
         for ids in args.varid:
             # run PDBmapper
             if isfile(ids) == 'yes':
-                for id in ids:
+                with open(ids) as list_varids:
+                    for id in list_varids:
+                        # remove \n from the end
+                        id = id.replace('\n', '')
+                        # grep variant in index file created with makevariantsdb
+                        cmd = ('grep \'{}\' {}').format(id, index_file)
+                        # call subprocess
+                        out, err = call_subprocess(cmd)
+                        if err is None and out != b'':
+                            toprocess = out.decode('utf-8')
+                            # geneid correspond to the 2nd column in the line
+                            transcriptid = toprocess.split(" ")[2].strip()
+                            # execute PDBmapper
+                            wrapper(transcriptid,
+                                    args.intdb,
+                                    args.vardb,
+                                    args.out,
+                                    args.pident,
+                                    args.feature,
+                                    id)
+                        else:
+                            logger.error(
+                                'Wrong input: {} is not a recognizable variant id'.format(id))
+                            continue
 
-                    cmd = 'grep \'' + id + '\' ' + index_file
-                    out, err = call_subprocess(cmd)
-                    toprocess = out.decode('utf-8')
             elif isfile(ids) == 'no':
-                print(ids)
-                cmd = 'grep \'' + ids + '\' ' + index_file
+                id = ids
+                # grep variant in index file created with makevariantsdb
+                cmd = ('grep \'{}\' {}').format(id, index_file)
+                # call subprocess
                 out, err = call_subprocess(cmd)
-                toprocess = out.decode('utf-8')
-                geneID = toprocess.split(" ")[1].strip()
-                print(j)
-            else:
-                print("wrong input")
-
-    if args.ensemblid:
-
-        # decorator to monitor function
-        @tags(text_start="Running PDBmapper...",
-              text_succeed=" Running PDBmapper...done.",
-              text_fail=" Running PDBmapper...failed!",
-              emoji=DNA)
-        # define function to run PDBmapper with the decorator
-        def f():
-            # PDBmapper accepts single or multiple protein ids
-            # as input as well as prot ids stored in a file
-            for ids in args.ensemblid:
-                # check if input is a file
-                if isfile(ids) == "yes":
-                    for ensemblid in lines:
-                        try:
-                            # for pids in lines:
-                            ensemblIDs = translate_ensembl(
-                                ensemblid, args.filter_iso, args.out)
-                            geneid = ensemblIDs['geneID']
-                            protid = ensemblIDs['protID']
-                            transcriptID = ensemblIDs['transcriptID']
-                        except IOError:
-                            logger.error('Warning: ' + ensemblid +
-                                         ' has no corresponding translation.')
-                            continue
-                        # run PDBmapper
-                        try:
-                            PDBmapper(protid,
-                                      geneid,
-                                      transcriptID,
-                                      args.intdb,
-                                      args.vardb,
-                                      args.out,
-                                      args.pident,
-                                      args.filter_var)
-                        # error handling
-                        except IOError:
-                            logger.error('Warning: ' + ensemblid +
-                                         ' has no mapping variants.')
-                            continue
-
-                # input is not a file but one or more protein ids
-                # given in command line
-                elif isfile(ids) == "no":
-                    # for prot id get the gene id
-                    ensemblid = ids
-                    try:
-                        ensemblIDs = translate_ensembl(
-                            ensemblid, args.filter_iso, args.out)
-                        geneid = ensemblIDs['geneID']
-                        protid = ensemblIDs['protID']
-                        transcriptID = ensemblIDs['transcriptID']
-                        # run PDBmapper
-                        try:
-                            PDBmapper(protid,
-                                      geneid,
-                                      transcriptID,
-                                      args.intdb,
-                                      args.vardb,
-                                      args.out,
-                                      args.pident,
-                                      args.filter_var)
-                    # error handling
-                        except IOError:
-                            logger.error('Warning: ' + ensemblid +
-                                         ' has no mapping variants.')
-                            next
-                    except IOError:
-                        logger.error('Warning: ' + ensemblid +
-                                     ' has no corresponding translation.')
-                        next
+                if err is None and out != b'':
+                    toprocess = out.decode('utf-8')
+                    # geneid correspond to the 2nd column in the line
+                    transcriptid = toprocess.split(" ")[2].strip()
+                    # execute PDBmapper
+                    wrapper(transcriptid,
+                            args.intdb,
+                            args.vardb,
+                            args.out,
+                            args.pident,
+                            args.feature,
+                            id)
                 else:
-                    logger.error('Wrong input!.')
+                    logger.error(
+                        'Wrong input: {} is not a recognizable variant id'.format(id))
+                    continue
+            else:
+                logger.error(
+                    'The input variants ids provided are not in a valid format.')
+                spinner.fail(" Running PDBmapper...failed!")
+                report.write(time_format + " Running PDBmapper...failed!")
+                raise IOError
 
         # execute main function and compute executiong time
-        logger.info('Running PDBmapper...')
-        report.write(time_format + 'Running PDBmapper...\n')
-
-        start = time.time()
-        f()
         end = time.time()
-
         logger.info('Done.')
         report.write(time_format + 'Congratulations!. PDBmapper has run in ' +
                      str(round(end-start, 2)) + 's.')
+        # print in console result
+        spinner.stop_and_persist(symbol='\U0001F4CD',
+                                 text='Congratulations!. PDBmapper has run in ' +
+                                 str(round(end-start, 2)) + 's.')
 
+    if args.ensemblid:
+        # execute main function and compute executiong time
+        start = time.time()
+        logger.info('Running PDBmapper...')
+        report.write(time_format + 'Running PDBmapper...\n')
+        spinner.start(text=' Running PDBmapper...')
+        # PDBmapper accepts single or multiple protein ids
+        # as input as well as prot ids stored in a file
+        for ids in args.ensemblid:
+            # check if input is a file
+            if isfile(ids) == "yes":
+                with open(ids) as list_ensemblids:
+                    logger.info(
+                        'Input variants file contains a list of ensembl ids to process.')
+                    # for every ensembl id
+                    for ensemblid in list_ensemblids:
+                        # remove \n from the end
+                        ensemblid = ensemblid.replace('\n', '')
+                        # run PDBmapper
+                        wrapper(ensemblid,
+                                args.intdb,
+                                args.vardb,
+                                args.out,
+                                args.pident,
+                                args.feature)
+                        continue
+
+            # input is not a file but one or more protein ids
+            # given in command line
+            elif isfile(ids) == "no":
+                # for prot id get the gene id
+                ensemblid = ids
+                # run PDBmapper
+                wrapper(ensemblid,
+                        args.intdb,
+                        args.vardb,
+                        args.out,
+                        args.pident,
+                        args.feature)
+                continue
+            else:
+                logger.error(
+                    'The input Ensembl ids provided are not in a valid format.')
+                spinner.fail(" Running PDBmapper...failed!")
+                report.write(time_format + " Running PDBmapper...failed!")
+                raise IOError
+        # Compute execution time
+        end = time.time()
+        logger.info('Done.')
+        report.write(time_format + 'Congratulations!. PDBmapper has run in ' +
+                     str(round(end-start, 2)) + 's.')
         # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',
                                  text='Congratulations!. PDBmapper has run in ' +

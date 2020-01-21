@@ -9,7 +9,7 @@ from .run_subprocess import call_subprocess
 from .logger import get_logger
 
 
-def translate_ensembl(ensid, isoform_filter, log_dir):
+def translate_ensembl(ensid, log_dir, isoform_filter=None):
     '''
     gene-protein Ensembl id translator.
 
@@ -47,7 +47,9 @@ def translate_ensembl(ensid, isoform_filter, log_dir):
             # check type of isoform
             isoform_col = cols.index("APPRIS annotation")
             isoform_class = line.split(",")[isoform_col].strip()
-            # print(isoform_col)
+            if isoform_filter is None:
+                isoform_filter = isoform_class
+            # translate ensemblid
             if isoform_class in isoform_filter:
                 if "ENSP" in ensid:
                     protID = ensid
@@ -58,6 +60,11 @@ def translate_ensembl(ensid, isoform_filter, log_dir):
                     protID = line.split(",")[prot_col].strip()
                     geneID = ensid
                     transcriptID = line.split(",")[transcript_col].strip()
+                    return {'protID': protID, 'geneID': geneID, 'transcriptID': transcriptID}
+                elif "ENST" in ensid:
+                    protID = line.split(",")[prot_col].strip()
+                    geneID = line.split(",")[gene_col].strip()
+                    transcriptID = ensid
                     return {'protID': protID, 'geneID': geneID, 'transcriptID': transcriptID}
                 # error handling
                 else:

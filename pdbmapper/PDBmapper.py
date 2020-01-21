@@ -14,11 +14,11 @@ from .explode import explode
 from .logger import get_logger
 
 
-def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, variant_type):
+def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, feature_type, varid=None):
     '''
     Map interfaces and genomic anntoated variants and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
-    another file with detailed information regarding the maped areas. 
+    another file with detailed information regarding the maped areas.
 
     Parameters
     ----------
@@ -33,23 +33,29 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, vari
     out_dir : str
         Output directory
     pident : int
-        Thershold of sequence identity (percertage). 
+        Thershold of sequence identity (percertage).
 
     Returns
     -------
     setID.File
-        txt file containing a data frame two columns corresponding to the 
+        txt file containing a data frame two columns corresponding to the
         analyzed interface id and the corresponding annotated genomic variants.
     MappedVariants.File
-        Same as setID.File but with additional information describing the 
-        interfaces and the variants. 
+        Same as setID.File but with additional information describing the
+        interfaces and the variants.
     '''
     # log file
     logger = get_logger(' PDBmapper', out_dir)
+
     # parse interfaces corresponding to the selected protein ID
     annoint = parser(protid, intdb)
+    if annoint.empty:
+        logger.error('Interfaces of protein ' +
+                     protid + 'could not be parsed.')
+        raise IOError
+    else:
+        logger.info('Interfaces of protein ' + protid + ' parsed.')
 
-    logger.info('Interfaces of protein ' + protid + 'parsed.')
     # if default database is used minor modifications are needed
     if pident is not None:
         logger.info('Filtering interfaces by pident = ' + str(pident) + '%.')
@@ -71,20 +77,41 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, vari
 
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneid, vardb)
-    logger.info('Variants file from gene id ' + geneid + 'parsed.')
+    logger.info('Variants file from gene id ' + geneid + ' parsed.')
+
     # filter by transcript ID
     annovars = annovars[annovars['Feature'] == transcritpID]
     if annovars.empty:
         raise IOError()
+
     # filter by variant type if one or more selected
-    if variant_type is not None:
+    if feature_type is not None:
         annovars = annovars[annovars['Consequence'].astype(
-            str).str.contains('|'.join(variant_type))]
-        logger.info('Filter of variants = ' + variant_type)
+            str).str.contains('|'.join(feature_type))]
+        logger.info('Filter of features = ' + feature_type)
         # if filter returns an empty df, raise error
         if annovars.empty:
             logger.error(
-                'Variants could not be filtered by variant type = ' + variant_type)
+                'Variants could not be filtered by feature type = ' + feature_type)
+            raise IOError()
+
+    # filter by variant type if one or more selected
+    if varid is not None:
+        if 'Existing_variation' in annovars.columns:
+            annovars = annovars[
+                annovars['Uploaded_variation'].astype(
+                    str).str.contains(varid) |
+                annovars['Existing_variation'].astype(
+                    str).str.contains(varid)]
+        else:
+            annovars = annovars[
+                annovars['Uploaded_variation'].astype(
+                    str).str.contains(varid)]
+        logger.info('Variant \'' + str(varid) + '\' has been selected.')
+        # if filter returns an empty df, raise error
+        if annovars.empty:
+            logger.error(
+                'Variants could not be filtered by variant id \'' + str(varid) + '\'')
             raise IOError()
 
     # for variants with high impact affecting several aminoacidic positions,
@@ -108,7 +135,7 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, vari
         if any(sub_df['end'].str.contains('\?')):
             sub_df['end'] = np.where(sub_df['end'] == '?', sub_df['start'],
                                      sub_df['end'])
-        #print(sub_df[['end', 'start']])
+        # print(sub_df[['end', 'start']])
         # create the range of numbers defined by the interval
         sub_df['Protein_position'] = sub_df.apply(lambda x: list(
             range(int(x['start']), int(x['end'])+1)), 1)

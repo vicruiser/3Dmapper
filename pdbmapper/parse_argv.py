@@ -42,61 +42,58 @@ def parse_commandline():
     parser = argparse.ArgumentParser(epilog=epilog,
                                      formatter_class=argparse.RawDescriptionHelpFormatter, description=description)
 
-    # variants db
-    parser.add_argument("-vardb", dest="vardb", metavar="<String>",
-                        help='input directory containing variants db', required=True)
-    parser.set_defaults(vardb=None)
-
-    # filter results by type of variant
-    parser.add_argument("-fv", nargs='+', dest="filter_var", metavar="<String>",
-                        help="filter by variant consequence", default=None)
-    parser.set_defaults(filter_var=None)
-
-    # filter results by isoforms
-    parser.add_argument("-fi", nargs='+', dest="filter_iso", metavar="<String>",
-                        help="filter by APPRIS isoform", default='principal1')
-    parser.set_defaults(filter_iso='principal1')
-
-    # interfaces database file
-    parser.add_argument("-force", dest="force", metavar="<String>",
-                        help="force to owerwrite? (y/n)", default="y")
-
+    # protein id, gene id or variant id
+    annovar_group = parser.add_mutually_exclusive_group(required=True)
+    annovar_group.add_argument('-ensid', nargs='+', metavar="<String>", dest="ensemblid",
+                               help='single or list of Ensembl protein/gene ids provided \
+                                    via command line or from a file')
+    annovar_group.add_argument('-varid', nargs='+', metavar="<String>", dest="varid",
+                               help='single or list of variants ids provided \
+                                    via command line or from a file')
     # interfaces database file
     parser.add_argument("-intdb", dest="intdb", metavar="<file>",
                         help="interfaces database directory", required=True)
     parser.set_defaults(intdb=None)
 
-    # interfaces database file
-    parser.add_argument("-pident", dest="pident", metavar="<int>",
-                        help="threshold of sequence identity (percertage)")
-    parser.set_defaults(pident=50)
-
-    # protein id, gene id or variant id
-    annovar_group = parser.add_mutually_exclusive_group(required=True)
-    annovar_group.add_argument('-protid', nargs='+', metavar="<String>", dest="ensemblid",
-                               help='single or multiple Ensemble protein ids provided \
-                                    in command line or file.')
-    annovar_group.add_argument('-geneid', nargs='+', metavar="<String>", dest="ensemblid",
-                               help='single or multiple Ensemble gene ids provided \
-                                    in command line or file.')
-    annovar_group.add_argument('-varid', nargs='+', metavar="<String>", dest="varid",
-                               help='single or multiple Ensemble protein ids provided \
-                                    in command line or file.')
-    #parser.add_argument("-protid", nargs='+', metavar="<String>", dest="protid",
-    #                    help="Ensembl protein id", required=True)
-
-    # create chimera script to visualize the region of interest
-    parser.add_argument("-chimera", action="store_true", dest="chimera",
-                        help="generates chimeraX script")
+    # variants db
+    parser.add_argument("-vardb", dest="vardb", metavar="<String>",
+                        help='variants database directory', required=True)
+    parser.set_defaults(vardb=None)
 
     # create default output directory
     parser.add_argument("-out", metavar="<String>", dest="out",
                         help="output directory")
     parser.set_defaults(out="./pdbmapper_results")
 
-    # create default output directory
-    parser.add_argument("-v", dest="verbose", action='store_true',
-                        default=False, help="Show progress of PDBmapper")
+    # filter results by type of variant
+    parser.add_argument("-feature", nargs='+', dest="feature", metavar="<String>",
+                        help="filter by feature type, e.g.:'missense_variant'. \
+                            The set of consequences is defined by Sequence Ontology (http://www.sequenceontology.org/).", default=None)
+    parser.set_defaults(filter_var=None)
+
+    # filter results by isoforms
+    parser.add_argument("-isoform", nargs='+', dest="isoform", metavar="<String>",
+                        help="filter by a single or a list of APPRIS isoforms. \
+                             The principal isoform is set by default. \
+                             Options are: principal1, principal2, ...")
+    parser.set_defaults(filter_iso='principal1')
+
+    # interfaces database file
+    parser.add_argument("-pident", dest="pident", metavar="<int>",
+                        help="threshold of sequence identity (percertage)")
+    parser.set_defaults(pident=50)
+
+    # force overwrite
+    parser.add_argument("-force", dest="force", metavar="<String>",
+                        help="force to owerwrite? (y/n)", default="y")
+
+    # create chimera script to visualize the region of interest
+    # parser.add_argument("-chimera", action="store_true", dest="chimera",
+    #                     help="generates chimeraX script")
+
+    # # create default output directory
+    # parser.add_argument("-v", dest="verbose", action='store_true',
+    #                     default=False, help="Show progress of PDBmapper")
 
     # store arguments into variable
     args = parser.parse_args()
