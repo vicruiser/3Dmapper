@@ -183,7 +183,7 @@ def main():
                                 # log info
                                 spinner.warn('Warning: input file', var_infile,
                                              'is neither in vep nor vcf format.')
-                                logger.warning(' Iinput file', var_infile,
+                                logger.warning(' Input file', var_infile,
                                                'is not in vep nor vcf format.')
                                 continue
 
