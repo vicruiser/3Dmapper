@@ -38,7 +38,7 @@ def detect_format(infile):
         else:
             # is vcf format
             return "vcf"
-    except:
+    except RuntimeError:
         # define the columns that must be present in the VEP file.
         vep_header = set(['#Uploaded_variation',
                           'Gene',

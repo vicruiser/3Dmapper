@@ -44,30 +44,33 @@ def parse_commandline():
 
     # vcf file
     annovar_group = parser.add_mutually_exclusive_group(required=True)
-    annovar_group.add_argument('-vcf', nargs='+', metavar="<String>", dest="vcf",
+    annovar_group.add_argument('--vcf', nargs='+', metavar="<String>", dest="vcf",
                                help='input directory containing single or \
                                     multiple annotated variants files (vcf)')
-    annovar_group.add_argument("-vep",   metavar="<file>",  dest="vep",
+    annovar_group.add_argument("--vep",   metavar="<file>",  dest="vep",
                                help="default VEP input")
-    annovar_group.add_argument("-maf", nargs='+', metavar="<String>", dest="maf",
+    annovar_group.add_argument("--maf", nargs='+', metavar="<String>", dest="maf",
                                help="annotated variant file in MAF format.")
-    annovar_group.add_argument("-varmap", action='store_true', dest="varmap",
+    annovar_group.add_argument("--varmap", action='store_true', dest="varmap",
                                help="use ClinVar db of annotated variants",
                                default="varmap")
     #parser.set_defaults(annovar = "varmap")
 
     # force orverwrite files
-    parser.add_argument("-force", dest="force", metavar="<String>",
+    parser.add_argument("--force", dest="force", metavar="<String>",
                         help="force to owerwrite? (y/n)", default="y")
 
     # create default output directory
-    parser.add_argument("-out", metavar="<String>", dest="out",
+    parser.add_argument("--out", metavar="<String>", dest="out",
                         help="output directory")
     parser.set_defaults(out=".")
 
     # create default output directory
-    parser.add_argument("-v", dest="verbose", action='store_true',
-                        default=False, help="Show progress of PDBmapper")
+    parser.add_argument("--parallel", dest="parallel", action='store_true',
+                        default=False,
+                        help="Speed up running time. Depends on GNU Parallel. \
+                        O. Tange(2011): GNU Parallel - The Command-Line Power Tool, \
+                        login: The USENIX Magazine, February 2011: 42-47.")
 
     # store arguments into variable
     args = parser.parse_args()

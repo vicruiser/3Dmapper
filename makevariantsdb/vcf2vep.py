@@ -11,7 +11,7 @@ from .logger import get_logger
 
 
 # define request function to avoid repeating code
-def request(input_file, out_dir, out_file, log_dir):
+def request(input_file, out_dir, out_file, log_dir, parallel=False):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -41,8 +41,19 @@ def request(input_file, out_dir, out_file, log_dir):
 %CHROM:%POS %Allele %Gene %Feature %Feature_type %Consequence %cDNA_position \
 %CDS_position %Protein_position %Amino_acids %Codons %Existing_variation\\n' \
 -A tab -d"
+
+    bcftools_parallel = "parallel --pipe -q bcftools \
++split-vep {} \
+-o {} \
+-f '%CHROM\_%POS\_%REF\/%ALT \
+%CHROM:%POS %Allele %Gene %Feature %Feature_type %Consequence %cDNA_position \
+%CDS_position %Protein_position %Amino_acids %Codons %Existing_variation\\n' \
+-A tab -d"
     # add input variables to command line
-    cmd = bcftools.format(input_file, out_file)
+    if parallel is True:
+        cmd = bcftools_parallel.format(input_file, out_file)
+    else:
+        cmd = bcftools.format(input_file, out_file)
     # log file
     logger = get_logger('vcf2vep', log_dir)
     logger.info('Using bcftools to convert vcf file to vep format.')

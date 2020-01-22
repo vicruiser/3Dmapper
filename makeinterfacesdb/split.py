@@ -21,8 +21,18 @@ awk -v ci=\"{}\" \
 {{p[$ci]; print h > f}} \
 {{print >> f; close(f)}}'"
 
+split_cmd_parallel = "grep -v '##' {} | \
+sed -e '1s/^#//' | parallel --pipe -q \
+awk -v ci=\"{}\" \
+-v od=\"{}/\" \
+-F ' ' 'NR==1 \
+{{h=$0; next}} \
+{{f=od$ci\".{}\"}} !($ci in p) \
+{{p[$ci]; print h > f}} \
+{{print >> f; close(f)}}'"
 
-def request(prefix, input_file, out_dir, out_extension, log_dir):
+
+def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -93,7 +103,7 @@ def request(prefix, input_file, out_dir, out_extension, log_dir):
       text_succeed="Split file by selected ensembl id...done.",
       text_fail="Split file by selected ensembl id...failed!",
       emoji="\U00002702")
-def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir):
+def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, parallel=False):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -121,6 +131,7 @@ def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir):
     if any(f.endswith("." + out_extension) for f in os.listdir(out_dir)):
 
         if overwrite.lower() == 'y':
-            request(prefix, input_file, out_dir, out_extension, log_dir)
+            request(prefix, input_file, out_dir,
+                    out_extension, log_dir, parallel)
     else:
-        request(prefix, input_file, out_dir, out_extension, log_dir)
+        request(prefix, input_file, out_dir, out_extension, log_dir, parallel)

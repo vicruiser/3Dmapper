@@ -38,39 +38,40 @@ from .input_isfile import isfile
 
 class generateVarDB:
 
-    def vcf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir):
+    def vcf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir, parallel=False):
 
         # from vcf to vep
         vcf2vep(var_infile, out_dir,
-                out_file, overwrite, log_dir)
+                out_file, overwrite, log_dir, parallel)
         # add header to resulting vep file
         add_header(out_file)
 
         # split vep file by protein id to speed up the
         # mapping process
         split('ENSG', out_file, vardb_outdir,
-              'vep', overwrite, log_dir)
+              'vep', overwrite, log_dir, parallel)
 
-    def vep(self, var_infile, vardb_outdir, overwrite, log_dir):
+    def vep(self, var_infile, vardb_outdir, overwrite, log_dir, parallel=False):
 
         # split vep file by protein id to speed up the
         # mapping process
         split('ENSG', var_infile, vardb_outdir,
-              'vep', overwrite, log_dir)
+              'vep', overwrite, log_dir, parallel)
 
-    def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir):
+    def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir, parallel=False):
         # from vcf to vep
         maf2vep(var_infile, out_dir,
                 out_file, overwrite, log_dir)
         # split vep file by protein id to speed up the
         # mapping process
         split('ENSG', out_file, vardb_outdir,
-              'vep', overwrite, log_dir)
+              'vep', overwrite, log_dir, parallel)
 
 
 def main():
     # parse command line options
     args = parse_commandline()
+
     # aesthetics
     description = '''
 
@@ -132,6 +133,7 @@ def main():
     # set up a log file
     logger = get_logger('main', out_dir)
     log_dir = out_dir
+    # spinner.start(text=' Running makevariantsdb...')
     start = time.time()
 
     # change input format if file doesn't exists or overwrite is True
@@ -161,7 +163,7 @@ def main():
                                         'Input file' + var_infile + ' is in .vcf format.')
                                     # split vcf file
                                     varfile.vcf(var_infile, out_dir,
-                                                out_file, vardb_outdir, args.force, log_dir)
+                                                out_file, vardb_outdir, args.force, log_dir, args.parallel)
                                     # log info
                                     logger.info(
                                         var_infile + ' has been splitted.')
@@ -175,7 +177,7 @@ def main():
                                     # split vep file by protein id to speed up the
                                     # mapping process
                                     varfile.vep(
-                                        var_infile, vardb_outdir, args.force, log_dir)
+                                        var_infile, vardb_outdir, args.force, log_dir, args.parallel)
                                     # log info
                                     logger.info(
                                         var_infile + ' has been splitted.')
@@ -195,8 +197,10 @@ def main():
                     if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
                         logger.info(
                             'Input file is a single file. Starting splitting process.')
+
                         # detect the format of the vcf file(s), either .vcf or .vep
                         input_format = detect_format(f)
+
                         # If vcf transform into vep format and split
                         if input_format == "vcf":
                             # change input format if file doesn't exists or overwrite is True
@@ -206,7 +210,7 @@ def main():
                                             ' is in .vcf format.')
                                 # split vcf file
                                 varfile.vcf(f, out_dir,
-                                            out_file, vardb_outdir, args.force, log_dir)
+                                            out_file, vardb_outdir, args.force, log_dir, args.parallel)
                                 # log info
                                 logger.info(
                                     f + ' has been splitted.')
@@ -223,7 +227,7 @@ def main():
                                 # split vep file by protein id to speed up the
                                 # mapping process
                                 varfile.vep(f, vardb_outdir,
-                                            args.force, log_dir)
+                                            args.force, log_dir, args.parallel)
                                 # log info
                                 logger.info(
                                     f + ' has been splitted.')
@@ -263,7 +267,7 @@ def main():
                             if os.path.isfile(out_file) is False or args.force.lower() == 'y':
                                 # split MAF file
                                 varfile.maf(var_infile, out_dir,
-                                            out_file, vardb_outdir, args.force, log_dir)
+                                            out_file, vardb_outdir, args.force, log_dir, args.parallel)
                                 # log info
                                 logger.info('File has been splitted.')
                                 report.write(
@@ -278,7 +282,7 @@ def main():
                     if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
                         # split MAF file
                         varfile.maf(f, out_dir,
-                                    out_file, vardb_outdir, args.force, log_dir)
+                                    out_file, vardb_outdir, args.force, log_dir, args.parallel)
                         # log info
                         logger.info('File has been splitted.')
                         report.write(
@@ -314,3 +318,7 @@ def main():
         time_format + 'Generation of genomic variants DB in ' +
         vardb_outdir + ' took ' + str(round(end-start, 2)) + 's\n')
     report.close()
+    # print in console result
+    spinner.stop_and_persist(symbol='\U0001F4CD',
+                             text=' makevariantsdb is done. in ' +
+                             str(round(end-start, 2)) + 's.')

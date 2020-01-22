@@ -14,6 +14,7 @@ import os.path
 
 import pandas as pd
 import numpy as np
+import multiprocessing as mp
 
 from halo import Halo
 from timeit import default_timer as timer
@@ -30,7 +31,7 @@ from .run_subprocess import call_subprocess
 from .pdbmapper_wrapper import wrapper
 
 pd.options.mode.chained_assignment = None
-
+print("Number of processors: ", mp.cpu_count())
 
 # define main function
 
@@ -42,10 +43,10 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\ 
-    $$  __$$\ $$  __$$\ $$  __$$\ 
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
+    $$$$$$$\  $$$$$$$\  $$$$$$$\
+    $$  __$$\ $$  __$$\ $$  __$$\
+    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -105,13 +106,20 @@ def main():
     report.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
     report.write(time_format + out_message + '\n')
 
-    # # create chimera scripts:
-    # if args.chimera is not None:
-    #     # chimera()
-    #     pass
+    # if parallel is True
+    if args.parallel is True:
+        pool = mp.Pool(mp.cpu_count()-1)
 
-    # run PDBmapper
-    if args.varid:
+        # results = pool.map(howmany_within_range_rowonly, [row for row in data])
+        # pool.close()
+
+   # # create chimera scripts:
+   # if args.chimera is not None:
+   #     # chimera()
+   #     pass
+
+   # run PDBmapper
+   if args.varid:
         # execute main function and compute executiong time
         start = time.time()
         logger.info('Running PDBmapper...')

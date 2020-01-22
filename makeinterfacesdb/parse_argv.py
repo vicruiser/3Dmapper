@@ -41,25 +41,24 @@ def parse_commandline():
     # innit parser
     parser = argparse.ArgumentParser(epilog=epilog,
                                      formatter_class=argparse.RawDescriptionHelpFormatter, description=description)
-
     # interfaces database file
-    parser.add_argument("-force", dest="force", metavar="<String>",
-                        help="force to owerwrite? (y/n)", default="y")
-
-    # interfaces database file
-    parser.add_argument("-intdb", nargs='+', metavar="<String>",
+    parser.add_argument("--intdb", nargs='+', metavar="<String>",
                         help="interfaces database directory", required=True)
     parser.set_defaults(intdb=None)
 
     # create default output directory
-    parser.add_argument("-out", metavar="<String>", dest="out",
+    parser.add_argument("--out", metavar="<String>", dest="out",
                         help="output directory")
     parser.set_defaults(out=".")
-
-    # create default output directory
-    parser.add_argument("-v", dest="verbose", action='store_true',
-                        default=False, help="Show progress of PDBmapper")
-
+    # interfaces database file
+    parser.add_argument("--force", dest="force", metavar="<String>",
+                        help="force to owerwrite? (y/n)", default="y")
+    # run in parallel
+    parser.add_argument("--parallel", dest="parallel", action='store_true',
+                        default=False,
+                        help="Speed up running time. Depends on GNU Parallel. \
+                        O. Tange(2011): GNU Parallel - The Command-Line Power Tool, \
+                        login: The USENIX Magazine, February 2011: 42-47.")
     # store arguments into variable
     args = parser.parse_args()
 
