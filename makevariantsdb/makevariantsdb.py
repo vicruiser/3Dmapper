@@ -71,7 +71,6 @@ class generateVarDB:
 def main():
     # parse command line options
     args = parse_commandline()
-
     # aesthetics
     description = '''
 
@@ -219,6 +218,7 @@ def main():
 
                         # If vep, only split
                         elif input_format == "vep":
+                            print("HOLA K ASE")
                             # split if empty dir or overwrite is True
                             if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
                                 # log info

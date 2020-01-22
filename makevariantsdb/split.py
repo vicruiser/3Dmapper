@@ -20,23 +20,27 @@ split_cmd = "grep -v '##' {} | \
 sed -e '1s/^#//' | \
 awk -v ci=\"{}\" \
 -v od=\"{}/\" \
--F ' ' 'NR==1 {{h=$0; next}} \
-{{f=od$ci\".{}\"}} \
-!($ci in p) {{p[$ci]}} \
-system(\" stat \" f \" > /dev/null 2> /dev/null\") != 0 {{print h > f }} \
-{{print >> f; close(f)}}'"
+-F ' ' 'NR==1 {{h=$0; next}}; \
+!seen[$ci]++{{f=od$ci\".{}\"; print h >> f}}; \
+{{f=od$ci\".{}\"; print >> f; close(f)}}'"
 
 split_cmd_parallel = "grep -v '##' {} | \
-sed -e '1s/^#//' | parallel --pipe -q \
+sed -e '1s/^#//' | parallel --citation --pipe -q \
 awk -v ci=\"{}\" \
 -v od=\"{}/\" \
--F ' ' 'NR==1 {{h=$0; next}} \
-{{f=od$ci\".{}\"}} \
-!($ci in p) {{p[$ci]}} \
-system(\" stat \" f \" > /dev/null 2> /dev/null\") != 0 {{print h > f }} \
-{{print >> f; close(f)}}'"
+-F ' ' 'NR==1 {{h=$0; next}}; \
+!seen[$ci]++{{f=od$ci\".{}\"; print h >> f}}; \
+{{f=od$ci\".{}\"; print >> f; close(f)}}'"
 
-index_file = "awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' {} >> {}  "
+# \
+#!($ci in p) {{p[$ci]}} \
+# system(\" stat \" f \" > /dev/null 2> /dev/null\") != 0 {{print h > f }} \
+# {{print >> f; close(f)}}'"
+
+# grep - v '##' ../data/ukb_wes_dec2019_chr.vep | sed - e '1s/^#//' | \
+#    awk - v ci = "4" - v od = "./" - F ' ' 'NR==1 {h=$0; next}; !seen[$ci]++{f=od$ci".{}"; print h >> f }; {f=od$ci".vep"; print >> f; close(f)}'
+
+index_file = "grep -v '##' {} | awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' >> {} "
 #index_file = "awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' {} | uniq >> {}  "
 
 # - grep -v '##': remove lines starting with ##
@@ -134,12 +138,12 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
         # command to split files
         if parallel is True:
             cmd4 = split_cmd_parallel.format(
-                input_file, col_index_geneid, out_dir, out_extension)
+                input_file, col_index_geneid, out_dir, out_extension, out_extension)
 
         else:
             cmd4 = split_cmd.format(
-                input_file, col_index_geneid, out_dir, out_extension)
-
+                input_file, col_index_geneid, out_dir, out_extension, out_extension)
+        print(cmd4)
         # register process
         out4, err4 = call_subprocess(cmd4)
         # error handling
@@ -150,12 +154,14 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
             raise IOError()
 
         # create index file
-        cmd5 = index_file.format(col_index_varid,
+        cmd5 = index_file.format(input_file,
+                                 col_index_varid,
                                  col_index_geneid,
                                  col_index_transcriptid,
                                  col_index_namevarid,
-                                 input_file,
                                  os.path.join(out_dir, 'variants.index'))
+
+        print(cmd5)
         # register process
         out5, err5 = call_subprocess(cmd5)
         # error handling
