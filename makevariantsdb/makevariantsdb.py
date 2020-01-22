@@ -79,7 +79,7 @@ def main():
     $$$$$$$\  $$$$$$$\  $$$$$$$\ 
     $$  __$$\ $$  __$$\ $$  __$$\ 
     $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\  
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -199,7 +199,6 @@ def main():
 
                         # detect the format of the vcf file(s), either .vcf or .vep
                         input_format = detect_format(f)
-
                         # If vcf transform into vep format and split
                         if input_format == "vcf":
                             # change input format if file doesn't exists or overwrite is True
@@ -218,7 +217,6 @@ def main():
 
                         # If vep, only split
                         elif input_format == "vep":
-                            print("HOLA K ASE")
                             # split if empty dir or overwrite is True
                             if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
                                 # log info

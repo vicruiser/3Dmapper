@@ -31,7 +31,7 @@ from .run_subprocess import call_subprocess
 from .pdbmapper_wrapper import wrapper
 
 pd.options.mode.chained_assignment = None
-print("Number of processors: ", mp.cpu_count())
+#print("Number of processors: ", mp.cpu_count())
 
 # define main function
 
@@ -43,10 +43,10 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\
-    $$  __$$\ $$  __$$\ $$  __$$\
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\
+    $$$$$$$\  $$$$$$$\  $$$$$$$\    
+    $$  __$$\ $$  __$$\ $$  __$$\    
+    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -119,7 +119,7 @@ def main():
    #     pass
 
    # run PDBmapper
-   if args.varid:
+    if args.varid:
         # execute main function and compute executiong time
         start = time.time()
         logger.info('Running PDBmapper...')

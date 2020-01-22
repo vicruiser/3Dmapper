@@ -15,21 +15,17 @@ split_cmd = "grep -v '##' {} | \
 sed -e '1s/^#//' | \
 awk -v ci=\"{}\" \
 -v od=\"{}/\" \
--F ' ' 'NR==1 \
-{{h=$0; next}} \
-{{f=od$ci\".{}\"}} !($ci in p) \
-{{p[$ci]; print h > f}} \
-{{print >> f; close(f)}}'"
+-F ' ' 'NR==1 {{h=$0; next}}; \
+!seen[$ci]++{{f=od$ci\".{}\"; print h >> f}}; \
+{{f=od$ci\".{}\"; print >> f; close(f)}}'"
 
 split_cmd_parallel = "grep -v '##' {} | \
-sed -e '1s/^#//' | parallel --pipe -q \
+sed -e '1s/^#//' | parallel --citation --pipe -q \
 awk -v ci=\"{}\" \
 -v od=\"{}/\" \
--F ' ' 'NR==1 \
-{{h=$0; next}} \
-{{f=od$ci\".{}\"}} !($ci in p) \
-{{p[$ci]; print h > f}} \
-{{print >> f; close(f)}}'"
+-F ' ' 'NR==1 {{h=$0; next}}; \
+!seen[$ci]++{{f=od$ci\".{}\"; print h >> f}}; \
+{{f=od$ci\".{}\"; print >> f; close(f)}}'"
 
 
 def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False):
@@ -79,7 +75,8 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
         log2.write('Splitting file...\n')
         log2.flush()
         # Second command
-        cmd2 = split_cmd.format(input_file, col_index, out_dir, out_extension)
+        cmd2 = split_cmd.format(input_file, col_index,
+                                out_dir, out_extension, out_extension)
         # register process
         p2 = subprocess.Popen(cmd2,
                               stdout=subprocess.PIPE,

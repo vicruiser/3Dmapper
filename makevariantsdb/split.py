@@ -143,7 +143,6 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
         else:
             cmd4 = split_cmd.format(
                 input_file, col_index_geneid, out_dir, out_extension, out_extension)
-        print(cmd4)
         # register process
         out4, err4 = call_subprocess(cmd4)
         # error handling
@@ -161,7 +160,6 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
                                  col_index_namevarid,
                                  os.path.join(out_dir, 'variants.index'))
 
-        print(cmd5)
         # register process
         out5, err5 = call_subprocess(cmd5)
         # error handling
