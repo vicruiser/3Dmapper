@@ -11,6 +11,7 @@ import subprocess
 import vcfpy
 import time
 import os.path
+import datetime
 
 import pandas as pd
 import numpy as np
@@ -27,16 +28,49 @@ from .logger import get_logger
 from .input_isfile import isfile
 
 
+class generateIntDB:
+    def stats(int_infile, intdb_outdir):
+        # count after transforming to vep format the total number
+        # of input interfaces, number of genes, etc
+
+        # number of interfaces
+        n_int_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | uniq | wc -l"
+        n_int, err1 = call_subprocess(
+            n_int_cmd).format(int_infile)
+
+        # number of proteins: count total number of splitted files
+        n_prot_cmd = "wc -l {}"
+        n_prot, err2 = call_subprocess(n_prot_cmd(intdb_outdir))
+
+        # number of interfaces ligand
+        n_int_ligand_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'ligand' | uniq | wc -l"
+        n_int_ligand, err3 = call_subprocess(
+            n_int_ligand_cmd).format(int_infile)
+
+        # number of interfaces protein
+        n_int_prot_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'protein' | uniq | wc -l"
+        n_int_prot, err3 = call_subprocess(
+            n_int_prot_cmd).format(int_infile)
+
+        # number of interfaces nucleic
+        n_int_nucleic_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'nucleic' | uniq | wc -l"
+        n_int_nucleic, err3 = call_subprocess(
+            n_int_nucleic_cmd).format(int_infile)
+
+        return n_int.decode('utf-8'), n_prot.decode('utf-8'), n_int_ligand.decode('utf-8'),
+        n_int_prot.decode('utf-8'), n_int_nucleic.decode('utf-8')
+
+
 def main():
     # aesthetics
     description = '''
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\   
-    $$  __$$\ $$  __$$\ $$  __$$\     
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
+    $$$$$$$\  $$$$$$$\  $$$$$$$\
+    $$  __$$\ $$  __$$\ $$  __$$\
+    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -51,8 +85,8 @@ def main():
 
     epilog = \
         '''
-          -------------------------------------------------------------------------        
-         |  Copyright (c) 2019 Victoria Ruiz --                                    |  
+          -------------------------------------------------------------------------
+         |  Copyright (c) 2019 Victoria Ruiz --                                    |
          |  vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
           -------------------------------------------------------------------------
 
@@ -64,6 +98,9 @@ def main():
     spinner = Halo(text='Loading', spinner='dots12', color="red")
     # parse command line options
     args = parse_commandline()
+
+    # initialize class
+    intdb_file = generateIntDB()
 
     # set out dir and out file names
     # created by default
@@ -80,7 +117,7 @@ def main():
     report.write(description)
     report.write(epilog)
     report.write('''
-    Command line input: 
+    Command line input:
     -------------------
     \n''')
     report.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
@@ -108,6 +145,8 @@ def main():
                         # split interface db
                         split('ENSP', int_infile, intdb_outdir,
                               'txt', args.force, log_dir)
+                        n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = intdb_file.stats(
+                            int_infile, intdb_outdir)
                         # log info
                         logger.info(
                             int_infile + ' has been splitted successfully.')
@@ -116,6 +155,8 @@ def main():
                 # split interface db
                 split('ENSP', f, intdb_outdir,
                       'txt', args.force, log_dir)
+                n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = intdb_file.stats(
+                    f, intdb_outdir)
                 # log info
                 logger.info(
                     f + ' has been splitted successfully.')
@@ -129,5 +170,16 @@ def main():
             report.write(
                 time_format + 'Reading and splitting input file...done. \n')
             report.write(
-                time_format + 'Generation of interfaces DB in ' + intdb_outdir + ' took ' + str(round(end-start, 2)) + 's\n')
+                time_format + 'Generation of interfaces DB in ' + intdb_outdir + ' took ' +
+                str(datetime.timedelta(seconds=end-start)) + 's\n')
+            report.write(('''
+
+                 Stats
+                 -----
+                  - Total number of input interfaces ids: {}
+                  - Total number of corresponding proteins (total number of splitted files): {}
+                  - Total number of interfaces of type ligand: {}
+                  - Total number of interfaces of type protein: {}
+                  - Total number of interfaces of type nucleic: {}
+                 ''').format(str(n_int), str(n_prot), str(n_int_ligand), str(n_int_prot), str(n_int_nucleic))
             report.close()

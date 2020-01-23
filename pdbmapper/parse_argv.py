@@ -66,8 +66,8 @@ def parse_commandline():
     parser.set_defaults(out="./pdbmapper_results")
 
     # filter results by type of variant
-    parser.add_argument("--feature", nargs='+', dest="feature", metavar="<String>",
-                        help="filter by feature type, e.g.:'missense_variant'. \
+    parser.add_argument("--consequence", nargs='+', dest="consequence", metavar="<String>",
+                        help="filter by consequence type, e.g.:'missense_variant'. \
                             The set of consequences is defined by Sequence Ontology (http://www.sequenceontology.org/).", default=None)
     parser.set_defaults(filter_var=None)
 

@@ -14,7 +14,7 @@ from .explode import explode
 from .logger import get_logger
 
 
-def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, feature_type, varid=None):
+def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, consequence, varid=None):
     '''
     Map interfaces and genomic anntoated variants and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
@@ -77,7 +77,7 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, feat
 
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneid, vardb)
-    logger.info('Variants file from gene id ' + geneid + ' parsed.')
+    logger.info('Variants file from gene id ' + geneid + ' parsed.')consequence
 
     # filter by transcript ID
     annovars = annovars[annovars['Feature'] == transcritpID]
@@ -85,14 +85,14 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, feat
         raise IOError()
 
     # filter by variant type if one or more selected
-    if feature_type is not None:
+    if consequence is not None:
         annovars = annovars[annovars['Consequence'].astype(
-            str).str.contains('|'.join(feature_type))]
-        logger.info('Filter of features = ' + feature_type)
+            str).str.contains('|'.join(consequence))]
+        logger.info('Filter of features = ' + consequence)
         # if filter returns an empty df, raise error
         if annovars.empty:
             logger.error(
-                'Variants could not be filtered by feature type = ' + feature_type)
+                'Variants could not be filtered by feature type = ' + consequence)
             raise IOError()
 
     # filter by variant type if one or more selected

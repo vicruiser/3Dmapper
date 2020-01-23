@@ -11,6 +11,7 @@ import subprocess
 import vcfpy
 import time
 import logging
+import datetime
 
 import os.path as path
 import pandas as pd
@@ -20,6 +21,7 @@ from halo import Halo
 from timeit import default_timer as timer
 from subprocess import call
 from multiprocessing import Pool
+from memory_profiler import memory_usage
 
 # import functions from scripts
 from .parse_argv import parse_commandline
@@ -32,6 +34,7 @@ from .add_header import add_header
 from .decorator import tags
 from .logger import get_logger
 from .input_isfile import isfile
+from .run_subprocess import call_subprocess
 
 # num_cpus = psutil.cpu_count(logical=False)
 
@@ -67,6 +70,24 @@ class generateVarDB:
         split('ENSG', out_file, vardb_outdir,
               'vep', overwrite, log_dir, parallel)
 
+    def stats(self, var_infile, vardb_outdir):
+        # count after transforming to vep format the total number
+        # of input variants, number of genes, etc
+
+        # number of variants: assuming that they are stored in the first column
+        n_variants_cmd = "awk '{{print $1}}' {} | uniq | wc -l"
+        n_variants, err1 = call_subprocess(n_variants_cmd).format(var_infile)
+
+        # number of genes: count total number of splitted files
+        n_genes_cmd = "wc -l {}"
+        n_genes, err2 = call_subprocess(n_genes_cmd(vardb_outdir))
+
+        # number of variants: assuming that they are stored in the first column
+        n_features_cmd = "awk '{{print $5}}' {} | uniq | wc -l"
+        n_features, err3 = call_subprocess(n_features_cmd).format(var_infile)
+
+        return n_variants.decode('utf-8'), n_genes.decode('utf-8'), n_features.decode('utf-8')
+
 
 def main():
     # parse command line options
@@ -79,7 +100,7 @@ def main():
     $$$$$$$\  $$$$$$$\  $$$$$$$\ 
     $$  __$$\ $$  __$$\ $$  __$$\ 
     $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\  
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -163,6 +184,9 @@ def main():
                                     # split vcf file
                                     varfile.vcf(var_infile, out_dir,
                                                 out_file, vardb_outdir, args.force, log_dir, args.parallel)
+                                    # report stats
+                                    n_variants, n_genes, n_features = varfile.stats(
+                                        var_infile, vardb_outdir)
                                     # log info
                                     logger.info(
                                         var_infile + ' has been splitted.')
@@ -177,6 +201,9 @@ def main():
                                     # mapping process
                                     varfile.vep(
                                         var_infile, vardb_outdir, args.force, log_dir, args.parallel)
+                                    # report stats
+                                    n_variants, n_genes, n_features = varfile.stats(
+                                        var_infile, vardb_outdir)
                                     # log info
                                     logger.info(
                                         var_infile + ' has been splitted.')
@@ -209,6 +236,9 @@ def main():
                                 # split vcf file
                                 varfile.vcf(f, out_dir,
                                             out_file, vardb_outdir, args.force, log_dir, args.parallel)
+                                # report stats
+                                n_variants, n_genes, n_features = varfile.stats(
+                                    f, vardb_outdir)
                                 # log info
                                 logger.info(
                                     f + ' has been splitted.')
@@ -226,6 +256,9 @@ def main():
                                 # mapping process
                                 varfile.vep(f, vardb_outdir,
                                             args.force, log_dir, args.parallel)
+                                # report stats
+                                n_variants, n_genes, n_features = varfile.stats(
+                                    f, vardb_outdir)
                                 # log info
                                 logger.info(
                                     f + ' has been splitted.')
@@ -266,6 +299,9 @@ def main():
                                 # split MAF file
                                 varfile.maf(var_infile, out_dir,
                                             out_file, vardb_outdir, args.force, log_dir, args.parallel)
+                                # report stats
+                                n_variants, n_genes, n_features = varfile.stats(
+                                    var_infile, vardb_outdir)
                                 # log info
                                 logger.info('File has been splitted.')
                                 report.write(
@@ -281,6 +317,9 @@ def main():
                         # split MAF file
                         varfile.maf(f, out_dir,
                                     out_file, vardb_outdir, args.force, log_dir, args.parallel)
+                        # report stats
+                        n_variants, n_genes, n_features = varfile.stats(
+                            f, vardb_outdir)
                         # log info
                         logger.info('File has been splitted.')
                         report.write(
@@ -314,9 +353,22 @@ def main():
     end = time.time()
     report.write(
         time_format + 'Generation of genomic variants DB in ' +
-        vardb_outdir + ' took ' + str(round(end-start, 2)) + 's\n')
+        vardb_outdir + ' took ' + str(datetime.timedelta(seconds=end-start)) + '\n')
+    report.write(('''
+                  
+                 Stats
+                 -----
+                  - Total number of input variants: {}
+                  - Total number of corresponding genes (total number of splitted files): {}
+                  - Total number of corresponding features: {}
+                 ''').format(str(n_variants), str(n_genes), str(n_features)))
+
+    #mem_usage = memory_usage(f)
+    #print('Memory usage (in chunks of .1 seconds): %s' % mem_usage)
+    #print('Maximum memory usage: %s' % max(mem_usage))
+
     report.close()
     # print in console result
     spinner.stop_and_persist(symbol='\U0001F4CD',
-                             text=' makevariantsdb is done. in ' +
-                             str(round(end-start, 2)) + 's.')
+                             text=' makevariantsdb process finished in ' +
+                             str(datetime.timedelta(seconds=end-start)) + '.')

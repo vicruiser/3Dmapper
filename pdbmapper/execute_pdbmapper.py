@@ -36,6 +36,14 @@ pd.options.mode.chained_assignment = None
 # define main function
 
 
+class PDBmapper:
+
+    def run():
+    def run_in_parallel():
+
+    def stats():
+
+
 def main():
 
     # aesthetics
@@ -149,7 +157,7 @@ def main():
                                     args.vardb,
                                     args.out,
                                     args.pident,
-                                    args.feature,
+                                    args.consequence,
                                     id)
                         else:
                             logger.error(
@@ -172,7 +180,7 @@ def main():
                             args.vardb,
                             args.out,
                             args.pident,
-                            args.feature,
+                            args.consequence,
                             id)
                 else:
                     logger.error(
@@ -219,7 +227,7 @@ def main():
                                 args.vardb,
                                 args.out,
                                 args.pident,
-                                args.feature)
+                                args.consequence)
                         continue
 
             # input is not a file but one or more protein ids
@@ -233,7 +241,7 @@ def main():
                         args.vardb,
                         args.out,
                         args.pident,
-                        args.feature)
+                        args.consequence)
                 continue
             else:
                 logger.error(
