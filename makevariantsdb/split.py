@@ -206,7 +206,7 @@ def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, parall
     # execute request function
     if any(f.endswith("." + out_extension) for f in os.listdir(out_dir)):
 
-        if overwrite.lower() == 'y':
+        if overwrite is True:
             request(prefix, input_file, out_dir,
                     out_extension, log_dir, parallel)
 

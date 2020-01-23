@@ -41,18 +41,50 @@ from .run_subprocess import call_subprocess
 
 class generateVarDB:
 
-    def vcf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir, parallel=False):
+    time = '[' + time.ctime(time.time()) + '] '
+
+    def log(self, message, report, logger):
+
+        logger.info(message)
+        report.write(self.time + message + '\n')
+
+    def stats(self, var_infile, vardb_outdir):
+            # count after transforming to vep format the total number
+            # of input variants, number of genes, etc
+
+            # number of variants: assuming that they are stored in the first column
+        n_variants_cmd = "awk '{{print $1}}' {} | uniq | wc -l"
+        n_variants, err1 = call_subprocess(n_variants_cmd.format(var_infile))
+
+        # number of genes: count total number of splitted files
+        n_genes_cmd = "ls {} | wc -l"
+        n_genes, err2 = call_subprocess(n_genes_cmd.format(vardb_outdir))
+
+        # number of variants: assuming that they are stored in the first column
+        n_features_cmd = "awk '{{print $5}}' {} | uniq | wc -l"
+        n_features, err3 = call_subprocess(n_features_cmd.format(var_infile))
+
+        n_variants, n_genes, n_features = n_variants.decode(
+            'utf-8'), n_genes.decode('utf-8'), n_features.decode('utf-8')
+
+        stats_message = ('''
+
+        Stats
+        -----
+         - Total number of input variants: {}
+         - Total number of corresponding genes (total number of splitted files): {}
+         - Total number of corresponding features: {}
+                 ''').format(str(n_variants), str(n_genes), str(n_features))
+
+        return stats_message
+
+    def vcf(self, var_infile, out_dir, out_file, overwrite, log_dir, parallel=False):
 
         # from vcf to vep
         vcf2vep(var_infile, out_dir,
                 out_file, overwrite, log_dir, parallel)
         # add header to resulting vep file
         add_header(out_file)
-
-        # split vep file by protein id to speed up the
-        # mapping process
-        split('ENSG', out_file, vardb_outdir,
-              'vep', overwrite, log_dir, parallel)
 
     def vep(self, var_infile, vardb_outdir, overwrite, log_dir, parallel=False):
 
@@ -61,32 +93,75 @@ class generateVarDB:
         split('ENSG', var_infile, vardb_outdir,
               'vep', overwrite, log_dir, parallel)
 
-    def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir, parallel=False):
+    def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir, report, logger, parallel=False):
         # from vcf to vep
         maf2vep(var_infile, out_dir,
                 out_file, overwrite, log_dir)
         # split vep file by protein id to speed up the
         # mapping process
-        split('ENSG', out_file, vardb_outdir,
-              'vep', overwrite, log_dir, parallel)
+        var_infile = out_file
 
-    def stats(self, var_infile, vardb_outdir):
-        # count after transforming to vep format the total number
-        # of input variants, number of genes, etc
+        self.vep(
+            var_infile, vardb_outdir, overwrite, log_dir, parallel)
 
-        # number of variants: assuming that they are stored in the first column
-        n_variants_cmd = "awk '{{print $1}}' {} | uniq | wc -l"
-        n_variants, err1 = call_subprocess(n_variants_cmd).format(var_infile)
+        # logging
+        self.log('Splitting process is done. Calculating stats info...',
+                 report, logger)
+        # report stats
+        stats_message = self.stats(
+            var_infile, vardb_outdir)
+        # log info
+        self.log('Calculating stats info...done.',
+                 report, logger)
 
-        # number of genes: count total number of splitted files
-        n_genes_cmd = "wc -l {}"
-        n_genes, err2 = call_subprocess(n_genes_cmd(vardb_outdir))
+        return stats_message
 
-        # number of variants: assuming that they are stored in the first column
-        n_features_cmd = "awk '{{print $5}}' {} | uniq | wc -l"
-        n_features, err3 = call_subprocess(n_features_cmd).format(var_infile)
+    def wrapper(self, input_format, var_infile, out, log_dir,
+                report, logger, spinner, overwrite=False, parallel=False):
 
-        return n_variants.decode('utf-8'), n_genes.decode('utf-8'), n_features.decode('utf-8')
+         # created by default
+        out_dir = os.path.join(out, 'DBs')
+        out_file = os.path.join(
+            out_dir, 'variants.vep')  # created by default
+        # set output dir to split vep
+        vardb_outdir = os.path.join(out_dir, 'varDB')  # created by default
+
+        # If vcf transform into vep format and split
+        if input_format == "vcf" or input_format == "vep":
+            # change input format if file doesn't exists or overwrite is True
+            if input_format == "vcf":
+                # split vcf file
+                self.vcf(var_infile, out_dir,
+                         out_file, overwrite,
+                         log_dir, parallel)
+                # logging
+                self.log('Input vcf file converted to vep format. Splitting vep file...',
+                         report, logger)
+
+                var_infile = out_file
+
+            # self.vep(
+            #    var_infile, vardb_outdir, overwrite, log_dir, parallel)
+            # logging
+            self.log('Splitting process is done. Calculating stats info...',
+                     report, logger)
+            # report stats
+            stats_message = self.stats(
+                var_infile, vardb_outdir)
+            # log info
+            self.log('Calculating stats info...done.',
+                     report, logger)
+
+            return stats_message
+
+        else:
+            # log info
+            spinner.warn('Warning: input file' + f +
+                         'is neither in vep nor vcf format.')
+            makedb.log('Warning: input file' + f +
+                       'is neither in vep nor vcf format.',
+                       report, logger)
+            return IOError
 
 
 def main():
@@ -126,7 +201,7 @@ def main():
     print(epilog)
 
     # initialize spinner decorator
-    spinner = Halo(text='Loading', spinner='dots12', color="red")
+    spinner = Halo(text='Loading', spinner='dots12', color="cyan")
     # set out dir and out file names
     # created by default
     out_dir = os.path.join(args.out, 'DBs')
@@ -137,15 +212,15 @@ def main():
     # create output dir if it doesn't exist
     os.makedirs(vardb_outdir, exist_ok=True)
     # initialize class
-    varfile = generateVarDB()
+    makedb = generateVarDB()
 
     # set up the results report
     report = open(os.path.join(out_dir, 'makevariantsdb.report'), 'w')
     report.write(description)
     report.write(epilog)
     report.write('''
-    Command line input:
-    -------------------
+        Command line input:
+        -------------------
     \n''')
     report.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
     time_format = '[' + time.ctime(time.time()) + '] '
@@ -157,127 +232,54 @@ def main():
     start = time.time()
 
     # change input format if file doesn't exists or overwrite is True
-    if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
+    if not os.listdir(vardb_outdir) or args.force is True:
         # Manage all possible genomic variant input files
         if args.vcf is not None:
-            report.write(time_format + 'Reading and splitting input file. \n')
-            logger.info('Reading and splitting input file.')
+            # logging
+            makedb.log('Starting process of splitting input file of variants.',
+                       report, logger)
             # for loop in case we have multiple inputs to read from a list of files
             for f in args.vcf:
                 # check if input is a file
                 if isfile(f) == 'list_files':
                     with open(f) as list_var_files:
+                        # read lines
                         var_f = list_var_files.read().splitlines()
                         logger.info(
-                            'Input variants file contains a list of variants files to process.')
+                            'Input is a list of files.')
                         # for every prot id
                         for var_infile in var_f:
                             # detect the format of the vcf file(s), either .vcf or .vep
                             input_format = detect_format(var_infile)
-                            # If vcf transform into vep format and split
-                            if input_format == "vcf":
-                                # change input format if file doesn't exists or overwrite is True
-                                if os.path.isfile(out_file) is False or args.force.lower() == 'y':
-                                    # log info
-                                    logger.info(
-                                        'Input file' + var_infile + ' is in .vcf format.')
-                                    # split vcf file
-                                    varfile.vcf(var_infile, out_dir,
-                                                out_file, vardb_outdir, args.force, log_dir, args.parallel)
-                                    # report stats
-                                    n_variants, n_genes, n_features = varfile.stats(
-                                        var_infile, vardb_outdir)
-                                    # log info
-                                    logger.info(
-                                        var_infile + ' has been splitted.')
-                            # If vep, only split
-                            elif input_format == "vep":
-                                # split if empty dir or overwrite is True
-                                if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
-                                     # log info
-                                    logger.info(
-                                        'Input file' + var_infile + ' is in .vep format.')
-                                    # split vep file by protein id to speed up the
-                                    # mapping process
-                                    varfile.vep(
-                                        var_infile, vardb_outdir, args.force, log_dir, args.parallel)
-                                    # report stats
-                                    n_variants, n_genes, n_features = varfile.stats(
-                                        var_infile, vardb_outdir)
-                                    # log info
-                                    logger.info(
-                                        var_infile + ' has been splitted.')
-                            else:
-                                # log info
-                                spinner.warn('Warning: input file', var_infile,
-                                             'is neither in vep nor vcf format.')
-                                logger.warning(' Input file', var_infile,
-                                               'is not in vep nor vcf format.')
+                            logger.info(
+                                'Input file is in ' + input_format + ' format.')
+                            try:
+                                stats_message = makedb.wrapper(
+                                    input_format, f, args.out, log_dir, report,
+                                    logger, spinner, args.force, args.parallel)
+                            except IOError:
                                 continue
 
-                        report.write(
-                            time_format + 'Splitting process done.\n')
-
                 elif isfile(f) == 'is_file':
-                    # change input format if file doesn't exists or overwrite is True
-                    if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
-                        logger.info(
-                            'Input file is a single file. Starting splitting process.')
+                    logger.info(
+                        'Input is a single file.')
+                    # detect the format of the vcf file(s), either .vcf or .vep
+                    input_format = detect_format(f)
+                    logger.info(
+                        'Input file is in ' + input_format + ' format.')
+                    try:
+                        stats_message = makedb.wrapper(
+                            input_format, f, args.out, log_dir, report,
+                            logger, spinner, args.force, args.parallel)
+                    except IOError:
+                        continue
 
-                        # detect the format of the vcf file(s), either .vcf or .vep
-                        input_format = detect_format(f)
-                        # If vcf transform into vep format and split
-                        if input_format == "vcf":
-                            # change input format if file doesn't exists or overwrite is True
-                            if os.path.isfile(out_file) is False or args.force.lower() == 'y':
-                                # log info
-                                logger.info('Input file' + f +
-                                            ' is in .vcf format.')
-                                # split vcf file
-                                varfile.vcf(f, out_dir,
-                                            out_file, vardb_outdir, args.force, log_dir, args.parallel)
-                                # report stats
-                                n_variants, n_genes, n_features = varfile.stats(
-                                    f, vardb_outdir)
-                                # log info
-                                logger.info(
-                                    f + ' has been splitted.')
-                                report.write(
-                                    time_format + 'Splitting process done.\n')
-
-                        # If vep, only split
-                        elif input_format == "vep":
-                            # split if empty dir or overwrite is True
-                            if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
-                                # log info
-                                logger.info('Input file' + f +
-                                            ' is in .vcf format.')
-                                # split vep file by protein id to speed up the
-                                # mapping process
-                                varfile.vep(f, vardb_outdir,
-                                            args.force, log_dir, args.parallel)
-                                # report stats
-                                n_variants, n_genes, n_features = varfile.stats(
-                                    f, vardb_outdir)
-                                # log info
-                                logger.info(
-                                    f + ' has been splitted.')
-                                report.write(
-                                    time_format + 'Splitting process done.\n')
-
-                        else:
-                            # log info
-                            spinner.warn('Warning: input file', f,
-                                         'is neither in vep nor vcf format.')
-                            logger.warning('Input file', f,
-                                           'is not in vep nor vcf format.')
-
-                            continue
                 else:
-                    spinner.warn(
+                    makedb.log('The input is neither a file(s) or a file containing a list of files.',
+                               report, logger)
+                    spinner.fail(
                         'The input is neither a file(s) or a file containing a list of files')
-                    logger.error(
-                        'The input is neither a file(s) or a file containing a list of files')
+                    exit(-1)
 
         # If MAF transform into VEP format and split
         elif args.maf is not None:
@@ -291,84 +293,65 @@ def main():
                     with open(f) as list_var_files:
                         var_f = list_var_files.read().splitlines()
                         logger.info(
-                            'Input variants file contains a list of variants files to process.')
+                            'Input is a list of files.')
                         # for every prot id
                         for var_infile in var_f:
-                            # change input format if file doesn't exists or overwrite is True
-                            if os.path.isfile(out_file) is False or args.force.lower() == 'y':
-                                # split MAF file
-                                varfile.maf(var_infile, out_dir,
-                                            out_file, vardb_outdir, args.force, log_dir, args.parallel)
-                                # report stats
-                                n_variants, n_genes, n_features = varfile.stats(
-                                    var_infile, vardb_outdir)
-                                # log info
-                                logger.info('File has been splitted.')
-                                report.write(
-                                    time_format + 'Splitting process done.\n')
-
-                            else:
-                                logger.warning(
-                                    vardb_outdir + ' already exists and force overwrite option is not active.')
+                            # split MAF file
+                            try:
+                                stats_message = makedb.maf(var_infile, out_dir,
+                                                           out_file, vardb_outdir,
+                                                           args.force, log_dir, report, logger, args.parallel)
+                            except IOError:
+                                continue
 
                 elif isfile(f) == 'is_file':
-                    # change input format if file doesn't exists or overwrite is True
-                    if not os.listdir(vardb_outdir) or args.force.lower() == 'y':
-                        # split MAF file
-                        varfile.maf(f, out_dir,
-                                    out_file, vardb_outdir, args.force, log_dir, args.parallel)
-                        # report stats
-                        n_variants, n_genes, n_features = varfile.stats(
-                            f, vardb_outdir)
-                        # log info
-                        logger.info('File has been splitted.')
-                        report.write(
-                            time_format + 'Input file is in .maf format. Splitting process done.\n')
-                    else:
-                        logger.warning(
-                            vardb_outdir + ' already exists and force overwrite option is not active.')
+                    logger.info(
+                        'Input is a single file.')
+                    # split MAF file
+                    try:
+                        stats_message = makedb.maf(f, out_dir,
+                                                   out_file, vardb_outdir,
+                                                   args.force, log_dir,  report, logger, args.parallel)
+                    except IOError:
+                        continue
 
                 else:
-                    spinner.warn(
-                        'The input is neither a file(s) or a file containing a list of files')
                     logger.error(
                         'The input is neither a file(s) or a file containing a list of files')
+                    spinner.fail(
+                        'The input is neither a file(s) or a file containing a list of files')
+                    exit(-1)
 
-        elif args.vep is not None:
-            spinner.warn(text='VEP option will be available soon. Using VarMap db instead. \
-    Otherwise, please provide your own vcf file with the -vcf option.\n')
-            try:
-                run_vep()
-            except:
-                vardb_outdir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
-                spinner.info('Using VarMap db\n')
-                exit(-1)
-        elif args.varmap is not None:
-            spinner.info('Using VarMap db')
-            vardb_outdir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
+        # elif args.vep is not None:
+        #     spinner.warn(text='VEP option will be available soon. Using VarMap db instead. \
+        # Otherwise, please provide your own vcf file with the -vcf option.\n')
+        #     try:
+        #         run_vep()
+        #     except:
+        #         vardb_outdir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
+        #         spinner.info('Using VarMap db\n')
+        #         exit(-1)
+        # elif args.varmap is not None:
+        #     spinner.info('Using VarMap db')
+        #     vardb_outdir = '/home/vruizser/PhD/2018-2019/git/PDBmapper/default_input_data/splitted_ClinVar'
+
+            # record total time of execution in report file
+        end = time.time()
+        report.write(
+            time_format + 'Generation of genomic variants DB in ' +
+            vardb_outdir + ' took ' + str(datetime.timedelta(seconds=end-start)) + '\n')
+        report.write(stats_message)
+
+        # mem_usage = memory_usage(f)
+        # print('Memory usage (in chunks of .1 seconds): %s' % mem_usage)
+        # print('Maximum memory usage: %s' % max(mem_usage))
+        report.close()
+        # print in console result
+        spinner.stop_and_persist(symbol='\U0001F4CD',
+                                 text=' makevariantsdb process finished in ' +
+                                 str(datetime.timedelta(seconds=end-start)) + '.')
     else:
-        print('A variants database already exists.')
-
-    # record total time of execution in report file
-    end = time.time()
-    report.write(
-        time_format + 'Generation of genomic variants DB in ' +
-        vardb_outdir + ' took ' + str(datetime.timedelta(seconds=end-start)) + '\n')
-    report.write(('''
-                  
-                 Stats
-                 -----
-                  - Total number of input variants: {}
-                  - Total number of corresponding genes (total number of splitted files): {}
-                  - Total number of corresponding features: {}
-                 ''').format(str(n_variants), str(n_genes), str(n_features)))
-
-    #mem_usage = memory_usage(f)
-    #print('Memory usage (in chunks of .1 seconds): %s' % mem_usage)
-    #print('Maximum memory usage: %s' % max(mem_usage))
-
-    report.close()
-    # print in console result
-    spinner.stop_and_persist(symbol='\U0001F4CD',
-                             text=' makevariantsdb process finished in ' +
-                             str(datetime.timedelta(seconds=end-start)) + '.')
+        makedb.log('A variants database already exists. Not overwritting files.')
+        spinner.stop_and_persist(symbol='\U0001F4CD',
+                                 text=' A variants database already exists. Not overwritting files.')
+        report.close()

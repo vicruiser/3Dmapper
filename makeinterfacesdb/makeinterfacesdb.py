@@ -95,7 +95,7 @@ def main():
     print(description)
     print(epilog)
     # initialize spinner decorator
-    spinner = Halo(text='Loading', spinner='dots12', color="red")
+    spinner = Halo(text='Loading', spinner='dots12', color="cyan")
     # parse command line options
     args = parse_commandline()
 
