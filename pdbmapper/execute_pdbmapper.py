@@ -36,7 +36,7 @@ pd.options.mode.chained_assignment = None
 # define main function
 
 
-class PDBmapper:
+class pdbmapper:
 
     def run():
     def run_in_parallel():
@@ -295,6 +295,10 @@ def main():
                 spinner.fail(" Running PDBmapper...failed!")
                 report.write(time_format + " Running PDBmapper...failed!")
                 raise IOError
+
+        # compute statistics
+        # pdbmapper.stats()
+
         # Compute execution time
         end = time.time()
         logger.info('Done.')

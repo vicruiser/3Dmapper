@@ -59,12 +59,13 @@ class generateIntDB:
             n_int_nucleic_cmd).format(int_infile)
 
         n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic =
-        n_int.decode('utf-8'), n_prot.decode('utf-8'),
-        n_int_ligand.decode('utf-8'), n_int_prot.decode('utf-8'),
-        n_int_nucleic.decode('utf-8')
+        n_int.decode('utf-8').rstrip(), n_prot.decode('utf-8').rstrip(),
+        n_int_ligand.decode(
+            'utf-8').rstrip(), n_int_prot.decode('utf-8').rstrip(),
+        n_int_nucleic.decode('utf-8').rstrip()
 
         with open(os.path.join(intdb_outdir, 'makevariantsdb_stats.info'), 'w', newline='') as file:
-            writer = csv.writer(file)
+            writer = csv.writer(file, delimiter=' ')
             writer.writerow([n_int, "n_interfaces"])
             writer.writerow([n_prot, "n_ENSP"])
             writer.writerow([n_int_ligad, "n_interfaces_ligand"])

@@ -65,12 +65,12 @@ class generateVarDB:
         n_features_cmd = "awk '{{print $5}}' {} | uniq | wc -l"
         n_features, err3 = call_subprocess(n_features_cmd.format(var_infile))
 
-        n_variants, n_genes, n_features = n_variants.decode(
-            'utf-8'), n_genes.decode('utf-8'), n_features.decode('utf-8')
+        n_variants, n_genes, n_features = n_variants.decode('utf-8').rstrip(),
+        n_genes.decode('utf-8').rstrip(), n_features.decode('utf-8').rstrip()
 
         with open(os.path.join(vardb_outdir, 'makevariantsdb_stats.info'), 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([str(n_variants), "n_variants"])
+            writer = csv.writer(file, delimiter=' ')
+            writer.writerow([n_variants, "n_variants"])
             writer.writerow([n_genes, "n_genes"])
             writer.writerow([n_features, "n_features"])
 
@@ -82,7 +82,7 @@ class generateVarDB:
          - Total number of corresponding genes (total number of splitted files): {}
          - Total number of corresponding features: {}
                  ''').format(str(n_variants), str(n_genes), str(n_features))
-        print(n_genes + 'que tal estais')
+
         return stats_message
 
     def vcf(self, var_infile, out_dir, out_file, overwrite, log_dir, parallel=False):
