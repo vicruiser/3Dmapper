@@ -29,6 +29,7 @@ from .input_isfile import isfile
 
 
 class generateIntDB:
+
     def stats(int_infile, intdb_outdir):
         # count after transforming to vep format the total number
         # of input interfaces, number of genes, etc
@@ -57,8 +58,31 @@ class generateIntDB:
         n_int_nucleic, err3 = call_subprocess(
             n_int_nucleic_cmd).format(int_infile)
 
-        return n_int.decode('utf-8'), n_prot.decode('utf-8'), n_int_ligand.decode('utf-8'),
-        n_int_prot.decode('utf-8'), n_int_nucleic.decode('utf-8')
+        n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic =
+        n_int.decode('utf-8'), n_prot.decode('utf-8'),
+        n_int_ligand.decode('utf-8'), n_int_prot.decode('utf-8'),
+        n_int_nucleic.decode('utf-8')
+
+        with open(os.path.join(intdb_outdir, 'makevariantsdb_stats.info'), 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([n_int, "n_interfaces"])
+            writer.writerow([n_prot, "n_ENSP"])
+            writer.writerow([n_int_ligad, "n_interfaces_ligand"])
+            writer.writerow([n_int_prot, "n_interfaces_protein"])
+            writer.writerow([n_int_nucleic, "n_interfaces_nucleic"])
+
+        stats_message = ('''
+
+        Stats
+        -----
+         - Total number of input interfaces ids: {}
+         - Total number of corresponding proteins (total number of splitted files): {}
+         - Total number of interfaces of type ligand: {}
+         - Total number of interfaces of type protein: {}
+         - Total number of interfaces of type nucleic: {}
+        ''').format(str(n_int), str(n_prot), str(n_int_ligand), str(n_int_prot), str(n_int_nucleic))
+
+        return stats_message
 
 
 def main():
@@ -100,7 +124,7 @@ def main():
     args = parse_commandline()
 
     # initialize class
-    intdb_file = generateIntDB()
+    makedb = generateIntDB()
 
     # set out dir and out file names
     # created by default
@@ -125,61 +149,60 @@ def main():
     start = time.time()
 
     if args.intdb is not None:
-        # set up a log file
-        logger = get_logger('main', out_dir)
-        log_dir = out_dir
-        logger.info('Reading and splitting input file.')
 
-        # report info
-        report.write(time_format + 'Reading and splitting input file. \n')
-        # for loop in case we have multiple inputs to read from a list of files
-        for f in args.intdb:
-            # check if input is a file
-            if isfile(f) == 'list_files':
-                with open(f) as list_int_files:
-                    int_f = list_int_files.read().splitlines()
-                    logger.info(
-                        'Input interfaces file contains a list of variants files to process.')
-                    # for every prot id
-                    for int_infile in int_f:
-                        # split interface db
-                        split('ENSP', int_infile, intdb_outdir,
-                              'txt', args.force, log_dir)
-                        n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = intdb_file.stats(
-                            int_infile, intdb_outdir)
-                        # log info
+        if args.force is True:
+            # set up a log file
+            logger = get_logger('main', out_dir)
+            log_dir = out_dir
+            logger.info('Reading and splitting input file.')
+
+            # report info
+            report.write(time_format + 'Reading and splitting input file. \n')
+            # for loop in case we have multiple inputs to read from a list of files
+            for f in args.intdb:
+                # check if input is a file
+                if isfile(f) == 'list_files':
+                    with open(f) as list_int_files:
+                        int_f = list_int_files.read().splitlines()
                         logger.info(
-                            int_infile + ' has been splitted successfully.')
+                            'Input interfaces file contains a list of variants files to process.')
+                        # for every prot id
+                        for int_infile in int_f:
+                            # split interface db
+                            split('ENSP', int_infile, intdb_outdir,
+                                  'txt', args.force, log_dir)
+                            stats_message = intdb_file.stats(
+                                int_infile, intdb_outdir)
+                            # log info
+                            logger.info(
+                                int_infile + ' has been splitted successfully.')
 
-            elif isfile(f) == 'is_file':
-                # split interface db
-                split('ENSP', f, intdb_outdir,
-                      'txt', args.force, log_dir)
-                n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = intdb_file.stats(
-                    f, intdb_outdir)
-                # log info
-                logger.info(
-                    f + ' has been splitted successfully.')
-            else:
-                logger.error(
-                    'Error: Interfaces file input could not be found.')
-                raise IOError
+                elif isfile(f) == 'is_file':
+                    # split interface db
+                    split('ENSP', f, intdb_outdir,
+                          'txt', args.force, log_dir)
+                    stats_message = intdb_file.stats(
+                        f, intdb_outdir)
+                    # log info
+                    logger.info(
+                        f + ' has been splitted successfully.')
+                else:
+                    logger.error(
+                        'Error: Interfaces file input could not be found.')
+                    raise IOError
 
-            # finish report
-            end = time.time()
-            report.write(
-                time_format + 'Reading and splitting input file...done. \n')
-            report.write(
-                time_format + 'Generation of interfaces DB in ' + intdb_outdir + ' took ' +
-                str(datetime.timedelta(seconds=end-start)) + 's\n')
-            report.write(('''
-
-                 Stats
-                 -----
-                  - Total number of input interfaces ids: {}
-                  - Total number of corresponding proteins (total number of splitted files): {}
-                  - Total number of interfaces of type ligand: {}
-                  - Total number of interfaces of type protein: {}
-                  - Total number of interfaces of type nucleic: {}
-                 ''').format(str(n_int), str(n_prot), str(n_int_ligand), str(n_int_prot), str(n_int_nucleic))
+                # finish report
+                end = time.time()
+                report.write(
+                    time_format + 'Reading and splitting input file...done. \n')
+                report.write(
+                    time_format + 'Generation of interfaces DB in ' + intdb_outdir + ' took ' +
+                    str(datetime.timedelta(seconds=end-start)) + 's\n')
+                report.write(stats_message)
+                report.close()
+        else:
+            makedb.log(
+                'A variants database already exists. Not overwritting files.')
+            spinner.stop_and_persist(symbol='\U0001F4CD',
+                                     text=' A variants database already exists. Not overwritting files.')
             report.close()

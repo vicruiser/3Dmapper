@@ -42,6 +42,50 @@ class PDBmapper:
     def run_in_parallel():
 
     def stats():
+         # count after transforming to vep format the total number
+        # of input interfaces, number of genes, etc
+
+        # number of interfaces
+        n_int_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | uniq | wc -l"
+        n_int, err1 = call_subprocess(
+            n_int_cmd).format(int_infile)
+
+        # number of proteins: count total number of splitted files
+        n_prot_cmd = "wc -l {}"
+        n_prot, err2 = call_subprocess(n_prot_cmd(intdb_outdir))
+
+        # number of interfaces ligand
+        n_int_ligand_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'ligand' | uniq | wc -l"
+        n_int_ligand, err3 = call_subprocess(
+            n_int_ligand_cmd).format(int_infile)
+
+        # number of interfaces protein
+        n_int_prot_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'protein' | uniq | wc -l"
+        n_int_prot, err3 = call_subprocess(
+            n_int_prot_cmd).format(int_infile)
+
+        # number of interfaces nucleic
+        n_int_nucleic_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'nucleic' | uniq | wc -l"
+        n_int_nucleic, err3 = call_subprocess(
+            n_int_nucleic_cmd).format(int_infile)
+
+        n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic =
+        n_int.decode('utf-8'), n_prot.decode('utf-8'),
+        n_int_ligand.decode('utf-8'), n_int_prot.decode('utf-8'),
+        n_int_nucleic.decode('utf-8')
+
+        stats_message = ('''
+
+        Stats
+        -----
+         - Total number of input interfaces ids: {}
+         - Total number of corresponding proteins (total number of splitted files): {}
+         - Total number of interfaces of type ligand: {}
+         - Total number of interfaces of type protein: {}
+         - Total number of interfaces of type nucleic: {}
+        ''').format(str(n_int), str(n_prot), str(n_int_ligand), str(n_int_prot), str(n_int_nucleic))
+
+        return stats_message
 
 
 def main():
@@ -222,13 +266,15 @@ def main():
                         # remove \n from the end
                         ensemblid = ensemblid.replace('\n', '')
                         # run PDBmapper
-                        wrapper(ensemblid,
-                                args.intdb,
-                                args.vardb,
-                                args.out,
-                                args.pident,
-                                args.consequence)
-                        continue
+                        try:
+                            wrapper(ensemblid,
+                                    args.intdb,
+                                    args.vardb,
+                                    args.out,
+                                    args.pident,
+                                    args.consequence)
+                        except:
+                            continue
 
             # input is not a file but one or more protein ids
             # given in command line

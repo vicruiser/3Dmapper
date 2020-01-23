@@ -12,6 +12,7 @@ import vcfpy
 import time
 import logging
 import datetime
+import csv
 
 import os.path as path
 import pandas as pd
@@ -49,10 +50,10 @@ class generateVarDB:
         report.write(self.time + message + '\n')
 
     def stats(self, var_infile, vardb_outdir):
-            # count after transforming to vep format the total number
-            # of input variants, number of genes, etc
+        # count after transforming to vep format the total number
+        # of input variants, number of genes, etc
 
-            # number of variants: assuming that they are stored in the first column
+        # number of variants: assuming that they are stored in the first column
         n_variants_cmd = "awk '{{print $1}}' {} | uniq | wc -l"
         n_variants, err1 = call_subprocess(n_variants_cmd.format(var_infile))
 
@@ -67,6 +68,12 @@ class generateVarDB:
         n_variants, n_genes, n_features = n_variants.decode(
             'utf-8'), n_genes.decode('utf-8'), n_features.decode('utf-8')
 
+        with open(os.path.join(vardb_outdir, 'makevariantsdb_stats.info'), 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([str(n_variants), "n_variants"])
+            writer.writerow([n_genes, "n_genes"])
+            writer.writerow([n_features, "n_features"])
+
         stats_message = ('''
 
         Stats
@@ -75,7 +82,7 @@ class generateVarDB:
          - Total number of corresponding genes (total number of splitted files): {}
          - Total number of corresponding features: {}
                  ''').format(str(n_variants), str(n_genes), str(n_features))
-
+        print(n_genes + 'que tal estais')
         return stats_message
 
     def vcf(self, var_infile, out_dir, out_file, overwrite, log_dir, parallel=False):
@@ -164,6 +171,7 @@ class generateVarDB:
             return IOError
 
 
+# main function
 def main():
     # parse command line options
     args = parse_commandline()
