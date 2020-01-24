@@ -54,19 +54,19 @@ class generateVarDB:
         # of input variants, number of genes, etc
 
         # number of variants: assuming that they are stored in the first column
-        n_variants_cmd = "awk '{{print $1}}' {} | uniq | wc -l"
+        n_variants_cmd = "grep -v 'Gene' {} | awk '{{print $1}}' | uniq | wc -l"
         n_variants, err1 = call_subprocess(n_variants_cmd.format(var_infile))
 
         # number of genes: count total number of splitted files
         n_genes_cmd = "ls {} | wc -l"
         n_genes, err2 = call_subprocess(n_genes_cmd.format(vardb_outdir))
 
-        # number of variants: assuming that they are stored in the first column
-        n_features_cmd = "awk '{{print $5}}' {} | uniq | wc -l"
+        # number of trasncripts: assuming that they are stored in the 5th column
+        n_features_cmd = "grep -v 'Gene' {} | awk '{{print $5}}' | uniq | wc -l"
         n_features, err3 = call_subprocess(n_features_cmd.format(var_infile))
 
-        n_variants, n_genes, n_features = n_variants.decode('utf-8').rstrip(),
-        n_genes.decode('utf-8').rstrip(), n_features.decode('utf-8').rstrip()
+        n_variants, n_genes, n_features = n_variants.decode(
+            'utf-8').rstrip(), n_genes.decode('utf-8').rstrip(), n_features.decode('utf-8').rstrip()
 
         with open(os.path.join(vardb_outdir, 'makevariantsdb_stats.info'), 'w', newline='') as file:
             writer = csv.writer(file, delimiter=' ')
@@ -147,8 +147,8 @@ class generateVarDB:
 
                 var_infile = out_file
 
-            # self.vep(
-            #    var_infile, vardb_outdir, overwrite, log_dir, parallel)
+            self.vep(
+                var_infile, vardb_outdir, overwrite, log_dir, parallel)
             # logging
             self.log('Splitting process is done. Calculating stats info...',
                      report, logger)
@@ -180,8 +180,8 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\ 
-    $$  __$$\ $$  __$$\ $$  __$$\ 
+    $$$$$$$\  $$$$$$$\  $$$$$$$\  
+    $$  __$$\ $$  __$$\ $$  __$$\  
     $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
     $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
@@ -230,7 +230,7 @@ def main():
         Command line input:
         -------------------
     \n''')
-    report.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    report.write(os.path.basename(" ".join(sys.argv)) + '\n' + '\n' + '\n')
     time_format = '[' + time.ctime(time.time()) + '] '
 
     # set up a log file
@@ -282,7 +282,7 @@ def main():
                     except IOError:
                         continue
 
-                else:
+                elif isfile(f) == 'file_not_recognized':
                     makedb.log('The input is neither a file(s) or a file containing a list of files.',
                                report, logger)
                     spinner.fail(
@@ -347,7 +347,7 @@ def main():
         end = time.time()
         report.write(
             time_format + 'Generation of genomic variants DB in ' +
-            vardb_outdir + ' took ' + str(datetime.timedelta(seconds=end-start)) + '\n')
+            vardb_outdir + ' took ' + str(datetime.timedelta(seconds=round(end-start))) + '\n')
         report.write(stats_message)
 
         # mem_usage = memory_usage(f)
@@ -356,8 +356,9 @@ def main():
         report.close()
         # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',
-                                 text=' makevariantsdb process finished in ' +
-                                 str(datetime.timedelta(seconds=end-start)) + '.')
+                                 text=' makevariantsdb process finished. Total time:  ' +
+                                 str(datetime.timedelta(
+                                     seconds=round(end-start))))
     else:
         makedb.log('A variants database already exists. Not overwritting files.')
         spinner.stop_and_persist(symbol='\U0001F4CD',

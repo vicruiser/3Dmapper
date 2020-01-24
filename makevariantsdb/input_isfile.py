@@ -6,7 +6,6 @@ import os
 def isfile(infile):
     # check if infile is a txt file containing a list of files
     try:
-
         with open(infile) as list_files:
             # read just first line
             lines = list_files.readline()
@@ -17,11 +16,10 @@ def isfile(infile):
             else:
                 raise IOError
     # check if infile is a txt file
-    except:
+    except IOError:
         normpath = os.path.normpath(infile)
         abspath = os.path.abspath(normpath)
-
         if os.path.isfile(abspath) is True:
             return 'is_file'
         else:
-            raise IOError()
+            return 'file_not_recognized'

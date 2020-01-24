@@ -77,7 +77,7 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
 
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneid, vardb)
-    logger.info('Variants file from gene id ' + geneid + ' parsed.')consequence
+    logger.info('Variants file from gene id ' + geneid + ' parsed.')
 
     # filter by transcript ID
     annovars = annovars[annovars['Feature'] == transcritpID]

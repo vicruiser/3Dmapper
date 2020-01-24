@@ -11,21 +11,21 @@ from .logger import get_logger
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
 
-split_cmd = "grep -v '##' {} | \
+split_cmd = "grep -v '##' {0} | \
 sed -e '1s/^#//' | \
-awk -v ci=\"{}\" \
--v od=\"{}/\" \
+awk -v ci=\"{1}\" \
+-v od=\"{2}/\" \
 -F ' ' 'NR==1 {{h=$0; next}}; \
-!seen[$ci]++{{f=od$ci\".{}\"; print h >> f}}; \
-{{f=od$ci\".{}\"; print >> f; close(f)}}'"
+!seen[$ci]++{{f=od$ci\".{3}\"; print h >> f}}; \
+{{f=od$ci\".{3}\"; print >> f; close(f)}}'"
 
-split_cmd_parallel = "grep -v '##' {} | \
-sed -e '1s/^#//' | parallel --citation --pipe -q \
-awk -v ci=\"{}\" \
--v od=\"{}/\" \
+split_cmd_parallel = "grep -v '##' {0} | \
+sed -e '1s/^#//' | parallel --pipe --header '(p.*\n)*' -q \
+awk -v ci=\"{1}\" \
+-v od=\"{2}/\" \
 -F ' ' 'NR==1 {{h=$0; next}}; \
-!seen[$ci]++{{f=od$ci\".{}\"; print h >> f}}; \
-{{f=od$ci\".{}\"; print >> f; close(f)}}'"
+!seen[$ci]++{{f=od$ci\".{3}\"; print h >> f}}; \
+{{f=od$ci\".{3}\"; print >> f; close(f)}}'"
 
 
 def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False):
@@ -35,18 +35,18 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
     Parameters
     ----------
     prefix : str
-        Ensembl ID prefix. Either ESNG or ENSP. 
-    input_file : str        
+        Ensembl ID prefix. Either ESNG or ENSP.
+    input_file : str
         Path to infile.
-    out_dir : str        
+    out_dir : str
         Path to output.
-    out_extension : str        
-        Output filename extension 
+    out_extension : str
+        Output filename extension
 
     Returns
     -------
-    ./dir 
-        Directory containing splitted files. 
+    ./dir
+        Directory containing splitted files.
     '''
     # log file
     logger = get_logger('split', log_dir)
@@ -71,12 +71,14 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
     # stop if no ENSP id detected
     if col_index != '':
         # write log file
-        log2 = open(os.path.join(out_dir, 'log_split_files.txt'), 'a')
-        log2.write('Splitting file...\n')
-        log2.flush()
+        logger.info('Splitting interfaces file...')
         # Second command
-        cmd2 = split_cmd.format(input_file, col_index,
-                                out_dir, out_extension, out_extension)
+        if parallel is True:
+            cmd2 = split_cmd_parallel.format(input_file, col_index,
+                                             out_dir, out_extension)
+        else:
+            cmd2 = split_cmd.format(input_file, col_index,
+                                    out_dir, out_extension)
         # register process
         p2 = subprocess.Popen(cmd2,
                               stdout=subprocess.PIPE,
@@ -85,9 +87,8 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
         # error handling
         out2, err2 = p2.communicate()
         if err2 is None:
-            logger.info('This file was splitted successfully')
+            logger.info('This file was splitted successfully.')
         else:
-            logger(err2)
             logger.error('This file could not be splitted')
             raise IOError()
     else:

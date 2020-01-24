@@ -11,6 +11,7 @@ import subprocess
 import vcfpy
 import time
 import os.path
+import datetime
 
 import pandas as pd
 import numpy as np
@@ -31,17 +32,27 @@ from .run_subprocess import call_subprocess
 from .pdbmapper_wrapper import wrapper
 
 pd.options.mode.chained_assignment = None
-#print("Number of processors: ", mp.cpu_count())
+
 
 # define main function
 
 
-class pdbmapper:
+class MapTools:
+
+    time = '[' + time.ctime(time.time()) + '] '
+
+    def log(self, message, report, logger):
+
+        logger.info(message)
+        report.write(self.time + message + '\n')
 
     def run():
-    def run_in_parallel():
+        pass
 
-    def stats():
+    def run_in_parallel():
+        pass
+
+    def stats(self, var_infile, vardb_outdir):
          # count after transforming to vep format the total number
         # of input interfaces, number of genes, etc
 
@@ -69,11 +80,14 @@ class pdbmapper:
         n_int_nucleic, err3 = call_subprocess(
             n_int_nucleic_cmd).format(int_infile)
 
-        n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic =
-        n_int.decode('utf-8'), n_prot.decode('utf-8'),
+        n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = n_int.decode(
+            'utf-8'), n_prot.decode('utf-8'),
         n_int_ligand.decode('utf-8'), n_int_prot.decode('utf-8'),
         n_int_nucleic.decode('utf-8')
 
+        #
+
+        # message to print out in report
         stats_message = ('''
 
         Stats
@@ -95,10 +109,10 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\    
-    $$  __$$\ $$  __$$\ $$  __$$\    
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
+    $$$$$$$\  $$$$$$$\  $$$$$$$\  
+    $$  __$$\ $$  __$$\ $$  __$$\  
+    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\  
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -111,8 +125,7 @@ def main():
 
     '''
 
-    epilog = \
-        '''
+    epilog = '''
           -------------------------------------------------------------------------
          |  Copyright (c) 2019 Victoria Ruiz --                                    |
          |  vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
@@ -144,7 +157,7 @@ def main():
             text=args.out + " is an existing directory. Results will be written in there.\n")
         out_message = args.out + ' is an existing directory. Results will be written in there.'
 
-  # set up the logging
+    # set up the logging
     logger = get_logger('main', args.out)
     logger.info(out_message)
 
@@ -155,13 +168,20 @@ def main():
     report.write('Command line input:\n' +
                  '-------------------\n' +
                  '\n')
-    report.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    report.write(os.path.basename(" ".join(sys.argv)) + '\n' + '\n' + '\n')
     report.write(time_format + out_message + '\n')
+
+    # initialize class
+    maptools = MapTools()
+
+    # print("Number of processors: ", mp.cpu_count())
 
     # if parallel is True
     if args.parallel is True:
-        pool = mp.Pool(mp.cpu_count()-1)
+        p = mp.Pool(mp.cpu_count()-1)
 
+    else:
+        p = mp.Pool(1)
         # results = pool.map(howmany_within_range_rowonly, [row for row in data])
         # pool.close()
 
@@ -289,12 +309,12 @@ def main():
                         args.pident,
                         args.consequence)
                 continue
-            else:
-                logger.error(
-                    'The input Ensembl ids provided are not in a valid format.')
-                spinner.fail(" Running PDBmapper...failed!")
-                report.write(time_format + " Running PDBmapper...failed!")
-                raise IOError
+            elif isfile(ids) == "not_recognized":
+                pdbmapper.log('The input is neither an id(s) or a file containing a list of ids.',
+                              report, logger)
+                spinner.fail(
+                    'The input is neither an id(s) or a file containing a list of ids.')
+                exit(-1)
 
         # compute statistics
         # pdbmapper.stats()
@@ -302,9 +322,11 @@ def main():
         # Compute execution time
         end = time.time()
         logger.info('Done.')
-        report.write(time_format + 'Congratulations!. PDBmapper has run in ' +
-                     str(round(end-start, 2)) + 's.')
+        report.write(time_format + ' PDBmapper has finished successfully. Total time: ' +
+                     str(datetime.timedelta(
+                         seconds=round(end-start))))
         # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',
-                                 text='Congratulations!. PDBmapper has run in ' +
-                                 str(round(end-start, 2)) + 's.')
+                                 text=' PDBmapper has finished successfully. Total time: ' +
+                                 str(datetime.timedelta(
+                                     seconds=round(end-start))))

@@ -51,8 +51,8 @@ def parse_commandline():
                         help="output directory")
     parser.set_defaults(out=".")
     # interfaces database file
-    parser.add_argument("--force", dest="force", metavar="<String>",
-                        help="force to owerwrite? (y/n)", default="y")
+    parser.add_argument("--force", dest="force", action='store_true',
+                        help="force to owerwrite? (y/n)", default=False)
     # run in parallel
     parser.add_argument("--parallel", dest="parallel", action='store_true',
                         default=False,

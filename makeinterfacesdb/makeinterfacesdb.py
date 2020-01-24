@@ -12,6 +12,7 @@ import vcfpy
 import time
 import os.path
 import datetime
+import csv
 
 import pandas as pd
 import numpy as np
@@ -26,49 +27,54 @@ from .split import split
 from .decorator import tags
 from .logger import get_logger
 from .input_isfile import isfile
+from .run_subprocess import call_subprocess
 
 
 class generateIntDB:
 
-    def stats(int_infile, intdb_outdir):
+    time = '[' + time.ctime(time.time()) + '] '
+
+    def log(self, message, report, logger):
+
+        logger.info(message)
+        report.write(self.time + message + '\n')
+
+    def stats(self, int_infile, intdb_outdir):
         # count after transforming to vep format the total number
         # of input interfaces, number of genes, etc
 
         # number of interfaces
-        n_int_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | uniq | wc -l"
+        n_int_cmd = "grep 'ligand' {} | awk '{{print $1,$2,$3,$4,$10}}' | uniq | wc -l"
         n_int, err1 = call_subprocess(
-            n_int_cmd).format(int_infile)
+            n_int_cmd.format(int_infile))
 
         # number of proteins: count total number of splitted files
-        n_prot_cmd = "wc -l {}"
-        n_prot, err2 = call_subprocess(n_prot_cmd(intdb_outdir))
+        n_prot_cmd = "ls {} | wc -l"
+        n_prot, err2 = call_subprocess(n_prot_cmd.format(intdb_outdir))
 
         # number of interfaces ligand
-        n_int_ligand_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'ligand' | uniq | wc -l"
+        n_int_ligand_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'ligand' | uniq | wc -l"
         n_int_ligand, err3 = call_subprocess(
-            n_int_ligand_cmd).format(int_infile)
+            n_int_ligand_cmd.format(int_infile))
 
         # number of interfaces protein
-        n_int_prot_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'protein' | uniq | wc -l"
+        n_int_prot_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'protein' | uniq | wc -l"
         n_int_prot, err3 = call_subprocess(
-            n_int_prot_cmd).format(int_infile)
+            n_int_prot_cmd.format(int_infile))
 
         # number of interfaces nucleic
-        n_int_nucleic_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'nucleic' | uniq | wc -l"
+        n_int_nucleic_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'nucleic' | uniq | wc -l"
         n_int_nucleic, err3 = call_subprocess(
-            n_int_nucleic_cmd).format(int_infile)
+            n_int_nucleic_cmd.format(int_infile))
 
-        n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic =
-        n_int.decode('utf-8').rstrip(), n_prot.decode('utf-8').rstrip(),
-        n_int_ligand.decode(
-            'utf-8').rstrip(), n_int_prot.decode('utf-8').rstrip(),
-        n_int_nucleic.decode('utf-8').rstrip()
+        n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = n_int.decode('utf-8').rstrip(), n_prot.decode('utf-8').rstrip(
+        ), n_int_ligand.decode('utf-8').rstrip(), n_int_prot.decode('utf-8').rstrip(), n_int_nucleic.decode('utf-8').rstrip()
 
         with open(os.path.join(intdb_outdir, 'makevariantsdb_stats.info'), 'w', newline='') as file:
             writer = csv.writer(file, delimiter=' ')
             writer.writerow([n_int, "n_interfaces"])
             writer.writerow([n_prot, "n_ENSP"])
-            writer.writerow([n_int_ligad, "n_interfaces_ligand"])
+            writer.writerow([n_int_ligand, "n_interfaces_ligand"])
             writer.writerow([n_int_prot, "n_interfaces_protein"])
             writer.writerow([n_int_nucleic, "n_interfaces_nucleic"])
 
@@ -137,6 +143,9 @@ def main():
     # create output dir if it doesn't exist
     os.makedirs(intdb_outdir, exist_ok=True)
 
+    # set up a log file
+    logger = get_logger('main', out_dir)
+    log_dir = out_dir
     # set up the report
     report = open(os.path.join(out_dir, 'makeinterfacesdb.report'), 'w')
     report.write(description)
@@ -145,16 +154,14 @@ def main():
     Command line input:
     -------------------
     \n''')
-    report.write((" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    report.write(os.path.basename(" ".join(sys.argv)) + '\n' + '\n' + '\n')
     time_format = '[' + time.ctime(time.time()) + '] '
     start = time.time()
 
     if args.intdb is not None:
 
-        if args.force is True:
-            # set up a log file
-            logger = get_logger('main', out_dir)
-            log_dir = out_dir
+        if not os.listdir(intdb_outdir) or args.force is True:
+
             logger.info('Reading and splitting input file.')
 
             # report info
@@ -172,7 +179,7 @@ def main():
                             # split interface db
                             split('ENSP', int_infile, intdb_outdir,
                                   'txt', args.force, log_dir)
-                            stats_message = intdb_file.stats(
+                            stats_message = makedb.stats(
                                 int_infile, intdb_outdir)
                             # log info
                             logger.info(
@@ -182,28 +189,29 @@ def main():
                     # split interface db
                     split('ENSP', f, intdb_outdir,
                           'txt', args.force, log_dir)
-                    stats_message = intdb_file.stats(
+                    stats_message = makedb.stats(
                         f, intdb_outdir)
                     # log info
                     logger.info(
                         f + ' has been splitted successfully.')
-                else:
+                elif isfile(f) == 'file_not_recognized':
                     logger.error(
-                        'Error: Interfaces file input could not be found.')
-                    raise IOError
+                        'Error: Not such file: \'' + f + '\'')
+                    print('Error: Not such file: \'' + f + '\'')
+                    exit(-1)
 
                 # finish report
                 end = time.time()
                 report.write(
                     time_format + 'Reading and splitting input file...done. \n')
                 report.write(
-                    time_format + 'Generation of interfaces DB in ' + intdb_outdir + ' took ' +
-                    str(datetime.timedelta(seconds=end-start)) + 's\n')
+                    time_format + 'Generation of interfaces DB in ' + intdb_outdir + ' done. Total time: ' +
+                    str(datetime.timedelta(seconds=round(end-start))) + '\n')
                 report.write(stats_message)
                 report.close()
         else:
             makedb.log(
-                'A variants database already exists. Not overwritting files.')
+                'A variants database already exists. Not overwritting files.', report, logger)
             spinner.stop_and_persist(symbol='\U0001F4CD',
                                      text=' A variants database already exists. Not overwritting files.')
             report.close()

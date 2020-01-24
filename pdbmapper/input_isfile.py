@@ -13,4 +13,4 @@ def isfile(infile):
         else:
             return 'no'
     except:
-        return 'no'
+        return 'not_recognized'

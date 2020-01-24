@@ -16,21 +16,22 @@ from .run_subprocess import call_subprocess
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
 
-split_cmd = "grep -v '##' {} | \
+split_cmd = "grep -v '##' {0} | \
 sed -e '1s/^#//' | \
-awk -v ci=\"{}\" \
--v od=\"{}/\" \
+awk -v ci=\"{1}\" \
+-v od=\"{2}/\" \
 -F ' ' 'NR==1 {{h=$0; next}}; \
-!seen[$ci]++{{f=od$ci\".{}\"; print h >> f}}; \
-{{f=od$ci\".{}\"; print >> f; close(f)}}'"
+!seen[$ci]++{{f=od$ci\".{3}\"; print h >> f}}; \
+{{f=od$ci\".{3}\"; print >> f; close(f)}}'"
 
-split_cmd_parallel = "grep -v '##' {} | \
-sed -e '1s/^#//' | parallel --citation --pipe -q \
-awk -v ci=\"{}\" \
--v od=\"{}/\" \
+split_cmd_parallel = "grep -v '##' {0} | \
+sed -e '1s/^#//' | parallel --pipe --header '(U.*\n)*' -q \
+awk -v ci=\"{1}\" \
+-v od=\"{2}/\" \
 -F ' ' 'NR==1 {{h=$0; next}}; \
-!seen[$ci]++{{f=od$ci\".{}\"; print h >> f}}; \
-{{f=od$ci\".{}\"; print >> f; close(f)}}'"
+!seen[$ci]++{{f=od$ci\".{3}\"; print h >> f}}; \
+{{f=od$ci\".{3}\"; print >> f; close(f)}}'"
+
 
 # \
 #!($ci in p) {{p[$ci]}} \
@@ -138,11 +139,11 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
         # command to split files
         if parallel is True:
             cmd4 = split_cmd_parallel.format(
-                input_file, col_index_geneid, out_dir, out_extension, out_extension)
+                input_file, col_index_geneid, out_dir, out_extension)
 
         else:
             cmd4 = split_cmd.format(
-                input_file, col_index_geneid, out_dir, out_extension, out_extension)
+                input_file, col_index_geneid, out_dir, out_extension)
         # register process
         out4, err4 = call_subprocess(cmd4)
         # error handling
