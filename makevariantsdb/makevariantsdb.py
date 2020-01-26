@@ -230,7 +230,8 @@ def main():
         Command line input:
         -------------------
     \n''')
-    report.write(os.path.basename(" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    progname = os.path.basename(sys.argv[0])
+    report.write(progname + ' ' + " ".join(sys.argv[1:]) + '\n' + '\n' + '\n')
     time_format = '[' + time.ctime(time.time()) + '] '
 
     # set up a log file

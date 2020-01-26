@@ -79,7 +79,7 @@ def request(input_file, out_dir, out_file, log_dir, parallel=False):
       text_succeed="Converting vcf to vep...done.\n",
       text_fail="Converting vcf to vep...failed!\n",
       emoji="\U0001F504 ")
-def vcf2vep(input_file, out_dir, out_file, overwrite, log_dir):
+def vcf2vep(input_file, out_dir, out_file, overwrite, log_dir, parallel=False):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -104,7 +104,7 @@ def vcf2vep(input_file, out_dir, out_file, overwrite, log_dir):
     os.makedirs(out_dir, exist_ok=True)
     # execute function
     if os.path.isfile(out_file):
-        if overwrite.lower() == 'y':
-            request(input_file, out_dir, out_file, log_dir)
+        if overwrite is True:
+            request(input_file, out_dir, out_file, overwrite, log_dir, parallel)
     else:
-        request(input_file, out_dir, out_file, log_dir)
+        request(input_file, out_dir, out_file,  overwrite, log_dir, parallel)

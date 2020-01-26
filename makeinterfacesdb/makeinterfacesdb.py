@@ -44,26 +44,26 @@ class generateIntDB:
         # of input interfaces, number of genes, etc
 
         # number of interfaces
-        n_int_cmd = "grep 'ligand' {} | awk '{{print $1,$2,$3,$4,$10}}' | uniq | wc -l"
+        n_int_cmd = " awk 'NR>1 {{print $1,$2,$3,$4,$10}}' {} | wc -l"
         n_int, err1 = call_subprocess(
             n_int_cmd.format(int_infile))
 
         # number of proteins: count total number of splitted files
-        n_prot_cmd = "ls {} | wc -l"
+        n_prot_cmd = "find {} -type f -iname 'ENSP*' | wc -l"
         n_prot, err2 = call_subprocess(n_prot_cmd.format(intdb_outdir))
 
         # number of interfaces ligand
-        n_int_ligand_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'ligand' | uniq | wc -l"
+        n_int_ligand_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'ligand' |  wc -l"
         n_int_ligand, err3 = call_subprocess(
             n_int_ligand_cmd.format(int_infile))
 
         # number of interfaces protein
-        n_int_prot_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'protein' | uniq | wc -l"
+        n_int_prot_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'protein' |  wc -l"
         n_int_prot, err3 = call_subprocess(
             n_int_prot_cmd.format(int_infile))
 
         # number of interfaces nucleic
-        n_int_nucleic_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'nucleic' | uniq | wc -l"
+        n_int_nucleic_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'nucleic' |  wc -l"
         n_int_nucleic, err3 = call_subprocess(
             n_int_nucleic_cmd.format(int_infile))
 
@@ -154,7 +154,8 @@ def main():
     Command line input:
     -------------------
     \n''')
-    report.write(os.path.basename(" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    progname = os.path.basename(sys.argv[0])
+    report.write(progname + ' ' + " ".join(sys.argv[1:]) + '\n' + '\n' + '\n')
     time_format = '[' + time.ctime(time.time()) + '] '
     start = time.time()
 
