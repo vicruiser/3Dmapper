@@ -54,7 +54,7 @@ class MapTools:
     def run_in_parallel():
         pass
 
-    def stats(self, var_statsfile, int_statsfile, mapped_infofile):
+    def stats(self, var_statsfile, int_statsfile, mapped_infofile, out_dir):
         # PDBmapper stats
         var_stats = pd.read_csv(var_statsfile, sep=" |\t", engine='python')
         int_stats = pd.read_csv(int_statsfile, sep=" |\t", engine='python')
@@ -122,6 +122,8 @@ class MapTools:
         # n_int_ligand.decode('utf-8'), n_int_prot.decode('utf-8'),
         # n_int_nucleic.decode('utf-8')
 
+        stats_table.to_csv(os.path.join(out_dir, 'pdbmapper_consequences_stats.info'),
+                           sep='\t', encoding='utf-8', index=False)
         stats_table = tabulate(
             summary, headers='keys', tablefmt='psql')
 
@@ -168,6 +170,9 @@ class MapTools:
         stats_message2 = tabulate(
             stats_message, headers='keys', tablefmt='psql')
 
+        stats_message.to_csv(os.path.join(out_dir, 'pdbmapper_stats.info'),
+                             sep='\t', encoding='utf-8', index=False)
+
         return stats_message2, stats_table
 
 
@@ -205,7 +210,7 @@ def main():
     # Emojis
     DNA = '\U0001F9EC'
     # spinner
-    spinner = Halo(text='Loading', spinner='dots12', color="red")
+    spinner = Halo(text='Loading', spinner='dots12', color="cyan")
     # parse command line options
     args = parse_commandline()
 
@@ -257,17 +262,16 @@ def main():
         # pool.close()
 
     if args.force is True and os.listdir(args.out):
-        os.remove(os.path.join(
-            args.out, ('setID_pident' + str(args.pident) + '.File')))
-        os.remove(os.path.join(
-            args.out, ('MappedVariants_pident' + str(args.pident) + '.File')))
+        for item in os.listdir(args.out):
+            if item.endswith(".File"):
+                os.remove(os.path.join(args.out, item))
     else:
         logger.warning(
             'Directory ' + args.out + 'is not empty. Not overwritting files. ' +
             'Please select option --force or specify a different output dir.')
-        spinner.stop_and_persist(symbol='\U0001F4CD',
-                                 text=' Directory ' + args.out + 'is not empty. Not overwritting files. \
-             Please select option --force or specify a different output dir.')
+        spinner.warn(
+            text=' Directory ' + args.out + 'is not empty. Not overwritting files. ' +
+            'Please select option --force or specify a different output dir.')
         exit(-1)
 
    # # create chimera scripts:
@@ -412,7 +416,7 @@ def main():
             args.out, 'MappedVariants*' + str(args.pident) + '*File'))[0]))
 
         stats_message, stats_table = maptools.stats(
-            var_statsfile, int_statsfile, mapped_infofile)
+            var_statsfile, int_statsfile, mapped_infofile, args.out)
 
         # Compute execution time
         end = time.time()
