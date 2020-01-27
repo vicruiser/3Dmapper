@@ -84,8 +84,8 @@ def parse_commandline():
     parser.set_defaults(pident=50)
 
     # force overwrite
-    parser.add_argument("--force", dest="force", metavar="<String>",
-                        help="force to owerwrite? (y/n)", default="y")
+    parser.add_argument("--force", dest="force", action='store_true',
+                        help="force to owerwrite? (y/n)", default=False)
     # create default output directory
     parser.add_argument("--parallel", dest="parallel", action='store_true',
                         default=False,

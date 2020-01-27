@@ -13,6 +13,7 @@ import time
 import os.path
 import datetime
 
+
 import pandas as pd
 import numpy as np
 import multiprocessing as mp
@@ -20,6 +21,7 @@ import multiprocessing as mp
 from halo import Halo
 from timeit import default_timer as timer
 from subprocess import call
+from tabulate import tabulate
 
 # import functions from scripts
 from .parse_argv import parse_commandline
@@ -52,54 +54,121 @@ class MapTools:
     def run_in_parallel():
         pass
 
-    def stats(self, var_infile, vardb_outdir):
-         # count after transforming to vep format the total number
-        # of input interfaces, number of genes, etc
+    def stats(self, var_statsfile, int_statsfile, mapped_infofile):
+        # PDBmapper stats
+        var_stats = pd.read_csv(var_statsfile, sep=" |\t", engine='python')
+        int_stats = pd.read_csv(int_statsfile, sep=" |\t", engine='python')
 
-        # number of interfaces
-        n_int_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | uniq | wc -l"
-        n_int, err1 = call_subprocess(
-            n_int_cmd).format(int_infile)
+        # number of mapped variants
+        n_variants_unique_cmd = "awk 'NR>1{{print $1}}' {} | uniq | wc -l"
+        n_variants_unique, err1 = call_subprocess(
+            n_variants_unique_cmd.format(mapped_infofile))
 
-        # number of proteins: count total number of splitted files
-        n_prot_cmd = "wc -l {}"
-        n_prot, err2 = call_subprocess(n_prot_cmd(intdb_outdir))
+        n_variants_cmd = "awk 'NR>1{{print $1}}' {}  | wc -l"
+        n_variants, err1 = call_subprocess(
+            n_variants_cmd.format(mapped_infofile))
+
+        # number of mapped genes
+        n_genes_cmd = "awk 'NR>1{{print $4}}' {} | uniq | wc -l"
+        n_genes, err2 = call_subprocess(n_genes_cmd.format(mapped_infofile))
+
+        # number of mapped consequences
+        # n_consequences_cmd = "awk '{{print $2}}' {} | uniq | wc -l"
+        # n_consequences, err3 = call_subprocess(
+        #     n_consequences_cmd.format(mapped_infofile))
+
+        # number of mapped interfaces, type of interfaces and consequences
+        interfaces_info = pd.read_csv(mapped_infofile, sep=' ', usecols=[
+                                      'interface_id', 'Consequence'])
+        interfaces_info[['pdb_id', 'ENSP', 'temp_chain', 'int_chain', 'type']
+                        ] = interfaces_info.interface_id.str.split("_", expand=True)
+
+        # Consequence
+        summary = interfaces_info.groupby(
+            ['type', 'Consequence']).size().reset_index(name='Count')
+        summary['type'] = summary['type'].replace({'ligand': 'interface_with_ligand',
+                                                   'protein': 'interface_with_protein',
+                                                   'nucleic': 'interface_with_dna'})
+
+        summary = summary.pivot(index='Consequence',
+                                columns='type', values='Count')
+        summary = summary.fillna(0)
+
+        # number of mapped proteins
+        n_prot = interfaces_info['ENSP'].drop_duplicates().count()
+
+        # number of mapped interfaces
+        n_int = interfaces_info['interface_id'].drop_duplicates().count()
 
         # number of interfaces ligand
-        n_int_ligand_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'ligand' | uniq | wc -l"
-        n_int_ligand, err3 = call_subprocess(
-            n_int_ligand_cmd).format(int_infile)
+        # n_int_ligand_cmd="awk '{{print $1,$2,$3,$4,$10}}' | grep 'ligand' | uniq | wc -l"
+        # n_int_ligand, err3=call_subprocess(
+        #     n_int_ligand_cmd).format(int_infile)
 
-        # number of interfaces protein
-        n_int_prot_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'protein' | uniq | wc -l"
-        n_int_prot, err3 = call_subprocess(
-            n_int_prot_cmd).format(int_infile)
+        # # number of interfaces protein
+        # n_int_prot_cmd="awk '{{print $1,$2,$3,$4,$10}}' | grep 'protein' | uniq | wc -l"
+        # n_int_prot, err3=call_subprocess(
+        #     n_int_prot_cmd).format(int_infile)
 
-        # number of interfaces nucleic
-        n_int_nucleic_cmd = "awk '{{print $1,$2,$3,$4,$10}}' | grep 'nucleic' | uniq | wc -l"
-        n_int_nucleic, err3 = call_subprocess(
-            n_int_nucleic_cmd).format(int_infile)
+        # # number of interfaces nucleic
+        # n_int_nucleic_cmd="awk '{{print $1,$2,$3,$4,$10}}' | grep 'nucleic' | uniq | wc -l"
+        # n_int_nucleic, err3=call_subprocess(
+        #     n_int_nucleic_cmd).format(int_infile)
 
-        n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = n_int.decode(
-            'utf-8'), n_prot.decode('utf-8'),
-        n_int_ligand.decode('utf-8'), n_int_prot.decode('utf-8'),
-        n_int_nucleic.decode('utf-8')
+        n_variants, n_variants_unique, n_genes = n_variants.decode(
+            'utf-8').rstrip(), n_variants_unique.decode(
+            'utf-8').rstrip(), n_genes.decode('utf-8').rstrip()
+        #     'utf-8'), n_prot.decode('utf-8'),
+        # n_int_ligand.decode('utf-8'), n_int_prot.decode('utf-8'),
+        # n_int_nucleic.decode('utf-8')
 
-        #
+        stats_table = tabulate(
+            summary, headers='keys', tablefmt='psql')
 
         # message to print out in report
-        stats_message = ('''
+#         stats_message = ('''
 
-        Stats
-        -----
-         - Total number of input interfaces ids: {}
-         - Total number of corresponding proteins (total number of splitted files): {}
-         - Total number of interfaces of type ligand: {}
-         - Total number of interfaces of type protein: {}
-         - Total number of interfaces of type nucleic: {}
-        ''').format(str(n_int), str(n_prot), str(n_int_ligand), str(n_int_prot), str(n_int_nucleic))
+#         Stats
+#         -----
+#          - Total number of mapped records : {}
+#          - Total number of mapped variants (unique ids): {}
+#          - Percentage of mapped variants : {}
+#          - Total number of corresponding interfaces : {}
+#          - Percentage of mapped variants : {}
+#          - Total number of corresponding proteins: {}
+#          - Total number of corresponding genes: {} \
 
-        return stats_message
+
+# ''').format(str(n_variants),
+#             str(n_variants_unique),
+#             str((n_variants_unique/var_stats['n_variants']) * 100)
+#             str(n_int),
+#             str((n_variants_unique/int_stats['n_interfaces']) * 100)
+#             str(n_prot),
+#             str(n_genes))
+
+        stats_message = {'Variable': ['Variants ids', 'Unique variants ids',
+                                      'Interface ids', 'Protein ids', 'Gene ids'],
+                         'Total':
+                         [int(n_variants), int(n_variants_unique),
+                          n_int, n_prot, int(n_genes)],
+                         '% (mapped / input)':
+                         ['-',
+                          round((int(n_variants_unique) /
+                                 var_stats.iloc[0]['n_variants']) * 100, 2),
+                          round((int(n_variants_unique) /
+                                 int_stats.iloc[0]['n_interfaces']) * 100, 2),
+                          round((int(n_variants_unique) /
+                                 int_stats.iloc[0]['n_interfaces']) * 100, 2),
+                          round((int(n_variants_unique) /
+                                 int_stats.iloc[0]['n_interfaces']) * 100, 2)]}
+
+        stats_message = pd.DataFrame(stats_message)
+        stats_message.set_index('Variable')
+        stats_message2 = tabulate(
+            stats_message, headers='keys', tablefmt='psql')
+
+        return stats_message2, stats_table
 
 
 def main():
@@ -109,8 +178,8 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\  
-    $$  __$$\ $$  __$$\ $$  __$$\  
+    $$$$$$$\  $$$$$$$\  $$$$$$$\   
+    $$  __$$\ $$  __$$\ $$  __$$\    
     $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
     $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\  
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
@@ -165,10 +234,12 @@ def main():
     report = open(os.path.join(args.out, 'pdbmapper.report'), 'w')
     report.write(description)
     report.write(epilog)
-    report.write('Command line input:\n' +
-                 '-------------------\n' +
-                 '\n')
-    report.write(os.path.basename(" ".join(sys.argv)) + '\n' + '\n' + '\n')
+    report.write('''
+    Command line input:
+    -------------------
+    \n''')
+    progname = os.path.basename(sys.argv[0])
+    report.write(progname + ' ' + " ".join(sys.argv[1:]) + '\n' + '\n' + '\n')
     report.write(time_format + out_message + '\n')
 
     # initialize class
@@ -184,6 +255,20 @@ def main():
         p = mp.Pool(1)
         # results = pool.map(howmany_within_range_rowonly, [row for row in data])
         # pool.close()
+
+    if args.force is True and os.listdir(args.out):
+        os.remove(os.path.join(
+            args.out, ('setID_pident' + str(args.pident) + '.File')))
+        os.remove(os.path.join(
+            args.out, ('MappedVariants_pident' + str(args.pident) + '.File')))
+    else:
+        logger.warning(
+            'Directory ' + args.out + 'is not empty. Not overwritting files. ' +
+            'Please select option --force or specify a different output dir.')
+        spinner.stop_and_persist(symbol='\U0001F4CD',
+                                 text=' Directory ' + args.out + 'is not empty. Not overwritting files. \
+             Please select option --force or specify a different output dir.')
+        exit(-1)
 
    # # create chimera scripts:
    # if args.chimera is not None:
@@ -317,14 +402,29 @@ def main():
                 exit(-1)
 
         # compute statistics
-        # pdbmapper.stats()
+        var_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
+            args.vardb, 'makevariantsdb_stats.info'))[0]))
+
+        int_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
+            args.intdb, 'makeinterfacesdb_stats.info'))[0]))
+
+        mapped_infofile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
+            args.out, 'MappedVariants*' + str(args.pident) + '*File'))[0]))
+
+        stats_message, stats_table = maptools.stats(
+            var_statsfile, int_statsfile, mapped_infofile)
 
         # Compute execution time
         end = time.time()
         logger.info('Done.')
-        report.write(time_format + ' PDBmapper has finished successfully. Total time: ' +
+        report.write(time_format + 'PDBmapper has finished successfully. Total time: ' +
                      str(datetime.timedelta(
-                         seconds=round(end-start))))
+                         seconds=round(end-start))) + '\n \n')
+        report.write('Stats\n')
+        report.write('-----\n')
+        report.write(stats_message)
+        report.write('\n')
+        report.write(stats_table)
         # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',
                                  text=' PDBmapper has finished successfully. Total time: ' +

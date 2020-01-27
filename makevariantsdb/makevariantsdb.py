@@ -68,12 +68,13 @@ class generateVarDB:
         n_variants, n_genes, n_features = n_variants.decode(
             'utf-8').rstrip(), n_genes.decode('utf-8').rstrip(), n_features.decode('utf-8').rstrip()
 
-        with open(os.path.join(vardb_outdir, 'makevariantsdb_stats.info'), 'w', newline='') as file:
-            writer = csv.writer(file, delimiter=' ')
-            writer.writerow([n_variants, "n_variants"])
-            writer.writerow([n_genes, "n_genes"])
-            writer.writerow([n_features, "n_features"])
-
+        # store results
+        d = {'n_variants': [n_variants],
+             'n_genes': [n_genes],
+             'n_features': [n_features]}
+        df = pd.DataFrame(data=d)
+        df.to_csv(os.path.join(vardb_outdir, 'makevariantsdb_stats.info'),
+                  sep='\t', encoding='utf-8', index=False)
         stats_message = ('''
 
         Stats
@@ -348,7 +349,7 @@ def main():
         end = time.time()
         report.write(
             time_format + 'Generation of genomic variants DB in ' +
-            vardb_outdir + ' took ' + str(datetime.timedelta(seconds=round(end-start))) + '\n')
+            vardb_outdir + ' completed successfully. Total time: ' + str(datetime.timedelta(seconds=round(end-start))) + '\n')
         report.write(stats_message)
 
         # mem_usage = memory_usage(f)

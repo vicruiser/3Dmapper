@@ -70,13 +70,14 @@ class generateIntDB:
         n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = n_int.decode('utf-8').rstrip(), n_prot.decode('utf-8').rstrip(
         ), n_int_ligand.decode('utf-8').rstrip(), n_int_prot.decode('utf-8').rstrip(), n_int_nucleic.decode('utf-8').rstrip()
 
-        with open(os.path.join(intdb_outdir, 'makevariantsdb_stats.info'), 'w', newline='') as file:
-            writer = csv.writer(file, delimiter=' ')
-            writer.writerow([n_int, "n_interfaces"])
-            writer.writerow([n_prot, "n_ENSP"])
-            writer.writerow([n_int_ligand, "n_interfaces_ligand"])
-            writer.writerow([n_int_prot, "n_interfaces_protein"])
-            writer.writerow([n_int_nucleic, "n_interfaces_nucleic"])
+        d = {'n_interfaces': [n_int],
+             'n_ENSP': [n_prot],
+             'n_interfaces_ligand': [n_int_ligand],
+             'n_interfaces_protein': [n_int_prot],
+             'n_interfaces_nucleic': [n_int_nucleic]}
+        df = pd.DataFrame(data=d)
+        df.to_csv(os.path.join(intdb_outdir, 'makeinterfacesdb_stats.info'),
+                  sep='\t', encoding='utf-8', index=False)
 
         stats_message = ('''
 
@@ -98,10 +99,10 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\
-    $$  __$$\ $$  __$$\ $$  __$$\
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\
+    $$$$$$$\  $$$$$$$\  $$$$$$$\  
+    $$  __$$\ $$  __$$\ $$  __$$\  
+    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\  
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -210,6 +211,11 @@ def main():
                     str(datetime.timedelta(seconds=round(end-start))) + '\n')
                 report.write(stats_message)
                 report.close()
+                # print in console result
+                spinner.stop_and_persist(symbol='\U0001F4CD',
+                                         text=' makeinterfacesdb process finished. Total time:  ' +
+                                         str(datetime.timedelta(
+                                             seconds=round(end-start))))
         else:
             makedb.log(
                 'A variants database already exists. Not overwritting files.', report, logger)
