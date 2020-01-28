@@ -22,6 +22,7 @@ from halo import Halo
 from timeit import default_timer as timer
 from subprocess import call
 from tabulate import tabulate
+from joblib import Parallel, delayed
 
 # import functions from scripts
 from .parse_argv import parse_commandline
@@ -35,7 +36,6 @@ from .pdbmapper_wrapper import wrapper
 from .stats import stats
 
 pd.options.mode.chained_assignment = None
-
 
 # define main function
 
@@ -63,8 +63,8 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\   
-    $$  __$$\ $$  __$$\ $$  __$$\    
+    $$$$$$$\  $$$$$$$\  $$$$$$$\  
+    $$  __$$\ $$  __$$\ $$  __$$\  
     $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
     $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\  
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
@@ -134,13 +134,14 @@ def main():
 
     # if parallel is True
     if args.parallel is True:
-        p = mp.Pool(mp.cpu_count()-1)
-
+        if args.njobs:
+            num_cores = int(args.njobs)
+        else:
+            num_cores = mp.cpu_count()-1
     else:
-        p = mp.Pool(1)
-        # results = pool.map(howmany_within_range_rowonly, [row for row in data])
-        # pool.close()
+        num_cores = 1
 
+    # if overwrite option is True
     if args.force is True:
         for item in os.listdir(args.out):
             if item.endswith(".File"):
@@ -261,35 +262,33 @@ def main():
                     logger.info(
                         'Input variants file contains a list of ensembl ids to process.')
                     # for every ensembl id
-                    for ensemblid in list_ensemblids:
-                        # remove \n from the end
-                        ensemblid = ensemblid.replace('\n', '')
-                        # run PDBmapper
-                        try:
-                            wrapper(ensemblid,
-                                    args.intdb,
-                                    args.vardb,
-                                    args.out,
-                                    args.pident,
-                                    args.consequence)
-                        except:
-                            continue
+                    Parallel(n_jobs=num_cores)(delayed(wrapper)(ensemblid.replace('\n', ''),
+                                                                args.intdb,
+                                                                args.vardb,
+                                                                args.out,
+                                                                args.pident,
+                                                                args.consequence)
+                                               for ensemblid in list_ensemblids)
+
+                    # for ensemblid in list_ensemblids:
+                    #     # remove \n from the end
+                    #     ensemblid = ensemblid.replace('\n', '')
+                    #     # run PDBmapper
+                    #     try:
+                    #         wrapper(ensemblid,
+                    #                 args.intdb,
+                    #                 args.vardb,
+                    #                 args.out,
+                    #                 args.pident,
+                    #                 args.consequence)
+                    #     except:
+                    #         continue
 
             # input is not a file but one or more protein ids
             # given in command line
             elif isfile(ids) == "no":
-                # for prot id get the gene id
-                ensemblid = ids
-                # run PDBmapper
-                try:
-                    wrapper(ensemblid,
-                            args.intdb,
-                            args.vardb,
-                            args.out,
-                            args.pident,
-                            args.consequence)
-                except:
-                    continue
+                input = 'not_file'
+                break
             elif isfile(ids) == "not_recognized":
                 pdbmapper.log('The input is neither an id(s) or a file containing a list of ids.',
                               report, logger)
@@ -297,7 +296,35 @@ def main():
                     'The input is neither an id(s) or a file containing a list of ids.')
                 exit(-1)
 
-        # compute statistics
+        # for prot id get the gene id
+        if input == 'not_file':
+            Parallel(n_jobs=num_cores)(delayed(wrapper)(ids,
+                                                        args.intdb,
+                                                        args.vardb,
+                                                        args.out,
+                                                        args.pident,
+                                                        args.consequence)
+                                       for ids in args.ensemblid)
+        #   ensemblid = ids
+        #    # run PDBmapper
+        #    try:
+        #         wrapper(ensemblid,
+        #                 args.intdb,
+        #                 args.vardb,
+        #                 args.out,
+        #                 args.pident,
+        #                 args.consequence)
+        #     except:
+        #         # compute statistics
+        for item in os.listdir(args.out):
+            if item.endswith(".File"):
+                pass
+            else:
+                logger.warning(
+                    'Error: Input ensembl ids has no mapping variants.')
+                spinner.warn(
+                    text=' Input ensembl ids has no mapping variants.')
+                exit(-1)
 
         var_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
             args.vardb, 'makevariantsdb_stats.info'))[0]))

@@ -76,7 +76,7 @@ def parse_commandline():
                         help="filter by a single or a list of APPRIS isoforms. \
                              The principal isoform is set by default. \
                              Options are: principal1, principal2, ...")
-    parser.set_defaults(filter_iso='principal1')
+    parser.set_defaults(filter_iso=None)
 
     # interfaces database file
     parser.add_argument("--pident", dest="pident", metavar="<int>",
@@ -92,6 +92,11 @@ def parse_commandline():
                         help="Speed up running time. Depends on GNU Parallel. \
                         O. Tange(2011): GNU Parallel - The Command-Line Power Tool, \
                         login: The USENIX Magazine, February 2011: 42-47.")
+
+    # interfaces database file
+    parser.add_argument("-j", "--jobs", dest="njobs", metavar="<int>",
+                        help="number of jobs to run in parallel")
+    parser.set_defaults(njobs=None)
 
     # create chimera script to visualize the region of interest
     # parser.add_argument("-chimera", action="store_true", dest="chimera",

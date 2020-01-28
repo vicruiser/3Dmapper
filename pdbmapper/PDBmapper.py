@@ -48,14 +48,16 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
     logger = get_logger(' PDBmapper', out_dir)
 
     # parse interfaces corresponding to the selected protein ID
+    print(protid, intdb)
     annoint = parser(protid, intdb)
+
     if annoint.empty:
         logger.error('Interfaces of protein ' +
                      protid + 'could not be parsed.')
         raise IOError
     else:
         logger.info('Interfaces of protein ' + protid + ' parsed.')
-
+    print(annoint)
     # if default database is used minor modifications are needed
     if pident is not None:
         logger.info('Filtering interfaces by pident = ' + str(pident) + '%.')
@@ -135,7 +137,6 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
         if any(sub_df['end'].str.contains('\?')):
             sub_df['end'] = np.where(sub_df['end'] == '?', sub_df['start'],
                                      sub_df['end'])
-        # print(sub_df[['end', 'start']])
         # create the range of numbers defined by the interval
         sub_df['Protein_position'] = sub_df.apply(lambda x: list(
             range(int(x['start']), int(x['end'])+1)), 1)
