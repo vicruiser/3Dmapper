@@ -51,7 +51,7 @@ def request(input_file, out_dir, out_file, log_dir, parallel=False):
 -A tab -d"
     # add input variables to command line
     if parallel is True:
-        cmd = bcftools_parallel.format(input_file, out_file)
+        cmd = bcftools.format(input_file, out_file)
     else:
         cmd = bcftools.format(input_file, out_file)
     # log file
