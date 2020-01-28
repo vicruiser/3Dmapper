@@ -149,12 +149,17 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
     # for sucessful merge, Protein_position column must be str type
     annoint['Protein_position'] = annoint['Protein_position'].astype(str)
     annovars['Protein_position'] = annovars['Protein_position'].astype(str)
+
+    annoint.set_index('Protein_position', inplace=True)
+    annovars.set_index('Protein_position', inplace=True)
+
+    mapped_variants = annovars.join(annoint, how='left')
     # Merge them both files
-    mapped_variants = pd.merge(annovars,
-                               annoint,
-                               left_on=['Protein_position'],
-                               right_on=['Protein_position'],
-                               sort=False)
+    # mapped_variants = pd.merge(annovars,
+    #                            annoint,
+    #                            left_on=['Protein_position'],
+    #                            right_on=['Protein_position'],
+    #                            sort=False)
 
     # stop if there are no results
     if mapped_variants.empty:
