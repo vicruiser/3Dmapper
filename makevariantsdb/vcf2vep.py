@@ -33,6 +33,8 @@ def request(input_file, out_dir, out_file, log_dir, parallel=False):
     os.environ["BCFTOOLS_PLUGINS"] = "%s/bin/" % os.environ.get(
         'VIRTUAL_ENV', '/usr/local/')
 
+    k = subprocess.Popen('bcftools +split-vep', stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT, shell=True)
     # shell command to execute bcftools (bash)
     bcftools = "bcftools \
 +split-vep {} \
@@ -58,6 +60,7 @@ def request(input_file, out_dir, out_file, log_dir, parallel=False):
     logger = get_logger('vcf2vep', log_dir)
     logger.info('Using bcftools to convert vcf file to vep format.')
 
+    print(cmd)
     # execute subprocess
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT, shell=True)
@@ -68,7 +71,6 @@ def request(input_file, out_dir, out_file, log_dir, parallel=False):
     if err is None:
         logger.info('File in vcf format converted successfully to vep format.')
     else:
-        logger.error(err)
         logger.error(
             'Something went wrong converting the vcf file into vep format.')
         raise IOError()
@@ -105,6 +107,6 @@ def vcf2vep(input_file, out_dir, out_file, overwrite, log_dir, parallel=False):
     # execute function
     if os.path.isfile(out_file):
         if overwrite is True:
-            request(input_file, out_dir, out_file, overwrite, log_dir, parallel)
+            request(input_file, out_dir, out_file, log_dir, parallel=False)
     else:
-        request(input_file, out_dir, out_file,  overwrite, log_dir, parallel)
+        request(input_file, out_dir, out_file, log_dir, parallel=False)

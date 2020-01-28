@@ -141,16 +141,26 @@ def main():
         # results = pool.map(howmany_within_range_rowonly, [row for row in data])
         # pool.close()
 
-    if args.force is True and os.listdir(args.out):
+    if args.force is True:
         for item in os.listdir(args.out):
             if item.endswith(".File"):
                 os.remove(os.path.join(args.out, item))
+    elif os.listdir(args.out):
+        for item in os.listdir(args.out):
+            if item.endswith(".File"):
+                logger.warning(
+                    'Directory ' + args.out + ' is not empty. Not overwritting files. ' +
+                    'Please select option --force or specify a different output dir.')
+                spinner.warn(
+                    text=' Directory ' + args.out + ' is not empty. Not overwritting files. ' +
+                    'Please select option --force or specify a different output dir.')
+                exit(-1)
     else:
         logger.warning(
-            'Directory ' + args.out + 'is not empty. Not overwritting files. ' +
+            'Directory ' + args.out + ' is not empty. Not overwritting files. ' +
             'Please select option --force or specify a different output dir.')
         spinner.warn(
-            text=' Directory ' + args.out + 'is not empty. Not overwritting files. ' +
+            text=' Directory ' + args.out + ' is not empty. Not overwritting files. ' +
             'Please select option --force or specify a different output dir.')
         exit(-1)
 

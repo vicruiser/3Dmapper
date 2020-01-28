@@ -127,7 +127,7 @@ class generateVarDB:
     def wrapper(self, input_format, var_infile, out, log_dir,
                 report, logger, spinner, overwrite=False, parallel=False):
 
-         # created by default
+        # created by default
         out_dir = os.path.join(out, 'DBs')
         out_file = os.path.join(
             out_dir, 'variants.vep')  # created by default
