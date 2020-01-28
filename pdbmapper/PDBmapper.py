@@ -150,10 +150,11 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
     annoint['Protein_position'] = annoint['Protein_position'].astype(str)
     annovars['Protein_position'] = annovars['Protein_position'].astype(str)
 
-    annoint.set_index('Protein_position', inplace=True)
-    annovars.set_index('Protein_position', inplace=True)
+    #annoint.set_index('Protein_position', inplace=True)
+    #annovars.set_index('Protein_position', inplace=True)
 
-    mapped_variants = annovars.join(annoint, how='left')
+    mapped_variants = annovars.join(
+        annoint.set_index('Protein_position'), on='Protein_position', how='inner')
     # Merge them both files
     # mapped_variants = pd.merge(annovars,
     #                            annoint,
