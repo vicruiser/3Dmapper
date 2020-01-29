@@ -183,6 +183,7 @@ def main():
         for ids in args.varid:
             # run PDBmapper
             if isfile(ids) == 'yes':
+                input = 'file'
                 with open(ids) as list_varids:
                     for id in list_varids:
                         # remove \n from the end
@@ -207,35 +208,66 @@ def main():
                             logger.error(
                                 'Wrong input: {} is not a recognizable variant id'.format(id))
                             continue
+            # given in command line
+            elif isfile(ids) == "no":
+                input = 'not_file'
+                break
 
-            elif isfile(ids) == 'no':
-                id = ids
-                # grep variant in index file created with makevariantsdb
-                cmd = ('grep \'{}\' {}').format(id, index_file)
-                # call subprocess
-                out, err = call_subprocess(cmd)
-                if err is None and out != b'':
-                    toprocess = out.decode('utf-8')
-                    # geneid correspond to the 2nd column in the line
-                    transcriptid = toprocess.split(" ")[2].strip()
-                    # execute PDBmapper
-                    wrapper(transcriptid,
-                            args.intdb,
-                            args.vardb,
-                            args.out,
-                            args.pident,
-                            args.consequence,
-                            id)
-                else:
-                    logger.error(
-                        'Wrong input: {} is not a recognizable variant id'.format(id))
-                    continue
             else:
                 logger.error(
                     'The input variants ids provided are not in a valid format.')
                 spinner.fail(" Running PDBmapper...failed!")
                 report.write(time_format + " Running PDBmapper...failed!")
                 raise IOError
+
+        if input == 'not_file':
+
+            cmd = ('grep \'{}\' {}').format(args.varid, index_file)
+            # call subprocess
+            out, err = call_subprocess(cmd)
+            if err is None and out != b'':
+                toprocess = out.decode('utf-8')
+                # geneid correspond to the 2nd column in the line
+                transcriptid = toprocess.split(" ")[2].strip()
+
+            Parallel(n_jobs=num_cores)(delayed(wrapper)(transcriptid[i],
+                                                        args.intdb,
+                                                        args.vardb,
+                                                        args.out,
+                                                        args.pident,
+                                                        args.consequence,
+                                                        varids[i])
+                                       for i in len(transcriptid))
+
+        if not any(fname.endswith('.File') for fname in os.listdir(args.out)):
+            logger.warning(
+                'Error: Input ensembl ids has no mapping variants.')
+            spinner.warn(
+                text=' Input ensembl ids has no mapping variants.')
+            exit(-1)
+
+        # elif isfile(ids) == 'no':
+        #         id = ids
+        #         # grep variant in index file created with makevariantsdb
+        #         cmd = ('grep \'{}\' {}').format(id, index_file)
+        #         # call subprocess
+        #         out, err = call_subprocess(cmd)
+        #         if err is None and out != b'':
+        #             toprocess = out.decode('utf-8')
+        #             # geneid correspond to the 2nd column in the line
+        #             transcriptid = toprocess.split(" ")[2].strip()
+        #             # execute PDBmapper
+        #             wrapper(transcriptid,
+        #                     args.intdb,
+        #                     args.vardb,
+        #                     args.out,
+        #                     args.pident,
+        #                     args.consequence,
+        #                     id)
+        #         else:
+        #             logger.error(
+        #                 'Wrong input: {} is not a recognizable variant id'.format(id))
+        #             continue
 
         # execute main function and compute executiong time
         end = time.time()
@@ -258,6 +290,7 @@ def main():
         for ids in args.ensemblid:
             # check if input is a file
             if isfile(ids) == "yes":
+                input = 'file'
                 with open(ids) as list_ensemblids:
                     logger.info(
                         'Input variants file contains a list of ensembl ids to process.')
@@ -270,21 +303,6 @@ def main():
                                                                 args.consequence)
                                                for ensemblid in list_ensemblids)
 
-                    # for ensemblid in list_ensemblids:
-                    #     # remove \n from the end
-                    #     ensemblid = ensemblid.replace('\n', '')
-                    #     # run PDBmapper
-                    #     try:
-                    #         wrapper(ensemblid,
-                    #                 args.intdb,
-                    #                 args.vardb,
-                    #                 args.out,
-                    #                 args.pident,
-                    #                 args.consequence)
-                    #     except:
-                    #         continue
-
-            # input is not a file but one or more protein ids
             # given in command line
             elif isfile(ids) == "no":
                 input = 'not_file'
@@ -305,26 +323,13 @@ def main():
                                                         args.pident,
                                                         args.consequence)
                                        for ids in args.ensemblid)
-        #   ensemblid = ids
-        #    # run PDBmapper
-        #    try:
-        #         wrapper(ensemblid,
-        #                 args.intdb,
-        #                 args.vardb,
-        #                 args.out,
-        #                 args.pident,
-        #                 args.consequence)
-        #     except:
-        #         # compute statistics
-        for item in os.listdir(args.out):
-            if item.endswith(".File"):
-                pass
-            else:
-                logger.warning(
-                    'Error: Input ensembl ids has no mapping variants.')
-                spinner.warn(
-                    text=' Input ensembl ids has no mapping variants.')
-                exit(-1)
+
+        if not any(fname.endswith('.File') for fname in os.listdir(args.out)):
+            logger.warning(
+                'Error: Input ensembl ids has no mapping variants.')
+            spinner.warn(
+                text=' Input ensembl ids has no mapping variants.')
+            exit(-1)
 
         var_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
             args.vardb, 'makevariantsdb_stats.info'))[0]))

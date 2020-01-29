@@ -27,28 +27,29 @@ def wrapper(ensemblid, intdb, vardb, out, pident, consequence, varid=None):
         geneid = ensemblIDs['geneID']
         protid = ensemblIDs['protID']
         transcriptID = ensemblIDs['transcriptID']
+
+        # run PDBmapper
+        for i in range(0, len(protid)):
+            try:
+                PDBmapper(protid[i],
+                          geneid[i],
+                          transcriptID[i],
+                          intdb,
+                          vardb,
+                          out,
+                          pident,
+                          consequence,
+                          varid)
+        # error handling
+            except:
+                if varid is None:
+                    logger.error(
+                        ('Warning: {} has no mapping variants.'.format(ensemblid)))
+                else:
+                    logger.error(
+                        ('Warning: {} has no mapping variants.'.format(str(varid))))
+            continue
      # error handling
     except:
         logger.error(
             ('Warning: {} has no matching ensembl ids.'.format(ensemblid)))
-    # run PDBmapper
-    for i in range(0, len(protid)):
-        try:
-            PDBmapper(protid[i],
-                      geneid[i],
-                      transcriptID[i],
-                      intdb,
-                      vardb,
-                      out,
-                      pident,
-                      consequence,
-                      varid)
-    # error handling
-        except:
-            if varid is None:
-                logger.error(
-                    ('Warning: {} has no mapping variants.'.format(ensemblid)))
-            else:
-                logger.error(
-                    ('Warning: {} has no mapping variants.'.format(str(varid))))
-        continue

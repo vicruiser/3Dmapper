@@ -48,7 +48,6 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
     logger = get_logger(' PDBmapper', out_dir)
 
     # parse interfaces corresponding to the selected protein ID
-    print(protid, intdb)
     annoint = parser(protid, intdb)
 
     if annoint.empty:
@@ -57,7 +56,7 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
         raise IOError
     else:
         logger.info('Interfaces of protein ' + protid + ' parsed.')
-    print(annoint)
+
     # if default database is used minor modifications are needed
     if pident is not None:
         logger.info('Filtering interfaces by pident = ' + str(pident) + '%.')
