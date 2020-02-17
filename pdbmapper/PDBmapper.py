@@ -75,7 +75,6 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
             raise IOError()
         # spread the data frame to have one amino acid position per row instead of compacted.
         annoint = reshape(annoint_pident)
-
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneid, vardb)
     logger.info('Variants file from gene id ' + geneid + ' parsed.')
@@ -155,6 +154,7 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
 
     mapped_variants = annovars.join(
         annoint.set_index('Protein_position'), on='Protein_position', how='inner')
+    # print(mapped_variants)
     # Merge them both files
     # mapped_variants = pd.merge(annovars,
     #                            annoint,
@@ -172,8 +172,9 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
     # if merging was successful, create setID file and
     # save the merged dataframe as well
     else:
-        setID_file = mapped_variants[['interface_id',
+        setID_file = mapped_variants[['PROTEIN_NAME',
                                       'Uploaded_variation']]
+        print(setID_file)
         setID_file.drop_duplicates(inplace=True)
         mapped_variants.drop_duplicates(inplace=True)
 

@@ -59,6 +59,8 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
                           shell=True)
     # get output
     out1, err1 = p1.communicate()
+    print(cmd1)
+    print(out1)
     # error handling
     if err1 is None:
         logger.info('This file contains protein ids')

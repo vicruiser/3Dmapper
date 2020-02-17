@@ -203,6 +203,7 @@ def main():
                                     args.out,
                                     args.pident,
                                     args.consequence,
+                                    args.uniprot,
                                     id)
                         else:
                             logger.error(
@@ -236,6 +237,7 @@ def main():
                                                         args.out,
                                                         args.pident,
                                                         args.consequence,
+                                                        args.uniprot,
                                                         varids[i])
                                        for i in len(transcriptid))
 
@@ -300,7 +302,8 @@ def main():
                                                                 args.vardb,
                                                                 args.out,
                                                                 args.pident,
-                                                                args.consequence)
+                                                                args.consequence,
+                                                                args.uniprot)
                                                for ensemblid in list_ensemblids)
 
             # given in command line
@@ -321,7 +324,8 @@ def main():
                                                         args.vardb,
                                                         args.out,
                                                         args.pident,
-                                                        args.consequence)
+                                                        args.consequence,
+                                                        args.uniprot)
                                        for ids in args.ensemblid)
 
         if not any(fname.endswith('.File') for fname in os.listdir(args.out)):
@@ -340,8 +344,8 @@ def main():
         mapped_infofile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
             args.out, 'MappedVariants*' + str(args.pident) + '*File'))[0]))
 
-        stats_message, stats_table = stats(
-            var_statsfile, int_statsfile, mapped_infofile, args.out)
+        # stats_message, stats_table = stats(
+        #    var_statsfile, int_statsfile, mapped_infofile, args.out)
 
         # Compute execution time
         end = time.time()
@@ -351,9 +355,9 @@ def main():
                          seconds=round(end-start))) + '\n \n')
         report.write('Stats\n')
         report.write('-----\n')
-        report.write(stats_message)
+        # report.write(stats_message)
         report.write('\n')
-        report.write(stats_table)
+        # report.write(stats_table)
         report.write('\n')
         # print in console result
         spinner.stop_and_persist(symbol='\U0001F4CD',

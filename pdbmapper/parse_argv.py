@@ -55,6 +55,10 @@ def parse_commandline():
                         help="interfaces database directory", required=True)
     parser.set_defaults(intdb=None)
 
+    # interfaces database file
+    parser.add_argument("--uniprot", dest="uniprot", action='store_true',
+                        help="protein features are defined by Uniprot IDs", default=False)
+
     # variants db
     parser.add_argument("--vardb", dest="vardb", metavar="<String>",
                         help='variants database directory', required=True)
@@ -81,7 +85,7 @@ def parse_commandline():
     # interfaces database file
     parser.add_argument("--pident", dest="pident", metavar="<int>",
                         help="threshold of sequence identity (percertage)")
-    parser.set_defaults(pident=50)
+    parser.set_defaults(pident=None)
 
     # force overwrite
     parser.add_argument("--force", dest="force", action='store_true',

@@ -189,7 +189,7 @@ def main():
 
                 elif isfile(f) == 'is_file':
                     # split interface db
-                    split('ENSP', f, intdb_outdir,
+                    split('UNIPROT_ACCESSION', f, intdb_outdir,
                           'txt', args.force, log_dir)
                     stats_message = makedb.stats(
                         f, intdb_outdir)

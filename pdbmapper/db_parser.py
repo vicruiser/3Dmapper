@@ -31,5 +31,8 @@ def parser(ensemblID, db_dir):
         raise IOError()
         exit(-1)
     else:
-        df = pd.read_csv(f[0], sep=" |\t", engine='python')
+        try:
+            df = pd.read_csv(f[0], sep="\t", engine='python')
+        except:
+            df = pd.read_csv(f[0], sep="\t", engine='python')
         return df

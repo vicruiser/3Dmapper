@@ -43,7 +43,7 @@ def translate_ensembl(ensid, log_dir, isoform_filter=None):
         if line != b'':
             list_ids = line.split('\n')
             df = pd.DataFrame(np.array(list_ids), columns=list("l"))
-            df[['isoform', 'geneID', 'transcriptID', 'protID']
+            df[['isoform', 'geneID', 'transcriptID', 'protID', 'UniprotID']
                ] = df['l'].str.split(',', expand=True)
 
             # filter by principal isoform if any filter
@@ -57,7 +57,9 @@ def translate_ensembl(ensid, log_dir, isoform_filter=None):
             protID = df['protID'].tolist()
             geneID = df['geneID'].tolist()
             transcriptID = df['transcriptID'].tolist()
-            return {'protID': protID, 'geneID': geneID, 'transcriptID': transcriptID}
+            UniprotID = df['UniprotID'].tolist()
+
+            return {'protID': protID, 'geneID': geneID, 'transcriptID': transcriptID, 'UniprotID': UniprotID}
 
         else:
             logger.error(

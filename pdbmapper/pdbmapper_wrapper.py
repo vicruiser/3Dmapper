@@ -16,7 +16,7 @@ DNA = '\U0001F9EC'
 #       text_succeed=" Running PDBmapper...done.",
 #       text_fail=" Running PDBmapper...failed!",
 #       emoji=DNA)
-def wrapper(ensemblid, intdb, vardb, out, pident, consequence, varid=None):
+def wrapper(ensemblid, intdb, vardb, out, pident, consequence, uniprot=False, varid=None):
 
     # logging
     logger = get_logger('wrapper', out)
@@ -27,7 +27,10 @@ def wrapper(ensemblid, intdb, vardb, out, pident, consequence, varid=None):
         geneid = ensemblIDs['geneID']
         protid = ensemblIDs['protID']
         transcriptID = ensemblIDs['transcriptID']
+        UniprotID = ensemblIDs['UniprotID']
 
+        if uniprot is True:
+            protid = UniprotID
         # run PDBmapper
         for i in range(0, len(protid)):
             try:
