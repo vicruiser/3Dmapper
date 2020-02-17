@@ -33,14 +33,6 @@ awk -v ci=\"{1}\" \
 {{f=od$ci\".{3}\"; print >> f; close(f)}}'"
 
 
-# \
-#!($ci in p) {{p[$ci]}} \
-# system(\" stat \" f \" > /dev/null 2> /dev/null\") != 0 {{print h > f }} \
-# {{print >> f; close(f)}}'"
-
-# grep - v '##' ../data/ukb_wes_dec2019_chr.vep | sed - e '1s/^#//' | \
-#    awk - v ci = "4" - v od = "./" - F ' ' 'NR==1 {h=$0; next}; !seen[$ci]++{f=od$ci".{}"; print h >> f }; {f=od$ci".vep"; print >> f; close(f)}'
-
 index_file = "grep -v '##' {} | awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' >> {} "
 #index_file = "awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' {} | uniq >> {}  "
 

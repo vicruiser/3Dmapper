@@ -177,7 +177,7 @@ def main():
                         # for every prot id
                         for int_infile in int_f:
                             # split interface db
-                            split('ENSP', int_infile, psdb_outdir,
+                            split('PROTEIN_ACCESSION', int_infile, psdb_outdir,
                                   'txt', args.force, log_dir)
                             stats_message = makedb.stats(
                                 int_infile, psdb_outdir)
@@ -187,7 +187,7 @@ def main():
 
                 elif isfile(f) == 'is_file':
                     # split interface db
-                    split('UNIPROT_ACCESSION', f, psdb_outdir,
+                    split('PROTEIN_ACCESSION', f, psdb_outdir,
                           'txt', args.force, log_dir)
                     stats_message = makedb.stats(
                         f, psdb_outdir)

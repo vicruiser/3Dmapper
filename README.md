@@ -44,7 +44,7 @@ pdbmapper -vardb test_pdbmapper/DBs/varDB/ -intdb test_pdbmapper/DBs/intDB/ -pro
 
 ### Paralellization
 
-PDBmapper has an option to speed up the running time by means of parallelization. While 'makepsdb' and 'makevariantsdb' run with GNU parallel [ref], 'pdbmapper' has an algorithm in python. 
+PDBmapper has an option to speed up the running time by means of parallelization. While `makepsdb` and `makevariantsdb` run with GNU parallel [ref], `pdbmapper` has an algorithm in python. 
 
 An alternative to parallelaize pdbmapper is to is to give as input the protein ids in individual tasks to perform a job array in a cluster computer?. The first task should write the initial files. The rest set the option `-force n` to prevent repeating innecesary steps. 
 
@@ -52,9 +52,31 @@ An alternative to parallelaize pdbmapper is to is to give as input the protein i
 
 # PDBmapper databases
 
-## Interfaces database
+## Protein structural features input format
 
-An already pre-computed database with a total number of **the number** proteins. Since an interface database is not an standard thing to  have, PDBmapper has been designed to manage databases of interfaces that are in a certain format. The default format is a 10 column tab-delimited file. Empty values are denoted by '-'. The output columns are: 
+The default format is a simple whitespace-separated format (columns may be separated by space or tab characters), containing six required columns. Any extra columns will be included in the results. Empty values are denoted by '-'.
+
+- PROTEIN_ACCESION: Ensembl or Uniprot accesion identifier. 
+- TRANSCRIPT_ACCESION: Ensembl identifier. 
+- PROTEIN_POSITION: residue position on the protein. 
+- PDB_CODE
+- PDB_CHAIN
+- PROTEIN_FEATURE_ID : structural identifier made up by the user, e.g.: PROTEIN_POSITION + PDB_CODE + PDB_CHAIN
+
+Optional but recommendable for downstream analysis:
+- AMINO_ACIDS: original residue. 
+- PDB_AMINO_ACIDS: original residue in the PDB file. 
+- PIDENT: sequence identity percentage between the protein sequence and the PDB chain. When available, this can be moludated as a filter parameter with the option `--pident`. 
+
+Put an example here:
+
+`ENSP0000023123  ENST0000023123  123    1wqs    A   ep300_1wqs_A`
+
+
+
+## Interfaces database 
+
+For our own research, a pre-computed database was used. We did generate this by following the protocol described in [ref to paper]. The format is a  10 column tab-delimited file: 
 
 | Column name         | Notes                                                                                                                                                                 |
 | :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -78,9 +100,15 @@ An already pre-computed database with a total number of **the number** proteins.
 
 ## Variant annotated files
 
-The input annotated genomic variants file must be either in [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format) or [VEP](https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout) default format. 
+The input annotated genomic variants file must be either in [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format), [VEP](https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout) or [MAF] (https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/) default format. Additionally, a VEP-like format is admisible. This is in question same as VEP but not all the files are needed: 
 
-### ClinVar
+- Uploaded_variation
+- Gene
+- Feature
+- Consequence
+- Protein_position
+- Amino_acids (optional but recommedable)
+
 
 ## Custom
 
