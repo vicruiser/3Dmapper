@@ -2,7 +2,7 @@
 
 #"""pdbmapper.__main__: executed when bootstrap directory is called as script."""
 
-from .makepdbmapperdb import main
+from .makepsdb import main
 
 if __name__ == '__main__':
     main()

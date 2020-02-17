@@ -27,13 +27,13 @@ def parse_commandline():
                                                          $$ |      $$ |
                                                          \__|      \__|
 
----------------  Map annotated genomic variants to protein interfaces data in 3D. -----------------
+---------------  Map genomic variants to protein data in 3D. -----------------
 
 '''
     epilog = \
         '''
           -------------------------------------------------------------------------        
-         |  Copyright (c) 2019 Victoria Ruiz --                                    |  
+         |  Copyright (c) 2020 Victoria Ruiz --                                    |  
          |  vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
           -------------------------------------------------------------------------
 
@@ -42,19 +42,19 @@ def parse_commandline():
     parser = argparse.ArgumentParser(epilog=epilog,
                                      formatter_class=argparse.RawDescriptionHelpFormatter, description=description)
     # interfaces database file
-    parser.add_argument("--intdb", nargs='+', metavar="<String>",
-                        help="interfaces database directory", required=True)
-    parser.set_defaults(intdb=None)
+    parser.add_argument("-psdb", "--prot_struct_db" nargs='+', metavar="<String>", dest="psdb",
+                        help="protein structure database directory", required=True)
+    parser.set_defaults(psdb=None)
 
     # create default output directory
-    parser.add_argument("--out", metavar="<String>", dest="out",
+    parser.add_argument("-o", "--out", metavar="<String>", dest="out",
                         help="output directory")
     parser.set_defaults(out=".")
     # interfaces database file
-    parser.add_argument("--force", dest="force", action='store_true',
+    parser.add_argument("-f", "--force", dest="force", action='store_true',
                         help="force to owerwrite? (y/n)", default=False)
     # run in parallel
-    parser.add_argument("--parallel", dest="parallel", action='store_true',
+    parser.add_argument("-p", "--parallel", dest="parallel", action='store_true',
                         default=False,
                         help="Speed up running time. Depends on GNU Parallel. \
                         O. Tange(2011): GNU Parallel - The Command-Line Power Tool, \

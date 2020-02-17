@@ -3,7 +3,7 @@
 # Introduction
 
 ## Motivation
-PDB mapper is a tool to map annotated genomic variants to protein interfaces data in 3D.
+PDBmapper is a tool to map annotated genomic variants to protein features data in 3D.
 
 ## Overview
 The PDBmaper program supports xxx different search methods:
@@ -13,7 +13,7 @@ The PDBmaper program supports xxx different search methods:
 ## Running PDBmapper
 
 ```markdown
-makeinterfacesdb -intdb PDBmapper/pdbmapper/data/p53_ep300_intdb.dat -out ./test_pdbmapper/
+makepsdb -psdb p53_ep300_intdb.dat --out out/path/dir 
 makevariantsdb -vcf PDBmapper/pdbmapper/data/p53_ep300_ExACvariants.vep -out ./test_pdbmapper/
 pdbmapper -vardb test_pdbmapper/DBs/varDB/ -intdb test_pdbmapper/DBs/intDB/ -protid ENSP00000263253 ENSP00000482258 -out test_pdbmapper/ 
 ```
@@ -44,7 +44,9 @@ pdbmapper -vardb test_pdbmapper/DBs/varDB/ -intdb test_pdbmapper/DBs/intDB/ -pro
 
 ### Paralellization
 
-PDBmapper is not possible to run in parallel per se. However, the easiest way to do this is to give as input the protein ids individually in parallel tasks. The first task should write the initial files. The rest set the option `-force n` to prevent repeating innecesary steps. 
+PDBmapper has an option to speed up the running time by means of parallelization. While 'makepsdb' and 'makevariantsdb' run with GNU parallel [ref], 'pdbmapper' has an algorithm in python. 
+
+An alternative to parallelaize pdbmapper is to is to give as input the protein ids in individual tasks to perform a job array in a cluster computer?. The first task should write the initial files. The rest set the option `-force n` to prevent repeating innecesary steps. 
 
 **Explain better or implemen a parallel option** 
 

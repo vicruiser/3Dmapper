@@ -39,58 +39,58 @@ class generateIntDB:
         logger.info(message)
         report.write(self.time + message + '\n')
 
-    def stats(self, int_infile, intdb_outdir):
-        # count after transforming to vep format the total number
-        # of input interfaces, number of genes, etc
+    # def stats(self, int_infile, psdb_outdir):
+    #     # count after transforming to vep format the total number
+    #     # of input interfaces, number of genes, etc
 
-        # number of interfaces
-        n_int_cmd = " awk 'NR>1 {{print $1,$2,$3,$4,$10}}' {} | wc -l"
-        n_int, err1 = call_subprocess(
-            n_int_cmd.format(int_infile))
+    #     # number of interfaces
+    #     n_int_cmd = " awk 'NR>1 {{print $1,$2,$3,$4,$10}}' {} | wc -l"
+    #     n_int, err1 = call_subprocess(
+    #         n_int_cmd.format(int_infile))
 
-        # number of proteins: count total number of splitted files
-        n_prot_cmd = "find {} -type f -iname 'ENSP*' | wc -l"
-        n_prot, err2 = call_subprocess(n_prot_cmd.format(intdb_outdir))
+    #     # number of proteins: count total number of splitted files
+    #     n_prot_cmd = "find {} -type f -iname 'ENSP*' | wc -l"
+    #     n_prot, err2 = call_subprocess(n_prot_cmd.format(psdb_outdir))
 
-        # number of interfaces ligand
-        n_int_ligand_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'ligand' |  wc -l"
-        n_int_ligand, err3 = call_subprocess(
-            n_int_ligand_cmd.format(int_infile))
+    #     # number of interfaces ligand
+    #     n_int_ligand_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'ligand' |  wc -l"
+    #     n_int_ligand, err3 = call_subprocess(
+    #         n_int_ligand_cmd.format(int_infile))
 
-        # number of interfaces protein
-        n_int_prot_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'protein' |  wc -l"
-        n_int_prot, err3 = call_subprocess(
-            n_int_prot_cmd.format(int_infile))
+    #     # number of interfaces protein
+    #     n_int_prot_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'protein' |  wc -l"
+    #     n_int_prot, err3 = call_subprocess(
+    #         n_int_prot_cmd.format(int_infile))
 
-        # number of interfaces nucleic
-        n_int_nucleic_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'nucleic' |  wc -l"
-        n_int_nucleic, err3 = call_subprocess(
-            n_int_nucleic_cmd.format(int_infile))
+    #     # number of interfaces nucleic
+    #     n_int_nucleic_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'nucleic' |  wc -l"
+    #     n_int_nucleic, err3 = call_subprocess(
+    #         n_int_nucleic_cmd.format(int_infile))
 
-        n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = n_int.decode('utf-8').rstrip(), n_prot.decode('utf-8').rstrip(
-        ), n_int_ligand.decode('utf-8').rstrip(), n_int_prot.decode('utf-8').rstrip(), n_int_nucleic.decode('utf-8').rstrip()
+    #     n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = n_int.decode('utf-8').rstrip(), n_prot.decode('utf-8').rstrip(
+    #     ), n_int_ligand.decode('utf-8').rstrip(), n_int_prot.decode('utf-8').rstrip(), n_int_nucleic.decode('utf-8').rstrip()
 
-        d = {'n_interfaces': [n_int],
-             'n_ENSP': [n_prot],
-             'n_interfaces_ligand': [n_int_ligand],
-             'n_interfaces_protein': [n_int_prot],
-             'n_interfaces_nucleic': [n_int_nucleic]}
-        df = pd.DataFrame(data=d)
-        df.to_csv(os.path.join(intdb_outdir, 'makeinterfacesdb_stats.info'),
-                  sep='\t', encoding='utf-8', index=False)
+    #     d = {'n_interfaces': [n_int],
+    #          'n_ENSP': [n_prot],
+    #          'n_interfaces_ligand': [n_int_ligand],
+    #          'n_interfaces_protein': [n_int_prot],
+    #          'n_interfaces_nucleic': [n_int_nucleic]}
+    #     df = pd.DataFrame(data=d)
+    #     df.to_csv(os.path.join(psdb_outdir, 'makeinterfacesdb_stats.info'),
+    #               sep='\t', encoding='utf-8', index=False)
 
-        stats_message = ('''
+    #     stats_message = ('''
 
-        Stats
-        -----
-         - Total number of input interfaces ids: {}
-         - Total number of corresponding proteins (total number of splitted files): {}
-         - Total number of interfaces of type ligand: {}
-         - Total number of interfaces of type protein: {}
-         - Total number of interfaces of type nucleic: {}
-        ''').format(str(n_int), str(n_prot), str(n_int_ligand), str(n_int_prot), str(n_int_nucleic))
+    #     Stats
+    #     -----
+    #      - Total number of input interfaces ids: {}
+    #      - Total number of corresponding proteins (total number of splitted files): {}
+    #      - Total number of interfaces of type ligand: {}
+    #      - Total number of interfaces of type protein: {}
+    #      - Total number of interfaces of type nucleic: {}
+    #     ''').format(str(n_int), str(n_prot), str(n_int_ligand), str(n_int_prot), str(n_int_nucleic))
 
-        return stats_message
+    #     return stats_message
 
 
 def main():
@@ -111,7 +111,7 @@ def main():
                                                             $$ |      $$ |
                                                             \__|      \__|
 
-    ---------------  Map annotated genomic variants to protein interfaces data in 3D. -----------------
+    ---------------  Map annotated genomic variants to protein data in 3D. -----------------
 
     \n'''
 
@@ -137,18 +137,16 @@ def main():
     # set out dir and out file names
     # created by default
     out_dir = os.path.join(args.out, 'DBs')
-    # out_file = os.path.join(
-    #    out_dir, 'variants.vep')  # created by default
     # set output dir to split vep
-    intdb_outdir = os.path.join(out_dir, 'intDB')  # created by default
+    psdb_outdir = os.path.join(out_dir, 'psdb')  # created by default
     # create output dir if it doesn't exist
-    os.makedirs(intdb_outdir, exist_ok=True)
+    os.makedirs(psdb_outdir, exist_ok=True)
 
     # set up a log file
     logger = get_logger('main', out_dir)
     log_dir = out_dir
     # set up the report
-    report = open(os.path.join(out_dir, 'makeinterfacesdb.report'), 'w')
+    report = open(os.path.join(out_dir, 'makepsdb.report'), 'w')
     report.write(description)
     report.write(epilog)
     report.write('''
@@ -160,16 +158,16 @@ def main():
     time_format = '[' + time.ctime(time.time()) + '] '
     start = time.time()
 
-    if args.intdb is not None:
+    if args.psdb is not None:
 
-        if not os.listdir(intdb_outdir) or args.force is True:
+        if not os.listdir(psdb_outdir) or args.force is True:
 
             logger.info('Reading and splitting input file.')
 
             # report info
             report.write(time_format + 'Reading and splitting input file. \n')
             # for loop in case we have multiple inputs to read from a list of files
-            for f in args.intdb:
+            for f in args.psdb:
                 # check if input is a file
                 if isfile(f) == 'list_files':
                     with open(f) as list_int_files:
@@ -179,20 +177,20 @@ def main():
                         # for every prot id
                         for int_infile in int_f:
                             # split interface db
-                            split('ENSP', int_infile, intdb_outdir,
+                            split('ENSP', int_infile, psdb_outdir,
                                   'txt', args.force, log_dir)
                             stats_message = makedb.stats(
-                                int_infile, intdb_outdir)
+                                int_infile, psdb_outdir)
                             # log info
                             logger.info(
                                 int_infile + ' has been splitted successfully.')
 
                 elif isfile(f) == 'is_file':
                     # split interface db
-                    split('UNIPROT_ACCESSION', f, intdb_outdir,
+                    split('UNIPROT_ACCESSION', f, psdb_outdir,
                           'txt', args.force, log_dir)
                     stats_message = makedb.stats(
-                        f, intdb_outdir)
+                        f, psdb_outdir)
                     # log info
                     logger.info(
                         f + ' has been splitted successfully.')
@@ -207,7 +205,7 @@ def main():
                 report.write(
                     time_format + 'Reading and splitting input file...done. \n')
                 report.write(
-                    time_format + 'Generation of interfaces DB in ' + intdb_outdir + ' done. Total time: ' +
+                    time_format + 'Generation of interfaces DB in ' + psdb_outdir + ' done. Total time: ' +
                     str(datetime.timedelta(seconds=round(end-start))) + '\n')
                 report.write(stats_message)
                 report.close()
