@@ -187,7 +187,7 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=['pdbmapper', 'makepdbmapperdb',
+    packages=['pdbmapper', 'makepsdb',
               'makevariantsdb'],  # Required!!!!!
 
     # Specify which Python versions you support. In contrast to the
@@ -237,7 +237,7 @@ setup(
     # executes the function `main` from this package when invoked:
     entry_points={
         "console_scripts": ['pdbmapper=pdbmapper.__main__:main',
-                            'makepdbmapperdb=makepdbmapperdb.__main__:main',
+                            'makepsdb=makepsdb.__main__:main',
                             'makevariantsdb=makevariantsdb.__main__:main']
     },
 

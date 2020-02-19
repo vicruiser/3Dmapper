@@ -78,25 +78,25 @@ Put an example here:
 
 For our own research, a pre-computed database was used. We did generate this by following the protocol described in [ref to paper]. The format is a  10 column tab-delimited file: 
 
-| Column name         | Notes                                                                                                                                                                 |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **pdb.id**          | Biological Assembly pdb id                                                                                                                                            |
-| **ensembl.prot.id** | Ensembl protein ID                                                                                                                                                    |
-| **temp.chain**      | Template chain (only protein)                                                                                                                                         |
-| **int.chain**       | Interacting chain (protein, ligand or DNA)                                                                                                                            |
-| **temp.length**     | Length of the Ensembl protein sequence (without including the gaps of the alignment)                                                                                  |
-| **temp.start**      | Start of alignment in the Ensembl protein sequence (template chain)                                                                                                   |
-| **temp.end**        | End of alignment in the Ensembl protein sequence (template chain)                                                                                                     |
-| **length.ali**      | Length of the alignment between Ensembl protein sequence (subject) and PDB chain sequence (query)                                                                     |
-| **pident**          | Sequence Identity percent. This parameter serves as threshold. Only results with pident equal or higher to 50% are included                                           |
-| **interaction**     | Type of interfacial interaction, i.e., “protein”,”nucleic” or “ligand”                                                                                                |
-| **resid_qseq**      | residues of aligned query (PDB chain) sequence (i.e.: only aligned and includes gaps.)                                                                                |
-| **resid_sseq**      | residues of aligned subject (Ensembl) sequence (i.e.: only aligned and includes gaps.)                                                                                |
-| **qpos**            | index position of each residue of the aligned query (PDB chain) sequence starting from 1                                                                              |
-| **spos**            | index position of each residue of the aligned subject (Ensembl) sequence starting from 1                                                                              |
-| **q_ali_pos**       | real index position of each residue of the aligned query (PDB chain) sequence (i.e, + qstart)                                                                         |
-| **mapped.real.pos** | Position of the interfacial residues on the Ensembl protein sequence. At the end of the day, this is the column of your interest! (Protein position in the MC3 file). |
-| **pdb.pos**         | Corresponding position of the interfacial residues on the PDB chain sequence                                                                                          |
+| Column name               | Notes                                                                                                                                          |
+| :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PDB_code**              | Biological Assembly PDB ID                                                                                                                     |
+| **Protein_accession**     | Ensembl protein ID                                                                                                                             |
+| **PDB_chain**             | Template chain (only protein)                                                                                                                  |
+| **PDB_interacting_chain** | Interacting chain (protein, ligand or DNA)                                                                                                     |
+| **Protein_length**        | Length of the Ensembl protein sequence (without including the gaps of the alignment)                                                           |
+| **Protein_start_pos**     | Start of alignment in the Ensembl protein sequence (template chain)                                                                            |
+| **Protein_end_pos**       | End of alignment in the Ensembl protein sequence (template chain)                                                                              |
+| **Length_align**          | Length of the alignment between Ensembl protein sequence (subject) and PDB chain sequence (query)                                              |
+| **Pident**                | Sequence Identity percent. This parameter serves as threshold. Only results with pident equal or higher to 50% are included                    |
+| **Interaction**           | Type of interfacial interaction, i.e., “protein”,”nucleic” or “ligand”                                                                         |
+| **PDB_aa**                | residues of aligned query (PDB chain) sequence (i.e.: only aligned and includes gaps.)                                                         |
+| **Protein_aa**            | residues of aligned subject (Ensembl) sequence (i.e.: only aligned and includes gaps.)                                                         |
+| **PDB_pos**               | index position of each residue of the aligned query (PDB chain) sequence starting from 1                                                       |
+| **Protein_pos**           | index position of each residue of the aligned subject (Ensembl) sequence starting from 1                                                       |
+| **PDB_align_pos**         | real index position of each residue of the aligned query (PDB chain) sequence                                                                  |
+| **Protein_align_pos**     | Position of the interfacial residues on the Ensembl protein sequence. This is the column of your interest! (Protein position in the MC3 file). |
+| **PDB_pos**               | Corresponding position of the interfacial residues on the PDB chain sequence                                                                   |
 
 ## Variant annotated files
 

@@ -111,7 +111,7 @@ def main():
                                                             $$ |      $$ |
                                                             \__|      \__|
 
-    ---------------  Map annotated genomic variants to protein data in 3D. -----------------
+          ---------------  Map genomic variants to protein data in 3D. -----------------
 
     \n'''
 
@@ -173,24 +173,24 @@ def main():
                     with open(f) as list_int_files:
                         int_f = list_int_files.read().splitlines()
                         logger.info(
-                            'Input interfaces file contains a list of variants files to process.')
+                            'Input file contains a list of protein files to process.')
                         # for every prot id
                         for int_infile in int_f:
                             # split interface db
-                            split('PROTEIN_ACCESSION', int_infile, psdb_outdir,
+                            split('Protein_accession', int_infile, psdb_outdir,
                                   'txt', args.force, log_dir)
-                            stats_message = makedb.stats(
-                                int_infile, psdb_outdir)
+                            # stats_message = makedb.stats(
+                            #    int_infile, psdb_outdir)
                             # log info
                             logger.info(
                                 int_infile + ' has been splitted successfully.')
 
                 elif isfile(f) == 'is_file':
                     # split interface db
-                    split('PROTEIN_ACCESSION', f, psdb_outdir,
+                    split('Protein_accession', f, psdb_outdir,
                           'txt', args.force, log_dir)
-                    stats_message = makedb.stats(
-                        f, psdb_outdir)
+                    # stats_message = makedb.stats(
+                    #    f, psdb_outdir)
                     # log info
                     logger.info(
                         f + ' has been splitted successfully.')
@@ -205,18 +205,18 @@ def main():
                 report.write(
                     time_format + 'Reading and splitting input file...done. \n')
                 report.write(
-                    time_format + 'Generation of interfaces DB in ' + psdb_outdir + ' done. Total time: ' +
+                    time_format + 'Generation of protein structures DB in ' + psdb_outdir + ' done. Total time: ' +
                     str(datetime.timedelta(seconds=round(end-start))) + '\n')
-                report.write(stats_message)
+                # report.write(stats_message)
                 report.close()
                 # print in console result
                 spinner.stop_and_persist(symbol='\U0001F4CD',
-                                         text=' makeinterfacesdb process finished. Total time:  ' +
+                                         text=' makepsdb process finished. Total time: ' +
                                          str(datetime.timedelta(
                                              seconds=round(end-start))))
         else:
             makedb.log(
-                'A variants database already exists. Not overwritting files.', report, logger)
+                'A protein structures DB already exists. Not overwritting files.', report, logger)
             spinner.stop_and_persist(symbol='\U0001F4CD',
-                                     text=' A variants database already exists. Not overwritting files.')
+                                     text=' A protein structures DB exists. Not overwritting files.')
             report.close()

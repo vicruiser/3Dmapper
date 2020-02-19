@@ -60,11 +60,12 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
     # get output
     out1, err1 = p1.communicate()
     # error handling
-    if err1 is None:
+    if err1 is None and out1 != b'':
         logger.info('This file contains protein ids')
     else:
         logger.error(err1)
-        logger.error('This file could not be splitted')
+        logger.error(
+            'This file could not be splitted. Check the format of your input file.')
         raise IOError()
     # detect if there is output
     col_index = re.findall('\d+', out1.decode('utf8'))[0]
@@ -89,17 +90,18 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
         if err2 is None:
             logger.info('This file was splitted successfully.')
         else:
-            logger.error('This file could not be splitted')
+            logger.error(
+                'This file could not be splitted. Check the format of your input file.')
             raise IOError()
     else:
-        logger.error('The input file has zero gene entries.')
+        logger.error('The input file has zero protein entries.')
         raise IOError()
 
 
 # add decorator to main function
-@tags(text_start="Split file by selected ensembl id...This might take up some time...",
-      text_succeed="Split file by selected ensembl id...done.",
-      text_fail="Split file by selected ensembl id...failed!",
+@tags(text_start="Creating protein structures DB...This might take up some time...",
+      text_succeed="Creating protein structures DB...done.",
+      text_fail="Creating protein structures DB...failed!. Check the format of your input file.",
       emoji="\U00002702")
 def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, parallel=False):
     '''

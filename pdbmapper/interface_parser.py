@@ -24,7 +24,7 @@ def reshape(annoint):
         reshaped interfaces file
     '''
     # store subspace
-    sub_annoint = annoint[['pdb.id',
+    sub_annoint = annoint[['PDB_code',
                            'ensembl.prot.id',
                            'temp.chain',
                            'int.chain',
