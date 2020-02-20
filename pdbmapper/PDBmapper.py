@@ -14,7 +14,7 @@ from .explode import explode
 from .logger import get_logger
 
 
-def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, consequence, varid=None):
+def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isoform, consequence, varid=None):
     '''
     Map interfaces and genomic anntoated variants and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
@@ -26,7 +26,7 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
         Ensembl protein ID
     geneid : str
         Translated Ensembl protein ID
-    intdb : str
+    psdb : str
         Directory where to find interface database
     vardb : str
         Directory where to find variants database
@@ -48,9 +48,8 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
     logger = get_logger(' PDBmapper', out_dir)
 
     # parse interfaces corresponding to the selected protein ID
-    annoint = parser(protid, intdb)
-
-    if annoint.empty:
+    psdf = parser(protid, psdb)
+    if psdf.empty:
         logger.error('Interfaces of protein ' +
                      protid + 'could not be parsed.')
         raise IOError
@@ -58,40 +57,49 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
         logger.info('Interfaces of protein ' + protid + ' parsed.')
 
     # if database is compacted and explode is needed
-    if any(sub_annoint[['resid_sseq', 'mapped_real_pos', 'pdb_pos']].stack().str.contains("-", na=False)) is True:
 
-        for col in ['resid_sseq', 'mapped_real_pos', 'pdb_pos']:
+    columns_type = psdf.applymap(lambda x: isinstance(x, list)).all()
+    columns_list = columns_type.index[columns_type].tolist()
 
-            sub_annoint.loc[:, col] = sub_annoint[col].str.replace(
+    # cols_stack
+    cols_stack = psdf.apply(lambda x: x.astype(
+        str).str.match(r'[a-zA-Z0.-9]+-[a-zA-Z0.-9]+'))
+    colsnames_stack = psdf.columns[cols_stack.any()].tolist()
+
+    if any(cols_stack) is True:
+        for col in colsnames_stack:
+
+            psdf.loc[:, col] = psdf[col].str.replace(
                 '-', ',')
-            sub_annoint.loc[:, col] = sub_annoint[col].str.split(',')
+            psdf.loc[:, col] = psdf[col].str.split(',')
 
-        sub_annoint = explode(sub_annoint,
-                              ['resid_sseq',
-                               'mapped_real_pos',
-                               'pdb_pos'])
+        psdf = explode(
+            psdf, colsnames_stack)
+
+    elif columns_list is not None:
+        psdf = explode(
+            psdf, columns_list)
     else:
-        sub_annoint[['resid_sseq', 'mapped_real_pos', 'pdb_pos']] = sub_annoint[[
-            'resid_sseq', 'mapped_real_pos', 'pdb_pos']].astype(str)
+        psdf[colsnames_stack] = \
+            psdf[colsnames_stack].astype(str)
 
     # if default database is used minor modifications are needed
     if pident is not None:
         logger.info('Filtering interfaces by pident = ' + str(pident) + '%.')
         # filter by pident
         pident = int(pident)  # from str to int
-        annoint_pident = annoint.loc[annoint.pident >= pident]
+        psdf_pident = psdf.loc[psdf.pident >= pident]
         # if pident threshold is to high, the next maximum value of pident is
         # notified in log file
-        if annoint_pident.empty:
-            alt_pident = annoint.loc[:, "Pident"].max()
+        if psdf_pident.empty:
+            alt_pident = psdf.loc[:, "Pident"].max()
             logger.error('Warning: for protid ' + str(pident) +
                          ', the variable "Pident" equal to ' +
                          str(pident) + ' is too high.\n A threshold lower than or equal to ' +
                          str(alt_pident) + ' would retrieve results.')
 
             raise IOError()
-        # spread the data frame to have one amino acid position per row instead of compacted.
-           #annoint = reshape(annoint_pident)
+
     # parse variants corresponding to the selected protein ID
     annovars = parser(geneid, vardb)
     logger.info('Variants file from gene id ' + geneid + ' parsed.')
@@ -105,9 +113,10 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
     if consequence is not None:
         annovars = annovars[annovars['Consequence'].astype(
             str).str.contains('|'.join(consequence))]
-        logger.info('Filter of features = ' + consequence)
+        logger.info('Filter of features = ' + str(consequence))
+
         # if filter returns an empty df, raise error
-        if annovars.empty:
+        if annovars.empty is True:
             logger.error(
                 'Variants could not be filtered by feature type = ' + consequence)
             raise IOError()
@@ -163,18 +172,19 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
         annovars = pd.concat([remaining_df, sub_df], sort=False)
 
     # for sucessful merge, Protein_position column must be str type
-    annoint['Protein_position'] = annoint['Protein_position'].astype(str)
+    psdf['Protein_position'] = psdf['Protein_position'].astype(str)
     annovars['Protein_position'] = annovars['Protein_position'].astype(str)
 
-    #annoint.set_index('Protein_position', inplace=True)
-    #annovars.set_index('Protein_position', inplace=True)
+    # psdf.set_index('Protein_position', inplace=True)
+    # annovars.set_index('Protein_position', inplace=True)
 
     mapped_variants = annovars.join(
-        annoint.set_index('Protein_position'), on='Protein_position', how='inner')
+        psdf.set_index('Protein_position'), on='Protein_position', how='inner')
+
     # print(mapped_variants)
     # Merge them both files
     # mapped_variants = pd.merge(annovars,
-    #                            annoint,
+    #                            psdf,
     #                            left_on=['Protein_position'],
     #                            right_on=['Protein_position'],
     #                            sort=False)
@@ -189,9 +199,8 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
     # if merging was successful, create setID file and
     # save the merged dataframe as well
     else:
-        setID_file = mapped_variants[['Protein_feature_id',
+        setID_file = mapped_variants[['Structure_feature_id',
                                       'Uploaded_variation']]
-        print(setID_file)
         setID_file.drop_duplicates(inplace=True)
         mapped_variants.drop_duplicates(inplace=True)
 
@@ -199,8 +208,9 @@ def PDBmapper(protid,  geneid, transcritpID, intdb, vardb, out_dir, pident, cons
         #  reapeting headers
         with open(os.path.join(out_dir, ('setID_pident' + str(pident) + '.File')), 'a') as f:
             setID_file.to_csv(f, sep=',', index=False,  header=f.tell() == 0)
-        with open(os.path.join(out_dir, ('MappedVariants_pident' + str(pident) + '.File')), 'a') as f:
+        with open(os.path.join(out_dir, ('MappedVariants_pident' + str(pident) + '_isoform_' +
+                                         '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
             mapped_variants.to_csv(f, sep=',', index=False,
                                    header=f.tell() == 0)
 
-    del(annoint, annoint_pident, annovars)
+    del(psdf, psdf_pident, annovars)

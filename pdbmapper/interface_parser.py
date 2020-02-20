@@ -25,45 +25,48 @@ def reshape(annoint):
     '''
     # store subspace
     sub_annoint = annoint[['PDB_code',
-                           'ensembl.prot.id',
-                           'temp.chain',
-                           'int.chain',
-                           'interaction',
-                           'resid_sseq',
-                           'mapped.real.pos',
-                           'pdb.pos',
-                           'pident']]
+                           'Protein_accession',
+                           'PDB_chain',
+                           'PDB_interacting_chain',
+                           'Interaction',
+                           'Protein_aa',
+                           'Protein_pos',
+                           'PDB_pos',
+                           'Pident']]
 
     # put it into right format
-    sub_annoint.columns = \
-        sub_annoint.columns.str.replace('\\.', '_')
+    # sub_annoint.columns = \
+    #     sub_annoint.columns.str.replace('\\.', '_')
     # if database only contains one row, explode is not needed
-    if any(sub_annoint[['resid_sseq', 'mapped_real_pos', 'pdb_pos']].stack().str.contains("-", na=False)) is True:
+    if any(sub_annoint[['Protein_aa',
+                        'Protein_pos',
+                        'PDB_pos']].stack().str.contains("-", na=False)) is True:
 
-        for col in ['resid_sseq', 'mapped_real_pos', 'pdb_pos']:
+        for col in ['Protein_aa', 'Protein_pos', 'PDB_pos']:
 
             sub_annoint.loc[:, col] = sub_annoint[col].str.replace(
                 '-', ',')
             sub_annoint.loc[:, col] = sub_annoint[col].str.split(',')
 
-        sub_annoint = explode(sub_annoint,
-                              ['resid_sseq',
-                               'mapped_real_pos',
-                               'pdb_pos'])
+        sub_annoint = explode(
+            sub_annoint, ['Protein_aa', 'Protein_pos', 'PDB_pos'])
+    elif 1 > 0:
+        sub_annoint = explode(
+            sub_annoint, ['Protein_aa', 'Protein_pos', 'PDB_pos'])
     else:
-        sub_annoint[['resid_sseq', 'mapped_real_pos', 'pdb_pos']] = sub_annoint[[
-            'resid_sseq', 'mapped_real_pos', 'pdb_pos']].astype(str)
+        sub_annoint[['Protein_aa', 'Protein_pos', 'PDB_pos']] = \
+            sub_annoint[['Protein_aa', 'Protein_pos', 'PDB_pos']].astype(str)
 
-    # change name of columns
-    sub_annoint.rename(columns={'mapped_real_pos':
-                                'Protein_position'}, inplace=True)
+    # # change name of columns
+    # sub_annoint.rename(columns={'mapped_real_pos':
+    #                             'Protein_position'}, inplace=True)
 
     # create region id for setID file
-    sub_annoint['interface_id'] = sub_annoint['pdb_id'].astype(str) + '_' + \
-        sub_annoint['ensembl_prot_id'].astype(str) + '_' + \
-        sub_annoint['temp_chain'].astype(str) + '_' + \
-        sub_annoint['int_chain'].astype(str) + '_' + \
-        sub_annoint['interaction'].astype(str)
+    # sub_annoint['interface_id'] = sub_annoint['pdb_id'].astype(str) + '_' + \
+    #     sub_annoint['ensembl_prot_id'].astype(str) + '_' + \
+    #     sub_annoint['temp_chain'].astype(str) + '_' + \
+    #     sub_annoint['int_chain'].astype(str) + '_' + \
+    #     sub_annoint['interaction'].astype(str)
     # drop unnecesary columns
     columns = ['pdb_id',
                'ensembl_prot_id',

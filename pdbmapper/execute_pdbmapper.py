@@ -63,10 +63,10 @@ def main():
 
     ----------------------------------------- Welcome to ----------------------------------------------
 
-    $$$$$$$\  $$$$$$$\  $$$$$$$\  
-    $$  __$$\ $$  __$$\ $$  __$$\  
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\  
+    $$$$$$$\  $$$$$$$\  $$$$$$$\
+    $$  __$$\ $$  __$$\ $$  __$$\
+    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\
+    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\
     $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
     $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
     $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
@@ -195,13 +195,16 @@ def main():
                         if err is None and out != b'':
                             toprocess = out.decode('utf-8')
                             # geneid correspond to the 2nd column in the line
-                            transcriptid = toprocess.split(" ")[2].strip()
+                            transcriptid = [s for s in toprocess.split(
+                                " ") if 'ENST' in s][0]
+                            #transcriptid = toprocess.split(" ")[2].strip()
                             # execute PDBmapper
                             wrapper(transcriptid,
-                                    args.intdb,
+                                    args.psdb,
                                     args.vardb,
                                     args.out,
                                     args.pident,
+                                    args.isoform,
                                     args.consequence,
                                     args.uniprot,
                                     id)
@@ -229,13 +232,15 @@ def main():
             if err is None and out != b'':
                 toprocess = out.decode('utf-8')
                 # geneid correspond to the 2nd column in the line
-                transcriptid = toprocess.split(" ")[2].strip()
+                transcriptid = [s for s in toprocess.split(
+                                " ") if 'ENST' in s]
 
             Parallel(n_jobs=num_cores)(delayed(wrapper)(transcriptid[i],
-                                                        args.intdb,
+                                                        args.psdb,
                                                         args.vardb,
                                                         args.out,
                                                         args.pident,
+                                                        args.isoform,
                                                         args.consequence,
                                                         args.uniprot,
                                                         varids[i])
@@ -260,7 +265,7 @@ def main():
         #             transcriptid = toprocess.split(" ")[2].strip()
         #             # execute PDBmapper
         #             wrapper(transcriptid,
-        #                     args.intdb,
+        #                     args.psdb,
         #                     args.vardb,
         #                     args.out,
         #                     args.pident,
@@ -281,7 +286,7 @@ def main():
                                  text='Congratulations!. PDBmapper has run in ' +
                                  str(round(end-start, 2)) + 's.')
 
-    if args.ensemblid:
+    if args.protid:
         # execute main function and compute executiong time
         start = time.time()
         logger.info('Running PDBmapper...')
@@ -289,30 +294,31 @@ def main():
         spinner.start(text=' Running PDBmapper...')
         # PDBmapper accepts single or multiple protein ids
         # as input as well as prot ids stored in a file
-        for ids in args.ensemblid:
+        for ids in args.protid:
             # check if input is a file
             if isfile(ids) == "yes":
                 input = 'file'
-                with open(ids) as list_ensemblids:
+                with open(ids) as list_protids:
                     logger.info(
                         'Input variants file contains a list of ensembl ids to process.')
                     # for every ensembl id
-                    Parallel(n_jobs=num_cores)(delayed(wrapper)(ensemblid.replace('\n', ''),
-                                                                args.intdb,
+                    Parallel(n_jobs=num_cores)(delayed(wrapper)(protid.replace('\n', ''),
+                                                                args.psdb,
                                                                 args.vardb,
                                                                 args.out,
                                                                 args.pident,
+                                                                args.isoform,
                                                                 args.consequence,
                                                                 args.uniprot)
-                                               for ensemblid in list_ensemblids)
+                                               for protid in list_protids)
 
             # given in command line
             elif isfile(ids) == "no":
                 input = 'not_file'
                 break
             elif isfile(ids) == "not_recognized":
-                pdbmapper.log('The input is neither an id(s) or a file containing a list of ids.',
-                              report, logger)
+                maptools.log('The input is neither an id(s) or a file containing a list of ids.',
+                             report, logger)
                 spinner.fail(
                     'The input is neither an id(s) or a file containing a list of ids.')
                 exit(-1)
@@ -320,13 +326,14 @@ def main():
         # for prot id get the gene id
         if input == 'not_file':
             Parallel(n_jobs=num_cores)(delayed(wrapper)(ids,
-                                                        args.intdb,
+                                                        args.psdb,
                                                         args.vardb,
                                                         args.out,
                                                         args.pident,
+                                                        args.isoform,
                                                         args.consequence,
                                                         args.uniprot)
-                                       for ids in args.ensemblid)
+                                       for ids in args.protid)
 
         if not any(fname.endswith('.File') for fname in os.listdir(args.out)):
             logger.warning(
@@ -335,14 +342,15 @@ def main():
                 text=' Input ensembl ids has no mapping variants.')
             exit(-1)
 
-        var_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
-            args.vardb, 'makevariantsdb_stats.info'))[0]))
+       # var_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
+        #    args.vardb, 'makevariantsdb_stats.info'))[0]))
 
-        int_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
-            args.intdb, 'makeinterfacesdb_stats.info'))[0]))
+        # int_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
+        #    args.psdb, 'makeinterfacesdb_stats.info'))[0]))
 
-        mapped_infofile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
-            args.out, 'MappedVariants*' + str(args.pident) + '*File'))[0]))
+        # mapped_infofile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
+        #     args.out, 'MappedVariants*' + str(args.pident) + '_isoform_' +
+        #     '_'.join(args.isoform) + '_consequence_' + '_'.join(args.consequence) + '*File'))[0]))
 
         # stats_message, stats_table = stats(
         #    var_statsfile, int_statsfile, mapped_infofile, args.out)
