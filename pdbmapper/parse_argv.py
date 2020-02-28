@@ -85,7 +85,7 @@ def parse_commandline():
     # interfaces database file
     parser.add_argument("--pident", dest="pident", metavar="<int>",
                         help="threshold of sequence identity (percertage)")
-    parser.set_defaults(pident=None)
+    parser.set_defaults(pident=50)
 
     # force overwrite
     parser.add_argument('-f', "--force", dest="force", action='store_true',

@@ -27,7 +27,6 @@ def wrapper(ensemblid, psdb, vardb, out, pident, isoform, consequence, uniprot=F
         protid = ensemblIDs['protID']
         transcriptID = ensemblIDs['transcriptID']
         UniprotID = ensemblIDs['UniprotID']
-
         if uniprot is True:
             protid = UniprotID
         # run PDBmapper

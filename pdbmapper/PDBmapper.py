@@ -8,10 +8,11 @@ import glob
 import pandas as pd
 import numpy as np
 from .db_parser import parser
-from .interface_parser import reshape
+# .interface_parser import reshape
 from .decorator import tags
 from .explode import explode
 from .logger import get_logger
+from ncls import NCLS
 
 
 def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isoform, consequence, varid=None):
@@ -49,6 +50,7 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
 
     # parse interfaces corresponding to the selected protein ID
     psdf = parser(protid, psdb)
+
     if psdf.empty:
         logger.error('Interfaces of protein ' +
                      protid + 'could not be parsed.')
@@ -88,7 +90,7 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
         logger.info('Filtering interfaces by pident = ' + str(pident) + '%.')
         # filter by pident
         pident = int(pident)  # from str to int
-        psdf_pident = psdf.loc[psdf.pident >= pident]
+        psdf_pident = psdf.loc[psdf.Pident >= pident]
         # if pident threshold is to high, the next maximum value of pident is
         # notified in log file
         if psdf_pident.empty:
@@ -174,21 +176,36 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
     # for sucessful merge, Protein_position column must be str type
     psdf['Protein_position'] = psdf['Protein_position'].astype(str)
     annovars['Protein_position'] = annovars['Protein_position'].astype(str)
-
-    # psdf.set_index('Protein_position', inplace=True)
-    # annovars.set_index('Protein_position', inplace=True)
-
+    # Merge them both files
     mapped_variants = annovars.join(
         psdf.set_index('Protein_position'), on='Protein_position', how='inner')
-
-    # print(mapped_variants)
     # Merge them both files
-    # mapped_variants = pd.merge(annovars,
-    #                            psdf,
-    #                            left_on=['Protein_position'],
-    #                            right_on=['Protein_position'],
-    #                            sort=False)
+    location_variants = annovars.join(
+        psdf.set_index('Protein_position'), on='Protein_position', how='outer')
 
+    v = psdf.loc[:, 'Protein_start_position':'Protein_end_position'].apply(
+        tuple, 1).tolist()
+
+    # you can also use `from_arrays`
+    idx = pd.IntervalIndex.from_tuples(v, closed='both')
+    # print(annovars.Protein_position.values)
+    # print(psdf.set_index(idx))
+    # print(idx.get_loc(annovars.Protein_position.values.astype(int).tolist()))
+    # print(idx.get_indexer(2045))
+    print(psdf.Protein_start_position.values)
+    ncls = NCLS(psdf.Protein_start_position.values,
+                psdf.Protein_end_position.values,
+                psdf.Protein_start_position.values)
+    it = ncls.find_overlap(2045)
+    print(it)
+    # muts = list(
+    #    map(int, annovars.Protein_position.values))
+    # print(muts)
+    # print(idx.get_loc(annovars.Protein_position.values))
+    # l = idx.get_indexer(
+    #    annovars.Protein_position.values[0:1].astype(int).tolist())
+
+    # print(l)
     # stop if there are no results
     if mapped_variants.empty:
         # report results
@@ -207,7 +224,8 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
         # Save the merged dataframe, appending results and not
         #  reapeting headers
         with open(os.path.join(out_dir, ('setID_pident' + str(pident) + '.File')), 'a') as f:
-            setID_file.to_csv(f, sep=',', index=False,  header=f.tell() == 0)
+            setID_file.to_csv(f, sep=',', index=False,
+                              header=f.tell() == 0)
         with open(os.path.join(out_dir, ('MappedVariants_pident' + str(pident) + '_isoform_' +
                                          '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
             mapped_variants.to_csv(f, sep=',', index=False,
