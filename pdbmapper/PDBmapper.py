@@ -195,21 +195,24 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
         except:
             left_variants = annovars
         # remove non protein coding variants
+        left_variants.drop_duplicates(inplace=True)
         left_variants = left_variants[left_variants.Protein_position != '-']
         left_variants['Protein_accession'] = protid
+
         # remove protein position since we know there are no matching positions
         # and will reduce the maximum number of combinations of rows
-        del psdf['Protein_position']
+        psdf = psdf.iloc[:, np.r_[0:3, 5:9]]
+        psdf.drop_duplicates(inplace=True)
         # merge rest of variants with protein structures
         left_variants = left_variants.merge(
-            psdf.set_index('Protein_accession'), on='Protein_accession', how='left')
+            psdf.set_index('Protein_accession'), on='Protein_accession', how='inner')
         # convert col to numeric to make comparison
         left_variants['Protein_position'] = pd.to_numeric(
             left_variants['Protein_position'], errors='coerce')
         left_variants['Protein_position'] = left_variants.Protein_position.values.astype(
             int)
         # mapped variant is on the rest of the structure
-        structure_variants = left_variants[(left_variants.Protein_position >= left_variants.Protein_start_position) & (
+        structure_variants = left_variants[(left_variants.Protein_position.values >= left_variants.Protein_start_position.values) & (
             (left_variants.Protein_position <= left_variants.Protein_end_position))]
 
         # do proper arragenments if no resulst are retrieved
@@ -218,7 +221,6 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
             if mapped_variants.empty is False:
                 mapped_variants['Mapping_position'] = 'Interface'
 
-            structure_variants = structure_variants.iloc[:, np.r_[0:18, 19:24]]
             structure_variants.drop_duplicates(inplace=True)
             structure_variants['Mapping_position'] = 'Structure'
             with open(os.path.join(out_dir, ('StructureVariants_pident' + str(pident) + '_isoform_' +
@@ -228,7 +230,7 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
             # unmapped variants
             unmapped_variants = left_variants.drop(structure_variants.index)
             if unmapped_variants.empty is False:
-                unmapped_variants = unmapped_variants.iloc[:, 1:16]
+                unmapped_variants = unmapped_variants.iloc[:, 0:16]
                 unmapped_variants.drop_duplicates(inplace=True)
                 unmapped_variants['Mapping_position'] = 'Unmmaped'
                 with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +
@@ -255,7 +257,7 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
                 # unmapped variants
                 unmapped_variants = left_variants
                 if unmapped_variants.empty is False:
-                    unmapped_variants = unmapped_variants.iloc[:, 1:16]
+                    unmapped_variants = unmapped_variants.iloc[:, 0:16]
                     unmapped_variants.drop_duplicates(inplace=True)
                     unmapped_variants['Mapping_position'] = 'Unmmaped'
                     with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +
@@ -263,6 +265,8 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
                         unmapped_variants.to_csv(f, sep=',', index=False,
                                                  header=f.tell() == 0)
                 raise IOError()
+        del (structure_variants,
+             unmapped_variants, left_variants)
     ###########################################################################
 
     # stop if there are no results
