@@ -206,6 +206,7 @@ def main():
                                     args.pident,
                                     args.isoform,
                                     args.consequence,
+                                    args.loc,
                                     args.uniprot,
                                     id)
                         else:
@@ -242,6 +243,7 @@ def main():
                                                         args.pident,
                                                         args.isoform,
                                                         args.consequence,
+                                                        args.loc,
                                                         args.uniprot,
                                                         varids[i])
                                        for i in len(transcriptid))
@@ -309,6 +311,7 @@ def main():
                                                                 args.pident,
                                                                 args.isoform,
                                                                 args.consequence,
+                                                                args.loc,
                                                                 args.uniprot)
                                                for protid in list_protids)
 
@@ -332,6 +335,7 @@ def main():
                                                         args.pident,
                                                         args.isoform,
                                                         args.consequence,
+                                                        args.loc,
                                                         args.uniprot)
                                        for ids in args.protid)
 

@@ -12,10 +12,9 @@ from .db_parser import parser
 from .decorator import tags
 from .explode import explode
 from .logger import get_logger
-from ncls import NCLS
 
 
-def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isoform, consequence, varid=None):
+def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isoform, consequence, loc, varid=None):
     '''
     Map interfaces and genomic anntoated variants and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
@@ -179,33 +178,100 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
     # Merge them both files
     mapped_variants = annovars.join(
         psdf.set_index('Protein_position'), on='Protein_position', how='inner')
-    # Merge them both files
-    location_variants = annovars.join(
-        psdf.set_index('Protein_position'), on='Protein_position', how='outer')
 
-    v = psdf.loc[:, 'Protein_start_position':'Protein_end_position'].apply(
-        tuple, 1).tolist()
+    if isoform is None:
+        isoform = ['all']
+    if consequence is None:
+        consequence = ['all']
+    ###########################################################################
+    # Locate rest of variants (mapping to a structure or not)
+    ###########################################################################
+    if loc:
+        # remove already mapped variants
+        try:
+            left_variants = annovars.drop(mapped_variants.index)
+        except:
+            left_variants = annovars
+        # remove non protein coding variants
+        left_variants = left_variants[left_variants.Protein_position != '-']
+        left_variants['Protein_accession'] = protid
+        # remove protein position since we know there are no matching positions
+        # and will reduce the maximum number of combinations of rows
+        del psdf['Protein_position']
+        # merge rest of variants with protein structures
+        left_variants = left_variants.merge(
+            psdf.set_index('Protein_accession'), on='Protein_accession', how='left')
+        # convert col to numeric to make comparison
+        left_variants['Protein_position'] = pd.to_numeric(
+            left_variants['Protein_position'], errors='coerce')
+        left_variants['Protein_position'] = left_variants.Protein_position.values.astype(
+            int)
+        # mapped variant is on the rest of the structure
+        structure_variants = left_variants[(left_variants.Protein_position >= left_variants.Protein_start_position) & (
+            (left_variants.Protein_position <= left_variants.Protein_end_position))]
 
-    # you can also use `from_arrays`
-    idx = pd.IntervalIndex.from_tuples(v, closed='both')
-    # print(annovars.Protein_position.values)
-    # print(psdf.set_index(idx))
-    # print(idx.get_loc(annovars.Protein_position.values.astype(int).tolist()))
-    # print(idx.get_indexer(2045))
-    print(psdf.Protein_start_position.values)
-    ncls = NCLS(psdf.Protein_start_position.values,
-                psdf.Protein_end_position.values,
-                psdf.Protein_start_position.values)
-    it = ncls.find_overlap(2045)
-    print(it)
-    # muts = list(
-    #    map(int, annovars.Protein_position.values))
-    # print(muts)
-    # print(idx.get_loc(annovars.Protein_position.values))
-    # l = idx.get_indexer(
-    #    annovars.Protein_position.values[0:1].astype(int).tolist())
+        # do proper arragenments if no resulst are retrieved
+        if structure_variants.empty is False:
+            structure_variants['Mapping_position'] = 'Structure'
+            if mapped_variants.empty is False:
+                mapped_variants['Mapping_position'] = 'Interface'
+                variants_location = mapped_variants.append(
+                    structure_variants, sort=False)
+            else:
+                variants_location = structure_variants
 
-    # print(l)
+            variants_location.drop_duplicates(inplace=True)
+            with open(os.path.join(out_dir, ('VariantsLocation_pident' + str(pident) + '_isoform_' +
+                                             '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
+                variants_location.to_csv(f, sep=',', index=False,
+                                         header=f.tell() == 0)
+            # unmapped variants
+            unmapped_variants = left_variants.drop(structure_variants.index)
+            if unmapped_variants.empty is False:
+                unmapped_variants = unmapped_variants.iloc[:, 1:14]
+                unmapped_variants.drop_duplicates(inplace=True)
+                unmapped_variants['Mapping_position'] = 'Unmmaped'
+                with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +
+                                                 '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
+                    unmapped_variants.to_csv(f, sep=',', index=False,
+                                             header=f.tell() == 0)
+        else:
+            if mapped_variants.empty is False:
+                mapped_variants['Mapping_position'] = 'Interface'
+                variants_location = mapped_variants
+                variants_location.drop_duplicates(inplace=True)
+                with open(os.path.join(out_dir, ('VariantsLocation_pident' + str(pident) + '_isoform_' +
+                                                 '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
+                    variants_location.to_csv(f, sep=',', index=False,
+                                             header=f.tell() == 0)
+                # unmapped variants
+                unmapped_variants = left_variants.drop(mapped_variants.index)
+
+                if unmapped_variants.empty is False:
+                    unmapped_variants = unmapped_variants.iloc[:, 1:14]
+                    unmapped_variants.drop_duplicates(inplace=True)
+                    unmapped_variants['Mapping_position'] = 'Unmmaped'
+                    with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +
+                                                     '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
+                        unmapped_variants.to_csv(f, sep=',', index=False,
+                                                 header=f.tell() == 0)
+            else:
+                # report results
+                logger.warning('Warning: ' + protid +
+                               ' does not map with any annotated variant.\n')
+                # unmapped variants
+                unmapped_variants = left_variants
+                if unmapped_variants.empty is False:
+                    unmapped_variants = unmapped_variants.iloc[:, 1:14]
+                    unmapped_variants.drop_duplicates(inplace=True)
+                    unmapped_variants['Mapping_position'] = 'Unmmaped'
+                    with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +
+                                                     '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
+                        unmapped_variants.to_csv(f, sep=',', index=False,
+                                                 header=f.tell() == 0)
+                raise IOError()
+    ###########################################################################
+
     # stop if there are no results
     if mapped_variants.empty:
         # report results
@@ -223,11 +289,14 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
 
         # Save the merged dataframe, appending results and not
         #  reapeting headers
-        with open(os.path.join(out_dir, ('setID_pident' + str(pident) + '.File')), 'a') as f:
+        with open(os.path.join(out_dir, ('setID_pident' + str(pident) + '_isoform_' +
+                                         '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
             setID_file.to_csv(f, sep=',', index=False,
                               header=f.tell() == 0)
+
         with open(os.path.join(out_dir, ('MappedVariants_pident' + str(pident) + '_isoform_' +
                                          '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
+
             mapped_variants.to_csv(f, sep=',', index=False,
                                    header=f.tell() == 0)
 

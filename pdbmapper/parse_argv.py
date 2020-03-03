@@ -53,7 +53,6 @@ def parse_commandline():
     # interfaces database file
     parser.add_argument("-psdb", "--prot_struct_db", dest="psdb", metavar="<String>",
                         help="interfaces database directory", required=True)
-    parser.set_defaults(intdb=None)
 
     # interfaces database file
     parser.add_argument('-u', "--uniprot", dest="uniprot", action='store_true',
@@ -62,7 +61,6 @@ def parse_commandline():
     # variants db
     parser.add_argument("-vdb", '--variant_db', dest="vardb", metavar="<String>",
                         help='variants database directory', required=True)
-    parser.set_defaults(vardb=None)
 
     # create default output directory
     parser.add_argument("-o", "--out", metavar="<String>", dest="out",
@@ -73,16 +71,26 @@ def parse_commandline():
     parser.add_argument('-c', "--consequence", nargs='+', dest="consequence", metavar="<String>",
                         help="filter by consequence type, e.g.:'missense_variant'. \
                             The set of consequences is defined by Sequence Ontology (http://www.sequenceontology.org/).", default=None)
-    parser.set_defaults(filter_var=None)
 
-    # filter results by isoforms
+    # filter by isoforms
     parser.add_argument('-i', "--isoform", nargs='+', dest="isoform", metavar="<String>",
                         help="filter by a single or a list of APPRIS isoforms. \
                              The principal isoform is set by default. \
                              Options are: principal1, principal2, ...")
-    parser.set_defaults(filter_iso=None)
+    # filter by distance (applicable to interfaces)
+    parser.add_argument('-d', "--dist", dest="dist", metavar="<float>",
+                        help="threshold of maximum distance allowed ")
+    parser.set_defaults(dist=50)
 
-    # interfaces database file
+    # parser.add_argument('-maxd', "--maxdist", dest="maxdist", metavar="<float>",
+    #                     help="threshold of maximum distance allowed ")
+    # parser.set_defaults(dist=50)
+
+    # parser.add_argument('-mind', "--mindist", dest="mindist", metavar="<float>",
+    #                     help="threshold of minimum distance allowed ")
+    # parser.set_defaults(dist=50)
+
+    # filter by sequence identity percent
     parser.add_argument("--pident", dest="pident", metavar="<int>",
                         help="threshold of sequence identity (percertage)")
     parser.set_defaults(pident=50)
@@ -101,6 +109,10 @@ def parse_commandline():
     parser.add_argument("-j", "--jobs", dest="njobs", metavar="<int>",
                         help="number of jobs to run in parallel")
     parser.set_defaults(njobs=None)
+
+    # force overwrite
+    parser.add_argument('-l', "--location", dest="loc", action='store_true',
+                        help="Map all variants and detect their location.", default=False)
 
     # create chimera script to visualize the region of interest
     # parser.add_argument("-chimera", action="store_true", dest="chimera",
