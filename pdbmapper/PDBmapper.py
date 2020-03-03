@@ -14,7 +14,7 @@ from .explode import explode
 from .logger import get_logger
 
 
-def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isoform, consequence, loc, varid=None):
+def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isoform, APPRIS, UniprotID, consequence, loc, varid=None):
     '''
     Map interfaces and genomic anntoated variants and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
@@ -175,6 +175,8 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
     # for sucessful merge, Protein_position column must be str type
     psdf['Protein_position'] = psdf['Protein_position'].astype(str)
     annovars['Protein_position'] = annovars['Protein_position'].astype(str)
+    annovars['APPRIS_isoform'] = APPRIS
+    annovars['Uniprot_accession'] = UniprotID
     # Merge them both files
     mapped_variants = annovars.join(
         psdf.set_index('Protein_position'), on='Protein_position', how='inner')
@@ -212,23 +214,21 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
 
         # do proper arragenments if no resulst are retrieved
         if structure_variants.empty is False:
-            structure_variants['Mapping_position'] = 'Structure'
+
             if mapped_variants.empty is False:
                 mapped_variants['Mapping_position'] = 'Interface'
-                variants_location = mapped_variants.append(
-                    structure_variants, sort=False)
-            else:
-                variants_location = structure_variants
 
-            variants_location.drop_duplicates(inplace=True)
-            with open(os.path.join(out_dir, ('VariantsLocation_pident' + str(pident) + '_isoform_' +
+            structure_variants = structure_variants.iloc[:, np.r_[0:18, 19:24]]
+            structure_variants.drop_duplicates(inplace=True)
+            structure_variants['Mapping_position'] = 'Structure'
+            with open(os.path.join(out_dir, ('StructureVariants_pident' + str(pident) + '_isoform_' +
                                              '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
-                variants_location.to_csv(f, sep=',', index=False,
-                                         header=f.tell() == 0)
+                structure_variants.to_csv(f, sep=',', index=False,
+                                          header=f.tell() == 0)
             # unmapped variants
             unmapped_variants = left_variants.drop(structure_variants.index)
             if unmapped_variants.empty is False:
-                unmapped_variants = unmapped_variants.iloc[:, 1:14]
+                unmapped_variants = unmapped_variants.iloc[:, 1:16]
                 unmapped_variants.drop_duplicates(inplace=True)
                 unmapped_variants['Mapping_position'] = 'Unmmaped'
                 with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +
@@ -238,17 +238,10 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
         else:
             if mapped_variants.empty is False:
                 mapped_variants['Mapping_position'] = 'Interface'
-                variants_location = mapped_variants
-                variants_location.drop_duplicates(inplace=True)
-                with open(os.path.join(out_dir, ('VariantsLocation_pident' + str(pident) + '_isoform_' +
-                                                 '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
-                    variants_location.to_csv(f, sep=',', index=False,
-                                             header=f.tell() == 0)
-                # unmapped variants
                 unmapped_variants = left_variants.drop(mapped_variants.index)
 
                 if unmapped_variants.empty is False:
-                    unmapped_variants = unmapped_variants.iloc[:, 1:14]
+                    unmapped_variants = unmapped_variants.iloc[:, 0:16]
                     unmapped_variants.drop_duplicates(inplace=True)
                     unmapped_variants['Mapping_position'] = 'Unmmaped'
                     with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +
@@ -262,7 +255,7 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
                 # unmapped variants
                 unmapped_variants = left_variants
                 if unmapped_variants.empty is False:
-                    unmapped_variants = unmapped_variants.iloc[:, 1:14]
+                    unmapped_variants = unmapped_variants.iloc[:, 1:16]
                     unmapped_variants.drop_duplicates(inplace=True)
                     unmapped_variants['Mapping_position'] = 'Unmmaped'
                     with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +

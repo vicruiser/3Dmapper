@@ -58,7 +58,8 @@ def translate_ensembl(protid, log_dir, isoform_filter=None):
             geneID = df['geneID'].tolist()
             transcriptID = df['transcriptID'].tolist()
             UniprotID = df['UniprotID'].tolist()
-            return {'protID': protID, 'geneID': geneID, 'transcriptID': transcriptID, 'UniprotID': UniprotID}
+            APPRIS = df['isoform'].tolist()
+            return {'protID': protID, 'geneID': geneID, 'transcriptID': transcriptID, 'UniprotID': UniprotID, 'APPRIS': APPRIS}
 
         else:
             logger.error(
