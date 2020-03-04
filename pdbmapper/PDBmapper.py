@@ -196,12 +196,27 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
             left_variants = annovars
         # remove non protein coding variants
         left_variants.drop_duplicates(inplace=True)
-        left_variants = left_variants[left_variants.Protein_position != '-']
+        noncoding_variants_index = left_variants.Protein_position.str.contains(
+            '\.|\-', regex=True)
+
+        noncoding_variants = left_variants.loc[noncoding_variants_index]
+
+        # non-protein coding mutations
+        if noncoding_variants.empty is False:
+            noncoding_variants = noncoding_variants.drop(
+                columns=['Uniprot_accession'])  # not needed
+            noncoding_variants['Mapping_position'] = 'Noncoding'
+            with open(os.path.join(out_dir, ('NoncodingVariants_pident' + str(pident) + '_isoform_' +
+                                             '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
+                noncoding_variants.to_csv(f, sep=',', index=False,
+                                          header=f.tell() == 0)
+
+        left_variants = left_variants.loc[~noncoding_variants_index]
         left_variants['Protein_accession'] = protid
 
         # remove protein position since we know there are no matching positions
         # and will reduce the maximum number of combinations of rows
-        psdf = psdf.iloc[:, np.r_[0:3, 5:9]]
+        psdf = psdf.iloc[:, np.r_[0:3, 4:9]]
         psdf.drop_duplicates(inplace=True)
         # merge rest of variants with protein structures
         left_variants = left_variants.merge(
