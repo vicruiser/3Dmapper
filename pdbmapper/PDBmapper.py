@@ -281,7 +281,7 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
                                                  header=f.tell() == 0)
                 raise IOError()
         del (structure_variants,
-             unmapped_variants, left_variants)
+             unmapped_variants, left_variants, noncoding_variants, noncoding_variants_index)
     ###########################################################################
 
     # stop if there are no results

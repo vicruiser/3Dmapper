@@ -87,7 +87,6 @@ class generateVarDB:
         return stats_message
 
     def vcf(self, var_infile, out_dir, out_file, overwrite, log_dir, parallel=False):
-
         # from vcf to vep
         vcf2vep(var_infile, out_dir,
                 out_file, overwrite, log_dir, parallel)
@@ -244,12 +243,12 @@ def main():
     # change input format if file doesn't exists or overwrite is True
     if not os.listdir(vardb_outdir) or args.force is True:
         # Manage all possible genomic variant input files
-        if args.vcf is not None:
+        if args.vf is not None:
             # logging
             makedb.log('Starting process of splitting input file of variants.',
                        report, logger)
             # for loop in case we have multiple inputs to read from a list of files
-            for f in args.vcf:
+            for f in args.vf:
                 # check if input is a file
                 if isfile(f) == 'list_files':
                     with open(f) as list_var_files:

@@ -44,12 +44,12 @@ def parse_commandline():
 
     # vcf file
     annovar_group = parser.add_mutually_exclusive_group(required=True)
-    annovar_group.add_argument('-vcf', nargs='+', metavar="<String>", dest="vcf",
+    annovar_group.add_argument('-vf', '--varfile', nargs='+', metavar="<String>", dest="vf",
                                help='input directory containing single or \
-                                    multiple annotated variants files (VCF)')
-    annovar_group.add_argument("-vep",   metavar="<file>",  dest="vep",
-                               help="default VEP input")
-    annovar_group.add_argument("-maf", nargs='+', metavar="<String>", dest="maf",
+                                    multiple annotated variants files is VCF or VEP format')
+    # annovar_group.add_argument("-vep",   metavar="<file>",  dest="vep",
+    #                           help="default VEP input")
+    annovar_group.add_argument("-maf", '--maf_file', nargs='+', metavar="<String>", dest="maf",
                                help="annotated variant file in MAF format.")
     annovar_group.add_argument("-varmap", action='store_true', dest="varmap",
                                help="use ClinVar db of annotated variants",
