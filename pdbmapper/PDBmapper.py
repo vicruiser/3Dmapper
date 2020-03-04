@@ -247,7 +247,7 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
             if unmapped_variants.empty is False:
                 unmapped_variants = unmapped_variants.iloc[:, 0:16]
                 unmapped_variants.drop_duplicates(inplace=True)
-                unmapped_variants['Mapping_position'] = 'Unmmaped'
+                unmapped_variants['Mapping_position'] = 'Unmapped'
                 with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +
                                                  '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
                     unmapped_variants.to_csv(f, sep=',', index=False,
@@ -260,7 +260,7 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
                 if unmapped_variants.empty is False:
                     unmapped_variants = unmapped_variants.iloc[:, 0:16]
                     unmapped_variants.drop_duplicates(inplace=True)
-                    unmapped_variants['Mapping_position'] = 'Unmmaped'
+                    unmapped_variants['Mapping_position'] = 'Unmapped'
                     with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +
                                                      '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
                         unmapped_variants.to_csv(f, sep=',', index=False,
@@ -274,7 +274,7 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
                 if unmapped_variants.empty is False:
                     unmapped_variants = unmapped_variants.iloc[:, 0:16]
                     unmapped_variants.drop_duplicates(inplace=True)
-                    unmapped_variants['Mapping_position'] = 'Unmmaped'
+                    unmapped_variants['Mapping_position'] = 'Unmapped'
                     with open(os.path.join(out_dir, ('UnmappedVariants_pident' + str(pident) + '_isoform_' +
                                                      '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
                         unmapped_variants.to_csv(f, sep=',', index=False,
