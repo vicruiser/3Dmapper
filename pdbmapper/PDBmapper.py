@@ -301,30 +301,18 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
 
         # Save the merged dataframe, appending results and not
         #  reapeting headers
-        #with open(os.path.join(out_dir, ('setID_pident' + str(pident) + '_isoform_' +
-        #                                 '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
-        #    setID_file.to_csv(f, sep=',', index=False,
-        #                      header=f.tell() == 0)
-
-        #with open(os.path.join(out_dir, ('MappedVariants_pident' + str(pident) + '_isoform_' +
-        #                                 '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
-
-        #    mapped_variants.to_csv(f, sep=',', index=False,
-        #                           header=f.tell() == 0)
-        #with open(os.path.join(out_dir, ('setID_pident' + str(pident) + '_isoform_' +
-        #                                 '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
-        f = os.path.join(out_dir, ('setID_pident' + str(pident) + '_isoform_' +
-                                         '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File'))
-        setID_file.to_csv(f, sep=',', index=False, mode= 'a', compression = 'xz',
+        with open(os.path.join(out_dir, ('setID_pident' + str(pident) + '_isoform_' +
+                                         '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
+            setID_file.to_csv(f, sep=',', index=False,
                               header=f.tell() == 0)
-        
 
-        f = os.path.join(out_dir, ('MappedVariants_pident' + str(pident) + '_isoform_' +
-                                         '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File'))
+        with open(os.path.join(out_dir, ('MappedVariants_pident' + str(pident) + '_isoform_' +
+                                         '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File')), 'a') as f:
 
-        mapped_variants.to_csv(f, sep=',', index=False, mode= 'a', compression = 'xz',
+            mapped_variants.to_csv(f, sep=',', index=False,
                                    header=f.tell() == 0)
         if hdf is True: 
-            setID_file.to_hdf(f+'.hdf5', key = 'mapped_variants',  mode= 'a' )
+            with open(f + '.hdf5', 'a') as f:
+                mapped_variants.to_hdf(f+'.hdf5', key = 'mapped_variants' )
 
     del(psdf, psdf_pident, annovars)
