@@ -115,7 +115,7 @@ def parse_commandline():
                         help="Map all variants and detect their location.", default=False)
     
     # filter by distance (applicable to interfaces)
-    parser.add_argument('-hdf', "--to_hdf", dest="hdf", metavar='store_true',
+    parser.add_argument('-hdf', "--to_hdf", dest="hdf", action='store_true',
                         help="Write the contained data to an HDF5 file using HDFStore.", default=False)
 
 
