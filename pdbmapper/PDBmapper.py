@@ -312,7 +312,8 @@ def PDBmapper(protid,  geneid, transcritpID, psdb, vardb, out_dir, pident, isofo
             mapped_variants.to_csv(f, sep=',', index=False,
                                    header=f.tell() == 0)
         if hdf is True: 
-            with open(f + '.hdf5', 'a') as f:
+            with open(os.path.join(out_dir, ('MappedVariants_pident' + str(pident) + '_isoform_' +
+                                         '_'.join(isoform) + '_consequence_' + '_'.join(consequence) + '.File.hdf5')), 'a') as f:
                 mapped_variants.to_hdf(f+'.hdf5', key = 'mapped_variants' )
 
     del(psdf, psdf_pident, annovars)
