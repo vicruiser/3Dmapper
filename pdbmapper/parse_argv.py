@@ -113,6 +113,11 @@ def parse_commandline():
     # force overwrite
     parser.add_argument('-l', "--location", dest="loc", action='store_true',
                         help="Map all variants and detect their location.", default=False)
+    
+    # filter by distance (applicable to interfaces)
+    parser.add_argument('-hdf', "--to_hdf", dest="hdf", metavar='store_true',
+                        help="Write the contained data to an HDF5 file using HDFStore.", default=False)
+
 
     # create chimera script to visualize the region of interest
     # parser.add_argument("-chimera", action="store_true", dest="chimera",

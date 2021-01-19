@@ -16,7 +16,7 @@ DNA = '\U0001F9EC'
 #       text_succeed=" Running PDBmapper...done.",
 #       text_fail=" Running PDBmapper...failed!",
 #       emoji=DNA)
-def wrapper(ensemblid, psdb, vardb, out, pident, isoform, consequence, loc, uniprot=False, varid=None):
+def wrapper(ensemblid, psdb, vardb, out, pident, isoform, consequence, loc, uniprot=False, varid=None, hdf = False):
     # logging
     logger = get_logger('wrapper', out)
     # translate ensembl id
@@ -45,7 +45,8 @@ def wrapper(ensemblid, psdb, vardb, out, pident, isoform, consequence, loc, unip
                           UniprotID[i],
                           consequence,
                           loc,
-                          varid)
+                          varid,
+                          hdf)
         # error handling
             except:
                 if varid is None:

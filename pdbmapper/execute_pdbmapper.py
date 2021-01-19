@@ -208,7 +208,8 @@ def main():
                                     args.consequence,
                                     args.loc,
                                     args.uniprot,
-                                    id)
+                                    id,
+                                    args.hdf)
                         else:
                             logger.error(
                                 'Wrong input: {} is not a recognizable variant id'.format(id))
@@ -245,7 +246,8 @@ def main():
                                                         args.consequence,
                                                         args.loc,
                                                         args.uniprot,
-                                                        varids[i])
+                                                        varids[i],
+                                                        args.hdf)
                                        for i in len(transcriptid))
 
         if not any(fname.endswith('.File') for fname in os.listdir(args.out)):
@@ -312,7 +314,9 @@ def main():
                                                                 args.isoform,
                                                                 args.consequence,
                                                                 args.loc,
-                                                                args.uniprot)
+                                                                args.uniprot,
+                                                                None,
+                                                                args.hdf)
                                                for protid in list_protids)
 
             # given in command line
@@ -336,7 +340,9 @@ def main():
                                                         args.isoform,
                                                         args.consequence,
                                                         args.loc,
-                                                        args.uniprot)
+                                                        args.uniprot,
+                                                        None,
+                                                        args.hdf5)
                                        for ids in args.protid)
 
         if not any(fname.endswith('.File') for fname in os.listdir(args.out)):
