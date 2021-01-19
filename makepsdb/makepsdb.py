@@ -117,10 +117,10 @@ def main():
 
     epilog = \
         '''
-          -------------------------------------------------------------------------
-         |  Copyright (c) 2019 Victoria Ruiz --                                    |
-         |  vruizser@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
-          -------------------------------------------------------------------------
+          ------------------------------------------------------------------------------------
+         |  Copyright (c) 2019 Victoria Ruiz --                                               |
+         |  victoria.ruizserrra@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
+          ------------------------------------------------------------------------------------
 
         '''
     # print ascii art
