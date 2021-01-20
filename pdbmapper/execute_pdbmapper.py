@@ -112,7 +112,7 @@ def main():
             text=args.out + " is an existing directory. Results will be written in there.\n")
         out_message = args.out + ' is an existing directory. Results will be written in there.'
         
-    if args.hdf:
+    if args.hdf is True:
         out_hdf = args.out + '/hdf5'
         if not os.path.exists(out_hdf):
             os.mkdir(out_hdf)
