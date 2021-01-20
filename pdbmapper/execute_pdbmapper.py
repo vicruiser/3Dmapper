@@ -12,6 +12,7 @@ import vcfpy
 import time
 import os.path
 import datetime
+import vaex
 
 
 import pandas as pd
@@ -110,6 +111,13 @@ def main():
         spinner.info(
             text=args.out + " is an existing directory. Results will be written in there.\n")
         out_message = args.out + ' is an existing directory. Results will be written in there.'
+        
+    if args.hdf:
+        out_hdf = args.out + '/hdf5'
+        if not os.path.exists(out_hdf):
+            os.mkdir(out_hdf)
+            spinner.info(text="Directory " + out_hdf + " created.\n")
+            out_message = "Directory " + out_hdf + ' created.'
 
     # set up the logging
     logger = get_logger('main', args.out)
