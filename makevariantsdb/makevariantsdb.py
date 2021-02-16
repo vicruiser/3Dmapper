@@ -13,6 +13,7 @@ import time
 import logging
 import datetime
 import csv
+import shutil
 
 import os.path as path
 import pandas as pd
@@ -97,7 +98,7 @@ class generateVarDB:
 
         # split vep file by protein id to speed up the
         # mapping process
-        split('ENSG', var_infile, vardb_outdir,
+        split('ENST', var_infile, vardb_outdir,
               'vep', overwrite, log_dir, parallel)
 
     def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir, report, logger, parallel=False):
@@ -217,8 +218,23 @@ def main():
         out_dir, 'variants.vep')  # created by default
     # set output dir to split vep
     vardb_outdir = os.path.join(out_dir, 'varDB')  # created by default
-    # create output dir if it doesn't exist
-    os.makedirs(vardb_outdir, exist_ok=True)
+
+    
+    if args.force is True:
+        shutil.rmtree(vardb_outdir)
+        os.makedirs(vardb_outdir, exist_ok=True)
+    else:
+        if os.path.exists(vardb_outdir):
+            spinner.warn(
+                    text=' Directory ' + vardb_outdir + ' is not empty. Not overwritting files. ' +
+                    'Please select option --force or specify a different output dir.')
+            exit(-1)
+        else: 
+            # create output dir if it doesn't exist
+            os.makedirs(vardb_outdir, exist_ok=True)
+    # set up a log file
+    logger = get_logger('main', out_dir)
+    log_dir = out_dir
     # initialize class
     makedb = generateVarDB()
 
@@ -234,9 +250,7 @@ def main():
     report.write(progname + ' ' + " ".join(sys.argv[1:]) + '\n' + '\n' + '\n')
     time_format = '[' + time.ctime(time.time()) + '] '
 
-    # set up a log file
-    logger = get_logger('main', out_dir)
-    log_dir = out_dir
+
     # spinner.start(text=' Running makevariantsdb...')
     start = time.time()
 

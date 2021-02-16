@@ -29,7 +29,7 @@ def translate_ensembl(protid, log_dir, isoform_filter=None):
     # read reference file of ensembl ids
     dirname = os.path.dirname(__file__)
     # rel_path =
-    biomartdb = os.path.join(dirname, "data/biomart_GRCh38p13_nov2019.dat")
+    biomartdb = os.path.join(dirname, "data/biomart_GRCh38p13_feb2021.dat")
 
     with open(biomartdb) as f:
         # get col names
@@ -40,7 +40,7 @@ def translate_ensembl(protid, log_dir, isoform_filter=None):
         out, err = call_subprocess(cmd)
         line = out.decode('utf-8')
         # avoid possible errors
-        if line != b'':
+        if out != b'':
             list_ids = line.split('\n')[:-1]
             df = pd.DataFrame(np.array(list_ids), columns=list("l"))
             df[['isoform', 'geneID', 'transcriptID', 'protID', 'UniprotID']
@@ -64,4 +64,5 @@ def translate_ensembl(protid, log_dir, isoform_filter=None):
         else:
             logger.error(
                 'Input Ensembl ID is neither a protein nor a gene.')
-            raise IOError()
+            raise IOError
+            

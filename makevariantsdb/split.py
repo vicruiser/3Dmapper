@@ -13,8 +13,8 @@ from .run_subprocess import call_subprocess
 
 
 # for all the columns, find the one that matches with the pattern ENSG
-detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
-{{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
+detect_column = "grep -v '##' {} | awk -F ' ' '{{for(i=1;i<=NF;i++) \
+{{if ($i ~ /{}/){{print i; exit}}}}}}' "
 
 split_cmd = "grep -v '##' {0} | \
 sed -e '1s/^#//' | \
@@ -33,7 +33,7 @@ awk -v ci=\"{1}\" \
 {{f=od$ci\".{3}\"; print >> f; close(f)}}'"
 
 
-index_file = "grep -v '##' {} | awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' >> {} "
+index_file = "grep -v '##' {} | awk -F ' ' '{{print ${}, ${}, ${} , ${}}}' > {} "
 #index_file = "awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' {} | uniq >> {}  "
 
 # - grep -v '##': remove lines starting with ##
@@ -74,31 +74,31 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
     logger.info('Splitting input file.')
 
     # command
-    cmd1 = detect_column.format(prefix, input_file)
+    cmd1 = detect_column.format(input_file, prefix)
     # execute subprocess
     out1, err1 = call_subprocess(cmd1)
     # error handling
     if err1 is None and out1 != b'':
-        col_index_geneid = re.findall('\d+', out1.decode('utf8'))[0]
+        col_index_transcriptid = re.findall('\d+', out1.decode('utf8'))[0]
         logger.info('This file contains gene ids')
     else:
         logger.error('This file could not be splitted')
         raise IOError()
 
     # command
-    cmd1_b = detect_column.format('ENST', input_file)
+    cmd1_b = detect_column.format(input_file,'ENSG')
     # execute subprocess
     out1_b, err1_b = call_subprocess(cmd1_b)
     # error handling
     if err1_b is None and out1_b != b'':
-        col_index_transcriptid = re.findall('\d+', out1_b.decode('utf8'))[0]
+        col_index_geneid = re.findall('\d+', out1_b.decode('utf8'))[0]
         logger.info('This file contains gene ids')
     else:
         logger.error('This file could not be splitted')
         raise IOError()
 
     # command
-    cmd2 = detect_column.format('Uploaded_variation', input_file)
+    cmd2 = detect_column.format(input_file, 'Uploaded_variation')
     # execute subprocess
     out2, err2 = call_subprocess(cmd2)
     # error handling
@@ -109,15 +109,16 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
         logger.error('This file cannot be indexed. \
             Does not contain \'Uploaded_variation\' column with variants ids.')
         raise IOError()
+    
 
     # command
-    cmd3 = detect_column.format('Existing_variation', input_file)
+    cmd3 = detect_column.format( input_file,'Existing_variation')
     # execute subprocess
     out3, err3 = call_subprocess(cmd3)
     # error handling
     if err3 is None and out3 != b'':
-        col_index_namevarid = ', $' + \
-            str(re.findall('\d+', out3.decode('utf8'))[0])
+        col_index_namevarid = str(re.findall('\d+', out3.decode('utf8'))[0]) #', $' + \
+            
         logger.info('\'Existing_variation\' columnd found.')
     else:
         # if 'Existing_variation' column does not exist
@@ -131,11 +132,11 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
         # command to split files
         if parallel is True:
             cmd4 = split_cmd_parallel.format(
-                input_file, col_index_geneid, out_dir, out_extension)
+                input_file, col_index_transcriptid, out_dir, out_extension)
 
         else:
             cmd4 = split_cmd.format(
-                input_file, col_index_geneid, out_dir, out_extension)
+                input_file, col_index_transcriptid, out_dir, out_extension)
         # register process
         out4, err4 = call_subprocess(cmd4)
         # error handling
@@ -152,7 +153,6 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
                                  col_index_transcriptid,
                                  col_index_namevarid,
                                  os.path.join(out_dir, 'variants.index'))
-
         # register process
         out5, err5 = call_subprocess(cmd5)
         # error handling

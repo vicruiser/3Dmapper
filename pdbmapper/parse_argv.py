@@ -114,7 +114,11 @@ def parse_commandline():
     parser.add_argument('-l', "--location", dest="loc", action='store_true',
                         help="Map all variants and detect their location.", default=False)
     
-    # filter by distance (applicable to interfaces)
+    # save final results in CSV format
+    parser.add_argument('-csv', "--to_csv", dest="csv", action='store_true',
+                        help="Write the contained data to a CSV file.", default=False)
+    
+    # save final results in HDF5 format
     parser.add_argument('-hdf', "--to_hdf", dest="hdf", action='store_true',
                         help="Write the contained data to an HDF5 file using HDFStore.", default=False)
 
