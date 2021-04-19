@@ -86,7 +86,7 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
         raise IOError()
 
     # command
-    cmd1_b = detect_column.format(input_file,'ENSG')
+    cmd1_b = detect_column.format(input_file,'Gene')
     # execute subprocess
     out1_b, err1_b = call_subprocess(cmd1_b)
     # error handling

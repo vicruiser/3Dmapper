@@ -24,7 +24,7 @@ DNA = '\U0001F9EC'
 #       text_succeed=" Running PDBmapper...done.",
 #       text_fail=" Running PDBmapper...failed!",
 #       emoji=DNA)
-def wrapper(ensemblid, psdb, vardb, out_dir, pident, isoform, consequence, loc, index_file, uniprot=False, varid=None, csv = False, hdf = False):
+def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc, index_file, uniprot=False, varid=None, csv = False, hdf = False):
     
     # logging
     logger = get_logger('wrapper', out_dir)
@@ -51,6 +51,7 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, isoform, consequence, loc, 
                           vardb,
                           out_dir,
                           pident,
+                          evalue,
                           isoform,
                           APPRIS[i],
                           UniprotID[i],
@@ -104,7 +105,7 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, isoform, consequence, loc, 
                             'Variants could not be filtered by variant id \'' + str(varid) + '\'')
                         raise IOError()
                 try: 
-                    noncoding_variants_index = annovars_left.Protein_position.str.contains('\.|\-', regex=True, na = True)
+                    noncoding_variants_index = annovars_left.Amino_acids.str.contains('\.|\-', regex=True, na = True)
                     noncoding_variants = annovars_left.loc[noncoding_variants_index]
                 except: 
                     noncoding_variants = False 

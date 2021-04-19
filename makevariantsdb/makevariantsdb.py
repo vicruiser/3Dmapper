@@ -98,7 +98,7 @@ class generateVarDB:
 
         # split vep file by protein id to speed up the
         # mapping process
-        split('ENST', var_infile, vardb_outdir,
+        split('Feature', var_infile, vardb_outdir,
               'vep', overwrite, log_dir, parallel)
 
     def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir, report, logger, parallel=False):

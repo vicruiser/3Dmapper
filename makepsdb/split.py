@@ -11,22 +11,17 @@ from .logger import get_logger
 detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
 
-split_cmd = "grep -v '##' {0} | \
-sed -e '1s/^#//' | \
-awk -v ci=\"{1}\" \
+split_cmd = "awk -v ci=\"{1}\" \
 -v od=\"{2}/\" \
--F ' ' 'NR==1 {{h=$0; next}}; \
+-F '\t' 'NR==1 {{h=$0; next}}; \
 !seen[$ci]++{{f=od$ci\".{3}\"; print h >> f}}; \
-{{f=od$ci\".{3}\"; print >> f; close(f)}}'"
+{{f=od$ci\".{3}\"; print >> f; close(f)}}' {0}"
 
-split_cmd_parallel = "grep -v '##' {0} | \
-sed -e '1s/^#//' | parallel --pipe --header '(p.*\n)*' -q \
-awk -v ci=\"{1}\" \
+split_cmd_parallel = "gawk -v ci=\"{1}\" \
 -v od=\"{2}/\" \
--F ' ' 'NR==1 {{h=$0; next}}; \
+-F '\t' 'NR==1 {{h=$0; next}}; \
 !seen[$ci]++{{f=od$ci\".{3}\"; print h >> f}}; \
-{{f=od$ci\".{3}\"; print >> f; close(f)}}'"
-
+{{f=od$ci\".{3}\"; print >> f; close(f)}}' {0}"
 
 def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False):
     '''

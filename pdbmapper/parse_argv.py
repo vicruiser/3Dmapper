@@ -49,7 +49,7 @@ def parse_commandline():
                                     via command line or from a file')
     annovar_group.add_argument('-vid', '--variant_id', nargs='+', metavar="<String>", dest="varid",
                                help='single or list of variants ids provided \
-                                    via command line or from a file')
+                                    via command line or from a file')   
     # interfaces database file
     parser.add_argument("-psdb", "--prot_struct_db", dest="psdb", metavar="<String>",
                         help="interfaces database directory", required=True)
@@ -80,7 +80,6 @@ def parse_commandline():
     # filter by distance (applicable to interfaces)
     parser.add_argument('-d', "--dist", dest="dist", metavar="<float>",
                         help="threshold of maximum distance allowed ")
-    parser.set_defaults(dist=50)
 
     # parser.add_argument('-maxd', "--maxdist", dest="maxdist", metavar="<float>",
     #                     help="threshold of maximum distance allowed ")
@@ -94,10 +93,22 @@ def parse_commandline():
     parser.add_argument("--pident", dest="pident", metavar="<int>",
                         help="threshold of sequence identity (percertage)")
     parser.set_defaults(pident=50)
-
+    
+    # filter by sequence identity percent
+    parser.add_argument('-e', "--evalue", dest="evalue", metavar="<int>",
+                        help="threshold of evalue", default=None)
     # force overwrite
-    parser.add_argument('-f', "--force", dest="force", action='store_true',
+    file_dest = parser.add_mutually_exclusive_group(required=False)
+    file_dest.add_argument('-f', "--force", dest="force", action='store_true',
                         help="force to owerwrite? (y/n)", default=False)
+    file_dest.add_argument('-a', "--append", dest="append", action='store_true',
+                        help="Two or more calls to the program write are able to append results to the same output file.",
+                        default=False)
+    
+   # parser.add_argument('-f', "--force", dest="force", action='store_true',
+   #                     help="force to owerwrite? (y/n)", default=False)
+
+
     # create default output directory
     parser.add_argument('-p', "--parallel", dest="parallel", action='store_true',
                         default=False,
@@ -108,6 +119,10 @@ def parse_commandline():
     # interfaces database file
     parser.add_argument("-j", "--jobs", dest="njobs", metavar="<int>",
                         help="number of jobs to run in parallel")
+    parser.set_defaults(njobs=None)
+    # interfaces database file
+    parser.add_argument("-v", "--verbose", dest="verbose", action='store_true',
+                        help="Print progress.", default=False)
     parser.set_defaults(njobs=None)
 
     # force overwrite

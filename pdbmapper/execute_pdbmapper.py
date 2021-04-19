@@ -1,6 +1,15 @@
 # coding: utf-8
 
 # Import necesary modules
+from .stats import stats
+from .pdbmapper_wrapper import wrapper
+from .run_subprocess import call_subprocess
+from .input_isfile import isfile
+from .logger import get_logger
+from .decorator import tags
+from .PDBmapper import PDBmapper
+from .translate_ensembl import translate_ensembl
+from .parse_argv import parse_commandline
 import sys
 import os
 import gzip
@@ -23,18 +32,8 @@ from halo import Halo
 from timeit import default_timer as timer
 from subprocess import call
 from tabulate import tabulate
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed, parallel_backend
 
-# import functions from scripts
-from .parse_argv import parse_commandline
-from .translate_ensembl import translate_ensembl
-from .PDBmapper import PDBmapper
-from .decorator import tags
-from .logger import get_logger
-from .input_isfile import isfile
-from .run_subprocess import call_subprocess
-from .pdbmapper_wrapper import wrapper
-from .stats import stats
 
 pd.options.mode.chained_assignment = None
 
@@ -56,23 +55,25 @@ class MapTools:
     def run_in_parallel():
         pass
 
-def finish_message(logger, report, time_format, start, spinner): 
+
+def finish_message(logger, report, time_format, start, spinner):
     end = time.time()
     logger.info('Done.')
     report.write(time_format + 'PDBmapper has finished successfully. Total time: ' +
-                str(datetime.timedelta(
-            seconds=round(end-start))) + '\n \n')
+                 str(datetime.timedelta(
+                     seconds=round(end-start))) + '\n \n')
     report.write('Stats\n')
     report.write('-----\n')
-    #report.write(stats_message)
+    # report.write(stats_message)
     report.write('\n')
-    #report.write(stats_table)
+    # report.write(stats_table)
     report.write('\n')
     # print in console result
-    spinner.stop_and_persist(symbol='\U0001F9EC', #'\U0001F9EC'
-                         text=' PDBmapper has finished successfully. Total time: ' +
-                         str(datetime.timedelta(
-                        seconds=round(end-start))))
+    spinner.stop_and_persist(symbol='\U0001F9EC',  # '\U0001F9EC'
+                             text=' PDBmapper has finished successfully. Total time: ' +
+                             str(datetime.timedelta(
+                                 seconds=round(end-start))))
+
 
 def main():
 
@@ -123,19 +124,18 @@ def main():
         os.mkdir(args.out)
         spinner.info(text="Directory " + args.out + " created.\n")
         out_message = "Directory " + args.out + ' created.'
-
     else:
         spinner.info(
             text=args.out + " is an existing directory. Results will be written in there.\n")
         out_message = args.out + ' is an existing directory. Results will be written in there.'
-    
+
     # set up the logging
     logger = get_logger('main', args.out)
     logger.info(out_message)
-    
+
     # if overwrite option is True
     if args.force is True:
-        #if os.path.exists(os.path.join(args.out, 'pdbmapper.log')):
+        # if os.path.exists(os.path.join(args.out, 'pdbmapper.log')):
         #    os.remove(os.path.join(args.out, 'pdbmapper.log'))
         fileList = glob.glob(os.path.join(args.out, 'setID*.txt'))
         # Iterate over the list of filepaths & remove each file.
@@ -148,26 +148,22 @@ def main():
             if item in ['hdf5', 'csv']:
                 shutil.rmtree(os.path.join(args.out, item))
 
-    elif os.listdir(args.out):
+    elif args.append is True:
+        spinner.info(
+                text=' Directory ' + args.out + ' is not empty. Appending files. ')
+        
+    else:
         for item in os.listdir(args.out):
             if item in ['hdf5', 'csv']:
                 logger.warning(
                     'Directory ' + args.out + ' is not empty. Not overwritting files. ' +
-                    'Please select option --force or specify a different output dir.')
+                    'Please select option --force or --apend or specify a different output dir.')
                 spinner.warn(
                     text=' Directory ' + args.out + ' is not empty. Not overwritting files. ' +
-                    'Please select option --force or specify a different output dir.')
+                    'Please select option --force or --apend specify a different output dir.')
                 exit(-1)
-    else:
-        logger.warning(
-            'Directory ' + args.out + ' is not empty. Not overwritting files. ' +
-            'Please select option --force or specify a different output dir.')
-        spinner.warn(
-            text=' Directory ' + args.out + ' is not empty. Not overwritting files. ' +
-            'Please select option --force or specify a different output dir.')
-        exit(-1)
 
-    out_hdf = args.out + '/hdf5'        
+    out_hdf = args.out + '/hdf5'
     if args.hdf is True:
         if not os.path.exists(out_hdf):
             os.mkdir(out_hdf)
@@ -177,8 +173,8 @@ def main():
             spinner.info(
                 text=out_hdf + " is an existing directory. Results will be written in there.\n")
             out_message = out_hdf + ' is an existing directory. Results will be written in there.'
-    
-    out_csv = args.out + '/csv'                     
+
+    out_csv = args.out + '/csv'
     if args.csv is True:
         if not os.path.exists(out_csv):
             os.mkdir(out_csv)
@@ -188,8 +184,6 @@ def main():
             spinner.info(
                 text=out_csv + " is an existing directory. Results will be written in there.\n")
             out_message = out_csv + ' is an existing directory. Results will be written in there.'
-    
-    
 
     # set up the results report
     report = open(os.path.join(args.out, 'pdbmapper.report'), 'w')
@@ -216,7 +210,7 @@ def main():
             num_cores = mp.cpu_count()-1
     else:
         num_cores = 1
-    
+
    # # create chimera scripts:
    # if args.chimera is not None:
    #     # chimera()
@@ -229,9 +223,11 @@ def main():
         start = time.time()
         logger.info('Running PDBmapper...')
         report.write(time_format + 'Running PDBmapper...\n')
-        spinner.start(text=' Running PDBmapper...')
+        if args.verbose:
+            spinner.start(text=' Running PDBmapper...')
+        else:
+            print('Running PDBmapper...')
         # find variants index file
-        
 
         for ids in args.varid:
            # print(ids)
@@ -254,19 +250,20 @@ def main():
                             #transcriptid = toprocess.split(" ")[2].strip()
                             # execute PDBmapper
                             Parallel(n_jobs=num_cores)(delayed(wrapper)(t,
-                                                            args.psdb,
-                                                            args.vardb,
-                                                            args.out,
-                                                            args.pident,
-                                                            args.isoform,
-                                                            args.consequence,
-                                                            args.loc,
-                                                            index_file,
-                                                            args.uniprot,
-                                                            id,
-                                                            args.csv,
-                                                            args.hdf)
-                                        for t in transcriptid)
+                                                                        args.psdb,
+                                                                        args.vardb,
+                                                                        args.out,
+                                                                        args.pident,
+                                                                        args.evalue,
+                                                                        args.isoform,
+                                                                        args.consequence,
+                                                                        args.loc,
+                                                                        index_file,
+                                                                        args.uniprot,
+                                                                        id,
+                                                                        args.csv,
+                                                                        args.hdf)
+                                                       for t in transcriptid)
                         else:
                             logger.error(
                                 'Wrong input: {} is not a recognizable variant id'.format(id))
@@ -274,30 +271,32 @@ def main():
             # given in command line
             elif isfile(ids) == "no":
                 #input = 'not_file'
-                #break
+                # break
                 cmd = ('grep \'\\b{}\\b\' {}').format(ids, index_file)
                 # call subprocess
                 out, err = call_subprocess(cmd)
                 if err is None and out != b'':
                     toprocess = out.decode('utf-8').split(" ")
                     # geneid correspond to the 2nd column in the line
-                    transcriptid = [s for s in toprocess if ('ENST' or '-') in s]
-                    if any(transcriptid) is False and len(toprocess)>0: 
+                    transcriptid = [
+                        s for s in toprocess if ('ENST' or '-') in s]
+                    if any(transcriptid) is False and len(toprocess) > 0:
                         transcriptid = ['-']
                     Parallel(n_jobs=num_cores)(delayed(wrapper)(t,
-                                                            args.psdb,
-                                                            args.vardb,
-                                                            args.out,
-                                                            args.pident,
-                                                            args.isoform,
-                                                            args.consequence,
-                                                            args.loc,
-                                                            index_file,
-                                                            args.uniprot,
-                                                            ids,
-                                                            args.csv,
-                                                            args.hdf)
-                                        for t in transcriptid)
+                                                                args.psdb,
+                                                                args.vardb,
+                                                                args.out,
+                                                                args.pident,
+                                                                args.evalue,
+                                                                args.isoform,
+                                                                args.consequence,
+                                                                args.loc,
+                                                                index_file,
+                                                                args.uniprot,
+                                                                ids,
+                                                                args.csv,
+                                                                args.hdf)
+                                               for t in transcriptid)
                 else:
                     logger.error(
                         'Wrong input: {} is not a recognizable variant id'.format(id))
@@ -309,7 +308,7 @@ def main():
                 spinner.fail(" Running PDBmapper...failed!")
                 report.write(time_format + " Running PDBmapper...failed!")
                 raise IOError
-            
+
             finish_message(logger, report, time_format, start, spinner)
 
             # if input == 'not_file':
@@ -382,7 +381,10 @@ def main():
         start = time.time()
         logger.info('Running PDBmapper...')
         report.write(time_format + 'Running PDBmapper...\n')
-        spinner.start(text=' Running PDBmapper...')
+        if args.verbose:
+            spinner.start(text=' Running PDBmapper...')
+        else:
+            print('Running PDBmapper...')
         # PDBmapper accepts single or multiple protein ids
         # as input as well as prot ids stored in a file
         for ids in args.protid:
@@ -398,6 +400,7 @@ def main():
                                                                 args.vardb,
                                                                 args.out,
                                                                 args.pident,
+                                                                args.evalue,
                                                                 args.isoform,
                                                                 args.consequence,
                                                                 args.loc,
@@ -421,12 +424,13 @@ def main():
 
         # for prot id get the gene id
         if input == 'not_file':
-            #print(args.protid)
+            # print(args.protid)
             Parallel(n_jobs=num_cores)(delayed(wrapper)(ids,
                                                         args.psdb,
                                                         args.vardb,
                                                         args.out,
                                                         args.pident,
+                                                        args.evalue,
                                                         args.isoform,
                                                         args.consequence,
                                                         args.loc,
@@ -444,17 +448,17 @@ def main():
                 text=' Input ensembl ids has no mapping variants.')
             exit(-1)
 
-        #var_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
+        # var_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
         #    args.vardb, 'makevariantsdb_stats.info'))[0]))
 
-        #int_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
+        # int_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
         #    args.psdb, 'makeinterfacesdb_stats.info'))[0]))
 
-        #mapped_infofile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
+        # mapped_infofile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
         #    args.out, 'MappedVariants*' + str(args.pident) + '_isoform_' +
         #     '_'.join(args.isoform) + '_consequence_' + '_'.join(args.consequence) + '*File'))[0]))
 
-        #stats_message, stats_table = stats(
+        # stats_message, stats_table = stats(
         #    var_statsfile, int_statsfile, mapped_infofile, args.out)
 
         # Compute execution time
