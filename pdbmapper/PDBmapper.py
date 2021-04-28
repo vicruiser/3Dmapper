@@ -12,6 +12,7 @@ from .db_parser import parser
 # .interface_parser import reshape
 from .decorator import tags
 from .explode import explode
+from .explode2 import explode2
 from .logger import get_logger
 from .writefile import writefile
 
@@ -109,7 +110,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
             sub_df['Protein_position'] = sub_df.apply(lambda x: list(
                 range(int(x['start']), int(x['end'])+1)), 1)
             # spread each individual position into one row
-            sub_df = explode(sub_df, ['Protein_position'])
+            sub_df = explode2(sub_df, ['Protein_position'])
             # drop unnecesary columns
             sub_df.drop(['start', 'end'], inplace=True, axis=1)
             # concatenate final result
@@ -119,6 +120,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
     except IOError:
         annovars = False
      # parse interfaces corresponding to the selected protein ID
+
     try:
         psdf = parser(protid, psdb)
         logger.info('Protein features file of ' + protid + ' parsed.')
