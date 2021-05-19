@@ -55,8 +55,8 @@ def parse_commandline():
                         help="interfaces database directory", required=True)
 
     # interfaces database file
-    parser.add_argument('-u', "--uniprot", dest="uniprot", action='store_true',
-                        help="protein features are defined by Uniprot IDs", default=False)
+    #parser.add_argument('-u', "--uniprot", dest="uniprot", action='store_true',
+    #                    help="protein features are defined by Uniprot IDs", default=False)
 
     # variants db
     parser.add_argument("-vdb", '--variant_db', dest="vardb", metavar="<String>",
@@ -66,6 +66,10 @@ def parse_commandline():
     parser.add_argument("-o", "--out", metavar="<String>", dest="out",
                         help="output directory")
     parser.set_defaults(out="./pdbmapper_results")
+    
+    # force overwrite
+    parser.add_argument('-dic', "--dic_geneprot", dest="dict_geneprot", metavar="<String>",
+                        help="File that contains protein, transcripts and gene IDs.", required = True)
 
     # filter results by type of variant
     parser.add_argument('-c', "--consequence", nargs='+', dest="consequence", metavar="<String>",

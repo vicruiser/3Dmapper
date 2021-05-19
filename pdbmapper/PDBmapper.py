@@ -19,7 +19,7 @@ from .writefile import writefile
 #import vaex
 
 
-def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalue, isoform, APPRIS, UniprotID, consequence, loc, varid=None, csv=False, hdf=False):
+def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalue, isoform, APPRIS, consequence, loc, varid=None, csv=False, hdf=False):
     '''
     Map interfaces and genomic anntoated variants and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
@@ -120,7 +120,6 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
     except IOError:
         annovars = False
      # parse interfaces corresponding to the selected protein ID
-
     try:
         psdf = parser(protid, psdb)
         logger.info('Protein features file of ' + protid + ' parsed.')
@@ -180,7 +179,8 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
         
     except IOError:
         psdf = False
-
+        
+        
     if psdf is False and annovars is False:
         logger.error('Protein ' +
                      protid + 'could not be parsed.')
@@ -224,8 +224,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
         psdf['Protein_position'] = psdf['Protein_position'].astype(str)
         annovars['Protein_position'] = annovars['Protein_position'].astype(str)
         annovars['APPRIS_isoform'] = APPRIS
-        annovars['Uniprot_accession'] = UniprotID
-
+       # annovars['Uniprot_accession'] = UniprotID
         # Merge them both files
         mapped_variants = annovars.join(
             psdf.set_index('Protein_position'), on='Protein_position', how='inner')
@@ -253,8 +252,8 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
 
                 # non-protein coding mutations
                 if noncoding_variants.empty is False:
-                    noncoding_variants = noncoding_variants.drop(
-                        columns=['Uniprot_accession'])  # not needed
+                   # noncoding_variants = noncoding_variants.drop(
+                   #     columns=['Uniprot_accession'])  # not needed
                     noncoding_variants['Mapping_position'] = 'Noncoding'
                     writefile(protid, out_dir, pident, isoform, consequence,
                               noncoding_variants, 'NoncodingVariants', csv, hdf)
@@ -265,7 +264,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
                 # and will reduce the maximum number of combinations of rows
                 #pdb.id ensembl.prot.id temp.chain int.chain 
                 psdf = psdf.loc[:, ['PDB_code', 'Protein_accession',
-                                    'PDB_chain', 'Protein_alignment_start', 'Protein_alignment_end']]
+                                    'PDB_chain', 'Protein_alignment_start', 'Protein_alignment_end', 'Pident']]
                 #psdf = psdf.iloc[:, np.r_[0:3, 4:9]]
                 psdf.drop_duplicates(inplace=True)
                 # merge rest of variants with protein structures
@@ -296,8 +295,8 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
                         unmapped_variants = unmapped_variants[[c for c in unmapped_variants.columns if c in cs]]
                         unmapped_variants.drop_duplicates(inplace=True)
                         unmapped_variants['Mapping_position'] = 'Unmapped'
-                        unmapped_variants = unmapped_variants.drop(
-                            columns=['Uniprot_accession'])
+                       # unmapped_variants = unmapped_variants.drop(
+                       #     columns=['Uniprot_accession'])
                         writefile(protid, out_dir, pident, isoform, consequence,
                                   unmapped_variants, 'UnmappedVariants', csv, hdf)
 
@@ -307,8 +306,8 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
                         if unmapped_variants.empty is False:
                             unmapped_variants.drop_duplicates(inplace=True)
                             unmapped_variants['Mapping_position'] = 'Unmapped'
-                            unmapped_variants = unmapped_variants.drop(
-                                columns=['Uniprot_accession'])
+                           # unmapped_variants = unmapped_variants.drop(
+                           #     columns=['Uniprot_accession'])
                             writefile(protid, out_dir, pident, isoform, consequence,
                                       unmapped_variants, 'UnmappedVariants', csv, hdf)
                     except:
@@ -323,7 +322,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
             # report results
             logger.warning('Warning: ' + protid +
                            ' does not map with any annotated variant.\n')
-            raise IOError()
+            #raise IOError()
 
         # if merging was successful, create setID file and
         # save the merged dataframe as well

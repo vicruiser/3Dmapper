@@ -259,7 +259,8 @@ def main():
                                                                         args.consequence,
                                                                         args.loc,
                                                                         index_file,
-                                                                        args.uniprot,
+                                                                        args.dict_geneprot,
+                                                                        #args.uniprot,
                                                                         id,
                                                                         args.csv,
                                                                         args.hdf)
@@ -292,7 +293,8 @@ def main():
                                                                 args.consequence,
                                                                 args.loc,
                                                                 index_file,
-                                                                args.uniprot,
+                                                                args.dict_geneprot,
+                                                               # args.uniprot,
                                                                 ids,
                                                                 args.csv,
                                                                 args.hdf)
@@ -405,7 +407,8 @@ def main():
                                                                 args.consequence,
                                                                 args.loc,
                                                                 index_file,
-                                                                args.uniprot,
+                                                                args.dict_geneprot,
+                                                               # args.uniprot,
                                                                 None,
                                                                 args.csv,
                                                                 args.hdf)
@@ -435,7 +438,8 @@ def main():
                                                         args.consequence,
                                                         args.loc,
                                                         index_file,
-                                                        args.uniprot,
+                                                        args.dict_geneprot,
+                                                       # args.uniprot,
                                                         None,
                                                         args.csv,
                                                         args.hdf)

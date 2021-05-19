@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import glob
 import os
+import re
 from subprocess import call
 from .logger import get_logger
 from .translate_ensembl import translate_ensembl
@@ -18,13 +19,14 @@ from .writefile import writefile
 DNA = '\U0001F9EC'
 
 # decorator to monitor function
-
+detect_column = "grep -v '##' {} | awk -F ' ' '{{for(i=1;i<=NF;i++) \
+{{if ($i ~ /{}/){{print i; exit}}}}}}' "
 
 # @tags(text_start="Running PDBmapper...",
 #       text_succeed=" Running PDBmapper...done.",
 #       text_fail=" Running PDBmapper...failed!",
 #       emoji=DNA)
-def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc, index_file, uniprot=False, varid=None, csv = False, hdf = False):
+def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc, index_file, dict_geneprot, varid=None, csv = False, hdf = False):
     
     # logging
     logger = get_logger('wrapper', out_dir)
@@ -33,14 +35,17 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
         if ensemblid == '-': 
             raise IOError()
         ensemblIDs = translate_ensembl(
-            ensemblid,  out_dir, isoform)
+            ensemblid,  out_dir, dict_geneprot, isoform)
+
         geneid = ensemblIDs['geneID']
         protid = ensemblIDs['protID']
         transcriptid = ensemblIDs['transcriptID']
-        UniprotID = ensemblIDs['UniprotID']
-        APPRIS = ensemblIDs['APPRIS']
-        if uniprot is True:
-            protid = UniprotID
+        if 'APPRIS' in ensemblIDs.keys():
+            APPRIS = ensemblIDs['APPRIS']
+        else:
+            APPRIS = [None] # change to list with same length as protid
+       # if uniprot is True:
+       #     protid = UniprotID
         # run PDBmapper
         for i in range(0, len(protid)):
             try:
@@ -54,7 +59,7 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
                           evalue,
                           isoform,
                           APPRIS[i],
-                          UniprotID[i],
+                         # UniprotID[i],
                           consequence,
                           loc,
                           varid,
@@ -84,8 +89,15 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
                     if err is None and out != b'':
                         toprocess = out.decode('utf-8')
                         # geneid correspond to the 2nd column in the line
-                        transcriptid = [s for s in toprocess.split(
-                                            " ") if 'ENST' in s][0]
+                        cmd2 = detect_column.format(index_file,'Feature')
+                        # execute subprocess
+                        out2, err2 = call_subprocess(cmd2)
+                        # error handling
+                        if err2 is None and out2 != b'':
+                            col_index_trasncriptid = re.findall('\d+', out2.decode('utf8'))[0]
+                            transcriptid = toprocess.split("")[col_index_trasncriptid]
+                        #transcriptid = [s for s in toprocess.split(
+                        #                    " ") if 'ENST' in s][0]
                 annovars_left = parser(transcriptid, vardb)
                 
                     #annovars_left = annovars[annovars['Feature']==ensemblid]
