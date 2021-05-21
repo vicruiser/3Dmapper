@@ -123,13 +123,17 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
     try:
         psdf = parser(protid, psdb)
         logger.info('Protein features file of ' + protid + ' parsed.')
+        # Get col PDB_position
         # if database is compacted and explode is needed
         columns_type = psdf.applymap(lambda x: isinstance(x, list)).all()
         columns_list = columns_type.index[columns_type].tolist()
+
         # cols_stack
         cols_stack = psdf.apply(lambda x: x.astype(
             str).str.match(r'[a-zA-Z0.-9]+-[a-zA-Z0.-9]+'))
         colsnames_stack = psdf.columns[cols_stack.any()].tolist()
+        # add column for chimera script
+        psdf['Chimera_positions'] = psdf['PDB_position']
         if 'Evalue' in colsnames_stack:
             colsnames_stack.remove('Evalue')
         if 'PDB_code' in colsnames_stack:
@@ -143,6 +147,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
         else:
             psdf[colsnames_stack] = \
                 psdf[colsnames_stack].astype(str)
+        
         # if default database is used minor modifications are needed
         if pident is not None:
             logger.info('Filtering interfaces by pident = ' +
@@ -176,6 +181,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
                              str(alt_evalue) + ' would retrieve results.')
 
                 raise IOError()
+        
         
     except IOError:
         psdf = False
@@ -328,7 +334,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
         # save the merged dataframe as well
         else:
             
-            mapped_variants['Mapping_position'] = 'Interface'
+            mapped_variants['Mapping_position'] = 'Mapped'
             setID_file = mapped_variants[['Structure_feature_id',
                                           'Uploaded_variation']]
             setID_file.drop_duplicates(inplace=True)
