@@ -53,7 +53,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
     logger = get_logger(' PDBmapper', out_dir)
     # parse variants corresponding to the selected protein ID
     try:
-        annovars = parser(transcriptid, vardb)
+        annovars = parser(transcriptid, vardb)     
         if consequence is not None:
             annovars = annovars[annovars['Consequence'].astype(
                 str).str.contains('|'.join(consequence))]
@@ -116,7 +116,6 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
             # concatenate final result
             annovars = pd.concat([remaining_df, sub_df], sort=False)
             annovars = annovars.reset_index(drop=True)
-
     except IOError:
         annovars = False
      # parse interfaces corresponding to the selected protein ID
@@ -133,7 +132,8 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
             str).str.match(r'[a-zA-Z0.-9]+-[a-zA-Z0.-9]+'))
         colsnames_stack = psdf.columns[cols_stack.any()].tolist()
         # add column for chimera script
-        psdf['Chimera_positions'] = psdf['PDB_position']
+        psdf['Interface_positions'] = psdf['PDB_position']
+        psdf['Interface_interacting_positions'] = psdf['PDB_interacting_position']
         if 'Evalue' in colsnames_stack:
             colsnames_stack.remove('Evalue')
         if 'PDB_code' in colsnames_stack:
@@ -180,12 +180,9 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
                              str(evalue) + ' is too low.\n A threshold higher than or equal to ' +
                              str(alt_evalue) + ' would retrieve results.')
 
-                raise IOError()
-        
-        
+                raise IOError()       
     except IOError:
         psdf = False
-        
         
     if psdf is False and annovars is False:
         logger.error('Protein ' +
@@ -224,7 +221,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
                 unmapped_variants['Mapping_position'] = 'Unmapped'
                 writefile(protid, out_dir, pident, isoform, consequence,
                           unmapped_variants, 'UnmappedVariants', csv, hdf)
-    
+        
     elif psdf is not False and annovars is not False:
         # for sucessful merge, Protein_position column must be str type
         psdf['Protein_position'] = psdf['Protein_position'].astype(str)

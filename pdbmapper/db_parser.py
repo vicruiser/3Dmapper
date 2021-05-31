@@ -29,7 +29,7 @@ def parser(ensemblID, db_dir):
     f = glob.glob(os.path.join(db_dir, (ensemblID + '.*')))
     if not f:
         raise IOError()
-        exit(-1)
+        #exit(-1)
     else:
         try:
             df = pd.read_csv(f[0], sep="\t| ", engine='python')

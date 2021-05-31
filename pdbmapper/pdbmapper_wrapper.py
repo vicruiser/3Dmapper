@@ -6,6 +6,7 @@ import glob
 import os
 import re
 from subprocess import call
+import itertools
 from .logger import get_logger
 from .translate_ensembl import translate_ensembl
 from .db_parser import parser
@@ -43,7 +44,7 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
         if 'APPRIS' in ensemblIDs.keys():
             APPRIS = ensemblIDs['APPRIS']
         else:
-            APPRIS = [None] # change to list with same length as protid
+            APPRIS = list(itertools.repeat(None, len(geneid))) # change to list with same length as protid
        # if uniprot is True:
        #     protid = UniprotID
         # run PDBmapper
@@ -66,14 +67,14 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
                           csv,
                           hdf)
         # error handling
-            except:
+            except IOError:
                 if varid is None:
                     logger.error(
                         ('Warning: {} has no mapping variants.'.format(ensemblid)))
                 else:
                     logger.error(
                         ('Warning: {} has no mapping variants.'.format(str(varid))))
-            continue
+                continue
         
      # error handling
     except IOError:
