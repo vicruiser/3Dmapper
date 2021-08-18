@@ -1,16 +1,16 @@
 <img src= "./docs/LogoPDBcopy2.png" width = "600" heigh = "300">
 
-# Introduction
+# Overview
 
-## Motivation
-PDBmapper is a tool to map annotated genomic variants to protein features data in 3D.
+3Dmapper is a tool to map annotated genomic positions to protein structures.
 
-## Overview
-The PDBmaper program supports xxx different search methods:
+# Install and documentation
 
-# Usage
+## Just variants mapping
 
-## Running PDBmapper
+## Generation of local interfaces database
+
+# Running PDBmapper
 
 ```markdown
 makepsdb -psdb p53_ep300_intdb.dat --out out/path/dir 
