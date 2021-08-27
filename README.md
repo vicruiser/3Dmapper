@@ -17,6 +17,20 @@ makepsdb -psdb p53_ep300_intdb.dat --out out/path/dir
 makevariantsdb -vcf PDBmapper/pdbmapper/data/p53_ep300_ExACvariants.vep -out ./test_pdbmapper/
 pdbmapper -vardb test_pdbmapper/DBs/varDB/ -intdb test_pdbmapper/DBs/intDB/ -protid ENSP00000263253 ENSP00000482258 -out test_pdbmapper/ 
 ```
+
+# Generate your own interface DB
+
+Requirements: 
+1. Download the PDB files you are interested in, either the entire database or just only a few files, and locate them in the same directory. 
+2. This step depends on the BLAST standalone tool. Please, follow the [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use this software locally. 
+3. Generate a target proteome database. For this, use the set of protein sequences of your choice and run the command "makeblastdb" from BLAST.
+
+Per each PDB file downloaded, run makeinterfacedb will do the following:  
+  1) Extract their protein chains. 
+  2) BLAST against the proteome of interest 
+  3) Predict interfaces
+  4) Map sequence and PDB positions. 
+
 ### Test
 
 <!-- More details in ./test -->
