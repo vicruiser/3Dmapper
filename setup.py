@@ -188,7 +188,7 @@ setup(
     #   py_modules=["my_module"],
     #
     packages=['pdbmapper', 'makepsdb',
-              'makevariantsdb'],  # Required!!!!!
+              'makevariantsdb', 'makechimera'],  # Required!!!!!
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -238,7 +238,8 @@ setup(
     entry_points={
         "console_scripts": ['pdbmapper=pdbmapper.__main__:main',
                             'makepsdb=makepsdb.__main__:main',
-                            'makevariantsdb=makevariantsdb.__main__:main']
+                            'makevariantsdb=makevariantsdb.__main__:main',
+                            'makechimera=makechimera.__main__:main']
     },
 
     # List additional URLs that are relevant to your project as a dict.
