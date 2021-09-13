@@ -104,7 +104,7 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
     # error handling
     if err2 is None and out2 != b'':
         col_index_varid = re.findall('\d+', out2.decode('utf8'))[0]
-        logger.info('\'Uploaded_variation\' columnd found.')
+        logger.info('\'Uploaded_variation\' column found.')
     else:
         logger.error('This file cannot be indexed. \
             Does not contain \'Uploaded_variation\' column with variants ids.')

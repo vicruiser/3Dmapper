@@ -2,6 +2,7 @@
 import glob
 import pandas as pd
 import os
+import dask.dataframe as dd
 
 
 def parser(ensemblID, db_dir):
@@ -33,6 +34,8 @@ def parser(ensemblID, db_dir):
     else:
         try:
             df = pd.read_csv(f[0], sep="\t| ", engine='python')
+            #df = dd.read_csv(f[0], sep="\t| ", engine='python')
         except:
+            #df = dd.read_csv(f[0], sep=" ", engine='python')
             df = pd.read_csv(f[0], sep=" ", engine='python')
         return df

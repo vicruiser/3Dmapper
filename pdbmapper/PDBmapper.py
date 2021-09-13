@@ -7,6 +7,7 @@ import re
 import glob
 import pandas as pd
 import numpy as np
+import dask.dataframe as dd
 
 from .db_parser import parser
 # .interface_parser import reshape
@@ -132,22 +133,29 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
             str).str.match(r'[a-zA-Z0.-9]+-[a-zA-Z0.-9]+'))
         colsnames_stack = psdf.columns[cols_stack.any()].tolist()
         # add column for chimera script
-        psdf['Interface_positions'] = psdf['PDB_position']
-        psdf['Interface_interacting_positions'] = psdf['PDB_interacting_position']
+        
+        if 'PDB_interacting_3D_position' in colsnames_stack:
+            #psdf['Interface_interacting_positions'] = psdf['PDB_interacting_position']  
+            psdf['Chimera_interacting_position'] = psdf['PDB_interacting_3D_position']
         if 'Evalue' in colsnames_stack:
             colsnames_stack.remove('Evalue')
         if 'PDB_code' in colsnames_stack:
             colsnames_stack.remove('PDB_code')
+        if 'PDB_3D_position' in colsnames_stack:
+            #colsnames_stack.remove('PDB_3D_position')
+            psdf['Chimera_3D_position'] = psdf['PDB_3D_position']
+        if 'Structure_feature_id' in colsnames_stack:
             colsnames_stack.remove('Structure_feature_id')
+
         if any(colsnames_stack):
             psdf = explode(psdf , colsnames_stack, '-')
         elif any(columns_list):
             psdf = explode(
-                psdf, columns_list)
+                psdf, columns_list, '-')
         else:
             psdf[colsnames_stack] = \
                 psdf[colsnames_stack].astype(str)
-        
+ 
         # if default database is used minor modifications are needed
         if pident is not None:
             logger.info('Filtering interfaces by pident = ' +
@@ -169,7 +177,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
             logger.info('Filtering interfaces by evalue = ' +
                         str(evalue) + '%.')
             # filter by pident
-            evalue = int(evalue)  # from str to int
+            evalue = float(evalue)  # from str to int
             psdf = psdf.loc[psdf.Evalue >= evalue]
             # if pident threshold is to high, the next maximum value of pident is
             # notified in log file
@@ -231,7 +239,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
         # Merge them both files
         mapped_variants = annovars.join(
             psdf.set_index('Protein_position'), on='Protein_position', how='inner')
-        
+
         if isoform is None:
             isoform = ['all']
         if consequence is None:
@@ -248,7 +256,7 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
             # remove non protein coding variants
             if left_variants.empty is False:
                 left_variants.drop_duplicates(inplace=True)
-                noncoding_variants_index = left_variants.Protein_position.str.contains(
+                noncoding_variants_index = left_variants.Amino_acids.str.contains(
                     '\.|\-', regex=True, na=False)
 
                 noncoding_variants = left_variants.loc[noncoding_variants_index]
@@ -267,7 +275,9 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
                 # and will reduce the maximum number of combinations of rows
                 #pdb.id ensembl.prot.id temp.chain int.chain 
                 psdf = psdf.loc[:, ['PDB_code', 'Protein_accession',
-                                    'PDB_chain', 'Protein_alignment_start', 'Protein_alignment_end', 'Pident']]
+                                    'PDB_chain', 'Protein_alignment_start',
+                                     'Protein_alignment_end', 'PDB_alignment_start',
+                                      'PDB_alignment_end', 'Pident']]
                 #psdf = psdf.iloc[:, np.r_[0:3, 4:9]]
                 psdf.drop_duplicates(inplace=True)
                 # merge rest of variants with protein structures
@@ -285,21 +295,30 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
                 # do proper arragenments if no resulst are retrieved
                 if structure_variants.empty is False:
                     structure_variants.drop_duplicates(inplace=True)
+                    
+                    # structure_variants['PDB_position'] = np.where(structure_variants['Protein_alignment_start'] > structure_variants['PDB_alignment_start'],
+                    #  structure_variants['Protein_position'] - structure_variants['Protein_alignment_start'] + structure_variants['PDB_alignment_start'],
+                    #   np.where(structure_variants['Protein_alignment_start'] < structure_variants['PDB_alignment_start'],
+                    #   structure_variants['Protein_position'] + structure_variants['PDB_alignment_start'] -1,
+                    #   structure_variants['Protein_position']  ))
+
+                    structure_variants['PDB_seq_position'] = structure_variants['Protein_position'] - structure_variants['Protein_alignment_start'] + structure_variants['PDB_alignment_start']
+
                     structure_variants['Mapping_position'] = 'Structure'
                     writefile(protid, out_dir, pident, isoform, consequence,
                               structure_variants, 'StructureVariants', csv, hdf)
-
                     # unmapped variants
-                    unmapped_variants = left_variants.drop(
-                        structure_variants.index)
+                   # unmapped_variants = left_variants.drop(
+                   #     structure_variants.index)
+                    unmapped_variants = left_variants[~left_variants.index.isin(structure_variants.index)]
+                   # unmapped_variants = left_variants.loc[left_variants.index.drop(structure_variants.index)]
+
                     if unmapped_variants.empty is False:
                         cs = annovars.columns.values.tolist()
                         cs.append("Protein_accession")  
                         unmapped_variants = unmapped_variants[[c for c in unmapped_variants.columns if c in cs]]
                         unmapped_variants.drop_duplicates(inplace=True)
                         unmapped_variants['Mapping_position'] = 'Unmapped'
-                       # unmapped_variants = unmapped_variants.drop(
-                       #     columns=['Uniprot_accession'])
                         writefile(protid, out_dir, pident, isoform, consequence,
                                   unmapped_variants, 'UnmappedVariants', csv, hdf)
 
@@ -309,8 +328,6 @@ def PDBmapper(protid,  geneid, transcriptid, psdb, vardb, out_dir, pident, evalu
                         if unmapped_variants.empty is False:
                             unmapped_variants.drop_duplicates(inplace=True)
                             unmapped_variants['Mapping_position'] = 'Unmapped'
-                           # unmapped_variants = unmapped_variants.drop(
-                           #     columns=['Uniprot_accession'])
                             writefile(protid, out_dir, pident, isoform, consequence,
                                       unmapped_variants, 'UnmappedVariants', csv, hdf)
                     except:

@@ -13,6 +13,7 @@ import time
 import os.path
 import datetime
 import csv
+import shutil
 
 import pandas as pd
 import numpy as np
@@ -140,7 +141,20 @@ def main():
     # set output dir to split vep
     psdb_outdir = os.path.join(out_dir, 'psdb')  # created by default
     # create output dir if it doesn't exist
-    os.makedirs(psdb_outdir, exist_ok=True)
+    if args.force is True:
+        if os.path.exists(psdb_outdir):
+            shutil.rmtree(psdb_outdir)
+        os.makedirs(psdb_outdir, exist_ok=True)
+    else:
+        if os.path.exists(psdb_outdir):
+            spinner.warn(
+                    text=' Directory ' + psdb_outdir + ' is not empty. Not overwritting files. ' +
+                    'Please select option --force or specify a different output dir.')
+            exit(-1)
+        else: 
+            # create output dir if it doesn't exist
+            os.makedirs(psdb_outdir, exist_ok=True)
+    
 
     # set up a log file
     logger = get_logger('main', out_dir)

@@ -96,7 +96,7 @@ def parse_commandline():
     # filter by sequence identity percent
     parser.add_argument("--pident", dest="pident", metavar="<int>",
                         help="threshold of sequence identity (percertage)")
-    parser.set_defaults(pident=50)
+    parser.set_defaults(pident=20)
     
     # filter by sequence identity percent
     parser.add_argument('-e', "--evalue", dest="evalue", metavar="<int>",

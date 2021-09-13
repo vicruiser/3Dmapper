@@ -5,31 +5,30 @@ import re
 import pandas as pd
 import numpy as np
 
-def explode(df,column_selectors, row_delimiter):
-    # we need to keep track of the ordering of the columns
-    def _split_list_to_rows(row,row_accumulator,column_selector,row_delimiter):
-        split_rows = {}
-        max_split = 0
-        for column_selector in column_selectors:
-
-            split_row = row[column_selector].split(row_delimiter)
-            split_rows[column_selector] = split_row
-            if len(split_row) > max_split:
-                max_split = len(split_row)
+# def explode(df,column_selectors, row_delimiter):
+#     # we need to keep track of the ordering of the columns
+#     def _split_list_to_rows(row,row_accumulator,column_selector,row_delimiter):
+#         split_rows = {}
+#         max_split = 0
+#         for column_selector in column_selectors:
+#             split_row = str(row[column_selector]).split(row_delimiter)
+#             split_rows[column_selector] = split_row
+#             if len(split_row) > max_split:
+#                 max_split = len(split_row)
             
-        for i in range(max_split):
-            new_row = row.to_dict()
-            for column_selector in column_selectors:
-                try:
-                    new_row[column_selector] = split_rows[column_selector].pop(0)
-                except IndexError:
-                    new_row[column_selector] = ''
-            row_accumulator.append(new_row)
+#         for i in range(max_split):
+#             new_row = row.to_dict()
+#             for column_selector in column_selectors:
+#                 try:
+#                     new_row[column_selector] = split_rows[column_selector].pop(0)
+#                 except IndexError:
+#                     new_row[column_selector] = ''
+#             row_accumulator.append(new_row)
 
-    new_rows = []
-    df.apply(_split_list_to_rows,axis=1,args = (new_rows,column_selectors,row_delimiter))
-    new_df = pd.DataFrame(new_rows, columns=df.columns)
-    return new_df
+#     new_rows = []
+#     df.apply(_split_list_to_rows,axis=1,args = (new_rows,column_selectors,row_delimiter))
+#     new_df = pd.DataFrame(new_rows, columns=df.columns)
+#     return new_df
 
 
 # def explode(df, columns):
@@ -58,24 +57,26 @@ def explode(df,column_selectors, row_delimiter):
 #                     axis=1).reset_index(drop=True)
 #     return res
 ##############################################################################
-# def explode(df, cols, split_on='-'):
-#     """
-#     Explode dataframe on the given column, split on given delimeter
-#     """
-#     print(cols)
-#     cols_sep = list(set(df.columns) - set(cols))
-#     print(cols_sep)
-#     df_cols = df[cols_sep]
-#     explode_len = df[cols[0]].str.split(split_on).map(len)
-#     print(explode_len)
-#     repeat_list = []
-#     for r, e in zip(df_cols.as_matrix(), explode_len):
-#         repeat_list.extend([list(r)]*e)
+def explode(df,cols,split_on):
+    """
+    Explode dataframe on the given column, split on given delimeter
+    """
+    #print(cols)
+    #print(set(df.columns))
+    cols_sep = [x for x in list(df.columns) if x not in cols]
+    #cols_sep = list(set(list(df.columns)) - set(cols))
+    df_cols = df[cols_sep]
+    explode_len = df[cols[0]].str.split(split_on).map(len)
+
+    repeat_list = []
+    for r, e in zip(df_cols.values, explode_len):
+        repeat_list.extend([list(r)]*e)
     
-#     df_repeat = pd.DataFrame(repeat_list, columns=cols_sep)
-#     print(df_repeat)
-#     df_explode = pd.concat([df[col].str.split(split_on, expand=True).stack().str.strip().reset_index(drop=True)
-#                             for col in cols], axis=1)
-#     df_explode.columns = cols
-#     print(df_explode)
-#     return pd.concat((df_repeat, df_explode), axis=1)
+    df_repeat = pd.DataFrame(repeat_list, columns=cols_sep)
+
+    
+    df_explode = pd.concat([df[col].str.split(split_on, expand=True).stack().str.strip().reset_index(drop=True)
+                            for col in cols], axis=1)
+    df_explode.columns = cols
+    
+    return pd.concat((df_repeat, df_explode), axis=1)

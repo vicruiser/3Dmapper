@@ -221,7 +221,8 @@ def main():
 
     
     if args.force is True:
-        shutil.rmtree(vardb_outdir)
+        if os.path.exists(vardb_outdir):
+            shutil.rmtree(vardb_outdir)
         os.makedirs(vardb_outdir, exist_ok=True)
     else:
         if os.path.exists(vardb_outdir):
