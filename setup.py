@@ -193,8 +193,9 @@ setup(
     #
     #   py_modules=["my_module"],
     #
+
     packages=['mapper', 'makepsdb',
-              'makevariantsdb', 'makeinterfacedb'],  # Required!!!!!
+              'makevariantsdb', 'makeinterfacedb', 'makechimera' ],  # Required!!!!!
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -247,7 +248,9 @@ setup(
         "console_scripts": ['mapper=mapper.__main__:main',
                             'makepsdb=makepsdb.__main__:main',
                             'makevariantsdb=makevariantsdb.__main__:main',
-                            'makeinterfacedb=makeinterfacedb.__main__:main']
+                            'makechimera=makechimera.__main__:main',
+                           'makeinterfacedb=makeinterfacedb.__main__:main']
+
     },
 
     # List additional URLs that are relevant to your project as a dict.
