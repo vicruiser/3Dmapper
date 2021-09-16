@@ -13,11 +13,6 @@ import numpy as np
 
 from .decorator import tags
 from .logger import get_logger
-# define request function to avoid repeating code
-#maf = "/home/vruizser/head_mc3.maf"
-#maf = '/home/vruizser/PhD/2018-2019/Immunity_interfaces_analysis/raw_data/mc3.v0.2.8.PUBLIC.maf'
-
-# add decorator to main function
 
 
 @tags(text_start="Converting MAF to VEP...This might take up some time...\n",

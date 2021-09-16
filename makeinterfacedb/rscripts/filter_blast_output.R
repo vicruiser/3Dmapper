@@ -1,3 +1,4 @@
+#! /usr/bin/Rscript
 # path to packages
 requiredPackages = c('tidyr', 'stringr')
 for (p in requiredPackages) {
@@ -13,6 +14,8 @@ COVERAGE_FILTER = as.numeric(commandArgs(TRUE)[3]) # percent of query length  th
 EVALUE_FILTER = as.numeric(commandArgs(TRUE)[4])
 OUTPUT_DIR = as.character(commandArgs(TRUE)[5])
 OUTPUT_FNAME = as.character(commandArgs(TRUE)[6])
+
+
 # read the output file if not empty.
 if (file.size(INPUT_FILE) > 0) {
   # read the output files as data frame

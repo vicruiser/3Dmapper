@@ -2,13 +2,13 @@
 
 # Import necesary modules
 from .stats import stats
-from .pdbmapper_wrapper import wrapper
+from .mapper_wrapper import wrapper
 from .run_subprocess import call_subprocess
 from .input_isfile import isfile
 from .logger import get_logger
 from .decorator import tags
-from .PDBmapper import PDBmapper
-from .translate_ensembl import translate_ensembl
+from .mapper import mapper
+from .translate import translate
 from .parse_argv import parse_commandline
 import sys
 import os
@@ -37,9 +37,6 @@ from joblib import Parallel, delayed, parallel_backend
 
 pd.options.mode.chained_assignment = None
 
-# define main function
-
-
 class MapTools:
 
     time = '[' + time.ctime(time.time()) + '] '
@@ -59,84 +56,57 @@ class MapTools:
 def finish_message(logger, report, time_format, start, spinner):
     end = time.time()
     logger.info('Done.')
-    report.write(time_format + 'PDBmapper has finished successfully. Total time: ' +
+    report.write(time_format + '3Dmapper has finished successfully. Execution time: ' +
                  str(datetime.timedelta(
                      seconds=round(end-start))) + '\n \n')
-    report.write('Stats\n')
-    report.write('-----\n')
-    # report.write(stats_message)
-    report.write('\n')
-    # report.write(stats_table)
-    report.write('\n')
-    # print in console result
     spinner.stop_and_persist(symbol='\U0001F9EC',  # '\U0001F9EC'
-                             text=' PDBmapper has finished successfully. Total time: ' +
+                             text=' 3Dmapper has finished successfully. Execution time: ' +
                              str(datetime.timedelta(
                                  seconds=round(end-start))))
 
-
-def main():
-
-    # aesthetics
+def aesthetis():
+    
     description = '''
-
-    ----------------------------------------- Welcome to ----------------------------------------------
-
-    $$$$$$$\  $$$$$$$\  $$$$$$$\ 
-    $$  __$$\ $$  __$$\ $$  __$$\ 
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\ 
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
-    $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
-    $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
-    $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
-    \__|      \_______/ \_______/ \__| \__| \__| \_______|$$  ____/ $$  ____/  \_______|\__|
-                                                            $$ |      $$ |
-                                                            $$ |      $$ |
-                                                            \__|      \__|
-
-    ---------------  Map annotated genomic variants to protein interfaces data in 3D. -----------------
-
+    ----------------------------------------------------
+    ____  _____                                        
+   |___ \|  __ \                                       
+     __) | |  | |_ __ ___   __ _ _ __  _ __   ___ _ __ 
+    |__ <| |  | | '_ ` _ \ / _` | '_ \| '_ \ / _ \ '__|
+    ___) | |__| | | | | | | (_| | |_) | |_) |  __/ |   
+   |____/|_____/|_| |_| |_|\__,_| .__/| .__/ \___|_|   
+                                | |   | |              
+                                |_|   |_|              
+    ----------------------------------------------------
     '''
 
     epilog = '''
-          ------------------------------------------------------------------------------------
-         |  Copyright (c) 2019 Victoria Ruiz --                                               |
-         |  victoria.ruizserrra@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
-          ------------------------------------------------------------------------------------
-
+          -----------------------------------
+         |  >>>Publication link<<<<<         |
+         |  victoria.ruiz.serra@gmail.com    |
+          -----------------------------------
         '''
-
-    # Emojis
-    DNA = '\U0001F9EC'
-    # spinner
-    spinner = Halo(text='Loading', spinner='dots12', color="cyan")
-    # parse command line options
-    args = parse_commandline()
-
     # print ascii art
     print(description)
     print(epilog)
-    # time message
-    time_format = '[' + time.ctime(time.time()) + '] '
 
+
+def out_file(out_dir, spinner):
     # create output directory if it doesn't exist
-    if not os.path.exists(args.out):
-        os.mkdir(args.out)
-        spinner.info(text="Directory " + args.out + " created.\n")
-        out_message = "Directory " + args.out + ' created.'
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
+        spinner.info(text="Directory " + out_dir + " created.\n")
+        out_message = "Directory " + out_dir+ ' created.'
     else:
         spinner.info(
-            text=args.out + " is an existing directory. Results will be written in there.\n")
-        out_message = args.out + ' is an existing directory. Results will be written in there.'
+            text=out_dir + " is an existing directory. Results will be written in there.\n")
+        out_message = out_dir + ' is an existing directory. Results will be written in there.'
+    return(out_message)
 
-    # set up the logging
-    logger = get_logger('main', args.out)
-    logger.info(out_message)
 
-    # if overwrite option is True
+
+def dest_results(spinner, logger):
+    args = parse_commandline()
     if args.force is True:
-        # if os.path.exists(os.path.join(args.out, 'pdbmapper.log')):
-        #    os.remove(os.path.join(args.out, 'pdbmapper.log'))
         fileList = glob.glob(os.path.join(args.out, 'setID*.txt'))
         # Iterate over the list of filepaths & remove each file.
         for filePath in fileList:
@@ -157,38 +127,88 @@ def main():
             if item in ['hdf5', 'csv']:
                 logger.warning(
                     'Directory ' + args.out + ' is not empty. Not overwritting files. ' +
-                    'Please select option --force or --apend or specify a different output dir.')
+                    'Please select option --force or --append or specify a different output dir.')
                 spinner.warn(
                     text=' Directory ' + args.out + ' is not empty. Not overwritting files. ' +
-                    'Please select option --force or --apend specify a different output dir.')
+                    'Please select option --force or --append specify a different output dir.')
                 exit(-1)
 
-    out_hdf = args.out + '/hdf5'
-    if args.hdf is True:
-        if not os.path.exists(out_hdf):
-            os.mkdir(out_hdf)
-            spinner.info(text="Directory " + out_hdf + " created.\n")
-            out_message = "Directory " + out_hdf + ' created.'
-        else:
-            spinner.info(
-                text=out_hdf + " is an existing directory. Results will be written in there.\n")
-            out_message = out_hdf + ' is an existing directory. Results will be written in there.'
+def result_format(arg, out, f_format, spinner, logger):
 
-    out_csv = args.out + '/csv'
-    if args.csv is True:
-        if not os.path.exists(out_csv):
-            os.mkdir(out_csv)
-            spinner.info(text="Directory " + out_csv + " created.\n")
-            out_message = "Directory " + out_csv + ' created.'
+    out_dest = os.path.join(out, f_format)
+    if arg is True:
+        if not os.path.exists(out_dest):
+            os.mkdir(out_dest )
+            spinner.info(text="Directory " + out_dest  + " created.\n")
+            out_message = "Directory " + out_dest + ' created.'
         else:
             spinner.info(
-                text=out_csv + " is an existing directory. Results will be written in there.\n")
-            out_message = out_csv + ' is an existing directory. Results will be written in there.'
+                text=out_dest  + " is an existing directory. Results will be written in there.\n")
+            out_message = out_dest  + ' is an existing directory. Results will be written in there.'
+        logger.info(out_message)
+
+def report(out, time_format):
+    # set up the results report
+    report = open(os.path.join(out, '3dmapper.report'), 'w')
+    #report.write(description)
+    #report.write(epilog)
+    report.write('''
+    Command line input:
+    -------------------
+    \n''')
+    progname = os.path.basename(sys.argv[0])
+    report.write(progname + ' ' + " ".join(sys.argv[1:]) + '\n' + '\n' + '\n')
+    report.write(time_format + out_message + '\n')
+
+
+def parallel(parallel, njobs): 
+    if parallel is True:
+        if njobs != 1:
+            num_cores = int(njobs)
+        else:
+            num_cores = mp.cpu_count()-1
+    else:
+        num_cores = njobs
+    return(num_cores)
+
+def start_spinner(verbose, logger, time_format):
+    start = time.time()
+    logger.info('Running 3Dmapper...')
+    if verbose:
+        spinner.start(text=' Running 3Dmapper...')
+    else:
+        print('Running 3Dmapper...')
+    return(start)
+
+
+def main():
+    # parse command line options
+    args = parse_commandline()
+
+    # Emojis & spinner
+    DNA = '\U0001F9EC'
+    spinner = Halo(text='Loading', spinner='dots12', color="cyan")
+
+    # set up the logging
+    out_message = out_file(args.out, spinner)
+    logger = get_logger('main', args.out)
+    logger.info(out_message)
+    # print ascii art
+    aesthetis()
+    #print(description)
+    #print(epilog)
+    # time message
+    time_format = '[' + time.ctime(time.time()) + '] '
+
+    dest_results(spinner, logger)
+
+    result_format(args.hdf, args.out, 'hdf5', spinner, logger)
+    result_format(args.csv, args.out, 'csv', spinner, logger)
 
     # set up the results report
-    report = open(os.path.join(args.out, 'pdbmapper.report'), 'w')
-    report.write(description)
-    report.write(epilog)
+    report = open(os.path.join(args.out, '3dmapper.report'), 'w')
+    #report.write(description)
+    #report.write(epilog)
     report.write('''
     Command line input:
     -------------------
@@ -200,37 +220,15 @@ def main():
     # initialize class
     maptools = MapTools()
 
-    # print("Number of processors: ", mp.cpu_count())
-
     # if parallel is True
-    if args.parallel is True:
-        if args.njobs:
-            num_cores = int(args.njobs)
-        else:
-            num_cores = mp.cpu_count()-1
-    else:
-        num_cores = 1
+    num_cores  = parallel(args.parallel, args.njobs)
 
-   # # create chimera scripts:
-   # if args.chimera is not None:
-   #     # chimera()
-   #     pass
-
-   # run PDBmapper
     index_file = glob.glob(os.path.join(args.vardb, '*.index'))[0]
+    start= start_spinner(args.verbose, logger, time_format)
     if args.varid:
-        # execute main function and compute executiong time
-        start = time.time()
-        logger.info('Running PDBmapper...')
-        report.write(time_format + 'Running PDBmapper...\n')
-        if args.verbose:
-            spinner.start(text=' Running PDBmapper...')
-        else:
-            print('Running PDBmapper...')
-        # find variants index file
 
+        # find variants index file
         for ids in args.varid:
-           # print(ids)
             # run PDBmapper
             if isfile(ids) == 'yes':
                 input = 'file'
@@ -240,15 +238,12 @@ def main():
                         id = id.replace('\n', '')
                         # grep variant in index file created with makevariantsdb
                         cmd = ('grep \'\\b{}\\b\' {}').format(id, index_file)
-                        # call subprocess
                         out, err = call_subprocess(cmd)
                         if err is None and out != b'':
                             toprocess = out.decode('utf-8')
-                            # geneid correspond to the 2nd column in the line
                             transcriptid = [s for s in toprocess.split(
                                 " ") if 'ENST' in s]
-                            #transcriptid = toprocess.split(" ")[2].strip()
-                            # execute PDBmapper
+
                             Parallel(n_jobs=num_cores)(delayed(wrapper)(t,
                                                                         args.psdb,
                                                                         args.vardb,
@@ -269,10 +264,8 @@ def main():
                             logger.error(
                                 'Wrong input: {} is not a recognizable variant id'.format(id))
                             continue
-            # given in command line
+
             elif isfile(ids) == "no":
-                #input = 'not_file'
-                # break
                 cmd = ('grep \'\\b{}\\b\' {}').format(ids, index_file)
                 # call subprocess
                 out, err = call_subprocess(cmd)
@@ -307,97 +300,23 @@ def main():
             else:
                 logger.error(
                     'The input variants ids provided are not in a valid format.')
-                spinner.fail(" Running PDBmapper...failed!")
-                report.write(time_format + " Running PDBmapper...failed!")
+                spinner.fail(" Running 3Dmapper...failed!")
+                report.write(time_format + " Running 3Dmapper...failed!")
                 raise IOError
-
             finish_message(logger, report, time_format, start, spinner)
 
-            # if input == 'not_file':
-            #     cmd = ('grep -E \'{}\' {}').format('|'.join(args.varid), index_file)
-            #     # call subprocess
-            #     out, err = call_subprocess(cmd)
-            #     #print(out, err)
-            #     if err is None and out != b'':
-            #         toprocess = out.decode('utf-8')
-            #         # geneid correspond to the 2nd column in the line
-            #         transcriptid = [s for s in toprocess.split(
-            #                         " ") if 'ENST' in s]
-            #     #print(transcriptid)
-            #     Parallel(n_jobs=num_cores)(delayed(wrapper)(transcriptid[i],
-            #                                                 args.psdb,
-            #                                                 args.vardb,
-            #                                                 args.out,
-            #                                                 args.pident,
-            #                                                 args.isoform,
-            #                                                 args.consequence,
-            #                                                 args.loc,
-            #                                                 args.uniprot,
-            #                                                 varids[i],
-            #                                                 args.csv,
-            #                                                 args.hdf)
-            #                             for i in len(transcriptid))
-
-            # if not any(fname.endswith('.File') for fname in os.listdir(args.out)):
-            #     logger.warning(
-            #         'Error: Input ensembl ids has no mapping variants.')
-            #     spinner.warn(
-            #         text=' Input ensembl ids has no mapping variants.')
-            #     exit(-1)
-
-        # elif isfile(ids) == 'no':
-        #         id = ids
-        #         # grep variant in index file created with makevariantsdb
-        #         cmd = ('grep \'{}\' {}').format(id, index_file)
-        #         # call subprocess
-        #         out, err = call_subprocess(cmd)
-        #         if err is None and out != b'':
-        #             toprocess = out.decode('utf-8')
-        #             # geneid correspond to the 2nd column in the line
-        #             transcriptid = toprocess.split(" ")[2].strip()
-        #             # execute PDBmapper
-        #             wrapper(transcriptid,
-        #                     args.psdb,
-        #                     args.vardb,
-        #                     args.out,
-        #                     args.pident,
-        #                     args.consequence,
-        #                     id)
-        #         else:
-        #             logger.error(
-        #                 'Wrong input: {} is not a recognizable variant id'.format(id))
-        #             continue
-
-        # # execute main function and compute executiong time
-        # end = time.time()
-        # logger.info('Done.')
-        # report.write(time_format + 'Congratulations!. PDBmapper has run in ' +
-        #              str(round(end-start, 2)) + 's.')
-        # # print in console result
-        # spinner.stop_and_persist(symbol='\U0001F4CD',
-        #                          text='Congratulations!. PDBmapper has run in ' +
-        #                          str(round(end-start, 2)) + 's.')
-
-    if args.protid:
-        # execute main function and compute executiong time
-        start = time.time()
-        logger.info('Running PDBmapper...')
-        report.write(time_format + 'Running PDBmapper...\n')
-        if args.verbose:
-            spinner.start(text=' Running PDBmapper...')
-        else:
-            print('Running PDBmapper...')
+    if args.prot_id:
         # PDBmapper accepts single or multiple protein ids
         # as input as well as prot ids stored in a file
-        for ids in args.protid:
+        for ids in args.prot_id:
             # check if input is a file
             if isfile(ids) == "yes":
                 input = 'file'
-                with open(ids) as list_protids:
+                with open(ids) as list_prot_ids:
                     logger.info(
                         'Input variants file contains a list of ensembl ids to process.')
                     # for every ensembl id
-                    Parallel(n_jobs=num_cores)(delayed(wrapper)(protid.replace('\n', ''),
+                    Parallel(n_jobs=num_cores)(delayed(wrapper)(prot_id.replace('\n', ''),
                                                                 args.psdb,
                                                                 args.vardb,
                                                                 args.out,
@@ -412,7 +331,7 @@ def main():
                                                                 None,
                                                                 args.csv,
                                                                 args.hdf)
-                                               for protid in list_protids)
+                                               for prot_id in list_prot_ids)
 
             # given in command line
             elif isfile(ids) == "no":
@@ -427,7 +346,7 @@ def main():
 
         # for prot id get the gene id
         if input == 'not_file':
-            # print(args.protid)
+            # print(args.prot_id)
             Parallel(n_jobs=num_cores)(delayed(wrapper)(ids,
                                                         args.psdb,
                                                         args.vardb,
@@ -443,7 +362,7 @@ def main():
                                                         None,
                                                         args.csv,
                                                         args.hdf)
-                                       for ids in args.protid)
+                                       for ids in args.prot_id)
 
         if not any(fname.endswith('.txt') for fname in os.listdir(args.out)):
             logger.warning(
@@ -451,19 +370,6 @@ def main():
             spinner.warn(
                 text=' Input ensembl ids has no mapping variants.')
             exit(-1)
-
-        # var_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
-        #    args.vardb, 'makevariantsdb_stats.info'))[0]))
-
-        # int_statsfile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
-        #    args.psdb, 'makeinterfacesdb_stats.info'))[0]))
-
-        # mapped_infofile = os.path.abspath(os.path.normpath(glob.glob(os.path.join(
-        #    args.out, 'MappedVariants*' + str(args.pident) + '_isoform_' +
-        #     '_'.join(args.isoform) + '_consequence_' + '_'.join(args.consequence) + '*File'))[0]))
-
-        # stats_message, stats_table = stats(
-        #    var_statsfile, int_statsfile, mapped_infofile, args.out)
 
         # Compute execution time
         finish_message(logger, report, time_format, start, spinner)

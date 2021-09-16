@@ -1,3 +1,4 @@
+#! /usr/bin/Rscript
 #' Title  READ PDB FILE
 #'
 #' @param pdb_file
@@ -50,7 +51,7 @@ readPDB <- function(pdb_file,
       
     } else if (any(str_detect(pdb_filename, "\\.pdb"))) {
       #pdb_filepath <- file.path(dirname(pdb_file), pdb_filename)
-      pdb_file <- read.pdb(pdb_file)#path)
+      pdb_file <- read.pdb(pdb_file, verbose =F)#path)
       
     } else {
       stop("Sorry, wrong PDB structure format.")

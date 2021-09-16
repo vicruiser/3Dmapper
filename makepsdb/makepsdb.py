@@ -40,108 +40,8 @@ class generateIntDB:
         logger.info(message)
         report.write(self.time + message + '\n')
 
-    # def stats(self, int_infile, psdb_outdir):
-    #     # count after transforming to vep format the total number
-    #     # of input interfaces, number of genes, etc
-
-    #     # number of interfaces
-    #     n_int_cmd = " awk 'NR>1 {{print $1,$2,$3,$4,$10}}' {} | wc -l"
-    #     n_int, err1 = call_subprocess(
-    #         n_int_cmd.format(int_infile))
-
-    #     # number of proteins: count total number of splitted files
-    #     n_prot_cmd = "find {} -type f -iname 'ENSP*' | wc -l"
-    #     n_prot, err2 = call_subprocess(n_prot_cmd.format(psdb_outdir))
-
-    #     # number of interfaces ligand
-    #     n_int_ligand_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'ligand' |  wc -l"
-    #     n_int_ligand, err3 = call_subprocess(
-    #         n_int_ligand_cmd.format(int_infile))
-
-    #     # number of interfaces protein
-    #     n_int_prot_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'protein' |  wc -l"
-    #     n_int_prot, err3 = call_subprocess(
-    #         n_int_prot_cmd.format(int_infile))
-
-    #     # number of interfaces nucleic
-    #     n_int_nucleic_cmd = "awk '{{print $1,$2,$3,$4,$10}}' {} | grep 'nucleic' |  wc -l"
-    #     n_int_nucleic, err3 = call_subprocess(
-    #         n_int_nucleic_cmd.format(int_infile))
-
-    #     n_int, n_prot, n_int_ligand, n_int_prot, n_int_nucleic = n_int.decode('utf-8').rstrip(), n_prot.decode('utf-8').rstrip(
-    #     ), n_int_ligand.decode('utf-8').rstrip(), n_int_prot.decode('utf-8').rstrip(), n_int_nucleic.decode('utf-8').rstrip()
-
-    #     d = {'n_interfaces': [n_int],
-    #          'n_ENSP': [n_prot],
-    #          'n_interfaces_ligand': [n_int_ligand],
-    #          'n_interfaces_protein': [n_int_prot],
-    #          'n_interfaces_nucleic': [n_int_nucleic]}
-    #     df = pd.DataFrame(data=d)
-    #     df.to_csv(os.path.join(psdb_outdir, 'makeinterfacesdb_stats.info'),
-    #               sep='\t', encoding='utf-8', index=False)
-
-    #     stats_message = ('''
-
-    #     Stats
-    #     -----
-    #      - Total number of input interfaces ids: {}
-    #      - Total number of corresponding proteins (total number of splitted files): {}
-    #      - Total number of interfaces of type ligand: {}
-    #      - Total number of interfaces of type protein: {}
-    #      - Total number of interfaces of type nucleic: {}
-    #     ''').format(str(n_int), str(n_prot), str(n_int_ligand), str(n_int_prot), str(n_int_nucleic))
-
-    #     return stats_message
-
-
-def main():
-    # aesthetics
-    description = '''
-
-    ----------------------------------------- Welcome to ----------------------------------------------
-
-    $$$$$$$\  $$$$$$$\  $$$$$$$\  
-    $$  __$$\ $$  __$$\ $$  __$$\  
-    $$ |  $$ |$$ |  $$ |$$ |  $$ |$$$$$$\$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\   $$$$$$\  
-    $$$$$$$  |$$ |  $$ |$$$$$$$\ |$$  _$$  _$$\  \____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\  
-    $$  ____/ $$ |  $$ |$$  __$$\ $$ / $$ / $$ | $$$$$$$ |$$ /  $$ |$$ /  $$ |$$$$$$$$ |$$ |  \__|
-    $$ |      $$ |  $$ |$$ |  $$ |$$ | $$ | $$ |$$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |
-    $$ |      $$$$$$$  |$$$$$$$  |$$ | $$ | $$ |\$$$$$$$ |$$$$$$$  |$$$$$$$  |\$$$$$$$\ $$ |
-    \__|      \_______/ \_______/ \__| \__| \__| \_______|$$  ____/ $$  ____/  \_______|\__|
-                                                            $$ |      $$ |
-                                                            $$ |      $$ |
-                                                            \__|      \__|
-
-          ---------------  Map genomic variants to protein data in 3D. -----------------
-
-    \n'''
-
-    epilog = \
-        '''
-          ------------------------------------------------------------------------------------
-         |  Copyright (c) 2019 Victoria Ruiz --                                               |
-         |  victoria.ruizserrra@bsc.es -- https://www.bsc.es/ruiz-serra-victoria-isabel       |
-          ------------------------------------------------------------------------------------
-
-        '''
-    # print ascii art
-    print(description)
-    print(epilog)
-    # initialize spinner decorator
-    spinner = Halo(text='Loading', spinner='dots12', color="cyan")
-    # parse command line options
-    args = parse_commandline()
-
-    # initialize class
-    makedb = generateIntDB()
-
-    # set out dir and out file names
-    # created by default
-    out_dir = os.path.join(args.out, 'DBs')
-    # set output dir to split vep
-    psdb_outdir = os.path.join(out_dir, 'psdb')  # created by default
-    # create output dir if it doesn't exist
-    if args.force is True:
+def out_file(force, psdb_outdir, spinner):
+    if force is True:
         if os.path.exists(psdb_outdir):
             shutil.rmtree(psdb_outdir)
         os.makedirs(psdb_outdir, exist_ok=True)
@@ -154,8 +54,44 @@ def main():
         else: 
             # create output dir if it doesn't exist
             os.makedirs(psdb_outdir, exist_ok=True)
-    
 
+def main():
+    # aesthetics
+    description = '''
+    ----------------------------------------------------
+    ____  _____                                        
+   |___ \|  __ \                                       
+     __) | |  | |_ __ ___   __ _ _ __  _ __   ___ _ __ 
+    |__ <| |  | | '_ ` _ \ / _` | '_ \| '_ \ / _ \ '__|
+    ___) | |__| | | | | | | (_| | |_) | |_) |  __/ |   
+   |____/|_____/|_| |_| |_|\__,_| .__/| .__/ \___|_|   
+                                | |   | |              
+                                |_|   |_|              
+    ----------------------------------------------------
+    '''
+
+    epilog = '''
+          -----------------------------------
+         |  >>>Publication link<<<<<         |
+         |  victoria.ruiz.serra@gmail.com    |
+          -----------------------------------
+        '''
+    # print ascii art
+    print(description)
+    print(epilog)
+    # initialize spinner decorator
+    spinner = Halo(text='Loading', spinner='dots12', color="cyan")
+    # parse command line options
+    args = parse_commandline()
+    # initialize class
+    makedb = generateIntDB()
+    # set out dir and out file names
+    # created by default
+    out_dir = os.path.join(args.out, 'DBs')
+    # set output dir to split vep
+    psdb_outdir = os.path.join(out_dir, 'psdb')  # created by default
+    # create output dir if it doesn't exist
+    out_file(args.force, psdb_outdir, spinner)
     # set up a log file
     logger = get_logger('main', out_dir)
     log_dir = out_dir
@@ -175,9 +111,7 @@ def main():
     if args.psdb is not None:
 
         if not os.listdir(psdb_outdir) or args.force is True:
-
             logger.info('Reading and splitting input file.')
-
             # report info
             report.write(time_format + 'Reading and splitting input file. \n')
             # for loop in case we have multiple inputs to read from a list of files
@@ -192,9 +126,7 @@ def main():
                         for int_infile in int_f:
                             # split interface db
                             split('Protein_accession', int_infile, psdb_outdir,
-                                  'txt', args.force, log_dir)
-                            # stats_message = makedb.stats(
-                            #    int_infile, psdb_outdir)
+                                  'txt', args.force, log_dir, args.sort)
                             # log info
                             logger.info(
                                 int_infile + ' has been splitted successfully.')
@@ -202,10 +134,7 @@ def main():
                 elif isfile(f) == 'is_file':
                     # split interface db
                     split('Protein_accession', f, psdb_outdir,
-                          'txt', args.force, log_dir)
-                    # stats_message = makedb.stats(
-                    #    f, psdb_outdir)
-                    # log info
+                          'txt', args.force, log_dir, args.sort)
                     logger.info(
                         f + ' has been splitted successfully.')
                 elif isfile(f) == 'file_not_recognized':
@@ -213,7 +142,6 @@ def main():
                         'Error: Not such file: \'' + f + '\'')
                     print('Error: Not such file: \'' + f + '\'')
                     exit(-1)
-
                 # finish report
                 end = time.time()
                 report.write(

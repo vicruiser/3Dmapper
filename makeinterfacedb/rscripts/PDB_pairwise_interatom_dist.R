@@ -1,3 +1,4 @@
+#! /usr/bin/Rscript
 ##### Load necessary functions
 
 
@@ -18,13 +19,22 @@
 #'
 PDB_iter_atom_distances <- function(pdb_filename,
                                     pdb_file,
-                                    type_of_interaction = "protein",
-                                    atom_select = "noh", 
+                                    type_of_interaction,
+                                    atom_select, 
                                     # backbone heavy atoms are only considered as default
                                     dist_threshold,
-                                    output_dir) {
-
+                                    output_dir, 
+                                    ROOT, 
+                                    biolip) {
+  
   biounit_filename = basename(pdb_filename)
+  if (biolip == "True" & type_of_interaction == "ligand"){
+    bp = fread(file.path(ROOT,'biolip_list.txt'), header = F)
+    pdb_file$atom = subset(pdb_file$atom, !resid %in% bp$V1 )
+    if (nrow(pdb_file$atom)<1) {
+      stop("This PDB file does not interact with any ligand.")
+    } 
+  }
   # Get all chains to make pairs type_of_interactions
   ChainsList <-
     PDB_pairwise_interaction(pdb_file, type_of_interaction, atom_select)
@@ -83,7 +93,6 @@ PDB_iter_atom_distances <- function(pdb_filename,
     try(#distList[[paste("iter", i, sep = "")]] <-
       distList[[1]] <-
         calc_PDB_dist(
-          pdb_file,
           CompareTemplateChains[[i]],
           CompareInteractionChains[[i]],
           CompareTemplateChains.Vector[i],

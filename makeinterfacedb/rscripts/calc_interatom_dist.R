@@ -1,3 +1,4 @@
+#! /usr/bin/Rscript
 ################################################################################################
 #' Title  CALCULATION OF INTER-ATOMIC DISTANCES BETWEEN CHAINS OF A PDB FILE.
 #'
@@ -7,20 +8,20 @@
 #' @param CompareInteractionChains.Vector
 #' @param dist_threshold
 #' @param type_of_interaction either 'protein', 'nucleic' or 'ligand'
-#' @param pdb_file
+#
 #'
 #' @return  list of distances matrices of all possible chains combinations
 #' @export
 #'
 #' @examples
 #'
-calc_PDB_dist <- function(pdb_file,
+calc_PDB_dist <- function(
                           CompareTemplateChains,
                           CompareInteractionChains,
                           CompareTemplateChains.Vector,
                           CompareInteractionChains.Vector,
-                          dist_threshold = 5,
-                          type_of_interaction = "protein") {
+                          dist_threshold,
+                          type_of_interaction ) {
   allDist <- dist.xyz(CompareTemplateChains.Vector[[1]],
                       CompareInteractionChains.Vector[[1]])
   

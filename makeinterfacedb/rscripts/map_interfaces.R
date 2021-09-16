@@ -1,6 +1,8 @@
+#! /usr/bin/Rscript
 ###############################################################################
 # Load necessary packages
 ###############################################################################
+warn.conflicts = FALSE
 #indicate library path
 requiredPackages = c('plyr', 'dplyr','data.table','stringr','reshape2','seqinr','bio3d')
 for (p in requiredPackages) {
@@ -36,7 +38,6 @@ source(file.path(ROOT,"new_mapped_interfaces.R"))
 new_mpi <-
   new.Mapped.Interfaces(pdb_id , interfaces_dir, blast_filtered)
 
-suppressMessages(gc())
 
 # store the results if the are any results associated to the pdb_id
 if (nrow(new_mpi) > 0) {
@@ -168,8 +169,7 @@ if (nrow(new_mpi) > 0) {
     sep = "_"
   )
   
-  date = format(Sys.time(), "%d%B%Y")
-  fn = file.path(output_dir, paste('interfacesDB_', date, ".txt", sep = ""))
+  fn = file.path(output_dir, 'interfacesDB.txt')
   
   write.table(
     individual_new_mpi,

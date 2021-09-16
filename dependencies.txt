@@ -62,7 +62,7 @@ nest-asyncio==1.4.3
 notebook==6.2.0
 numba==0.52.0
 numexpr==2.7.2
-numpy==1.17.4
+numpy==1.17.5
 packaging==20.8
 pandas==0.25.3
 pandocfilters==1.4.3
@@ -81,7 +81,7 @@ pycparser==2.20
 Pygments==2.7.4
 pyparsing==2.4.7
 pyrsistent==0.17.3
-pysam==0.15.3
+pysam==0.16.0.1
 python-dateutil==2.8.1
 python-utils==2.5.1
 pythreejs==2.2.1

@@ -1,3 +1,4 @@
+#! /usr/bin/Rscript
 ################################################################################
 #' Title:  INTERACTION PAIRS: select the option for pairs
 #'  between interaction to be find
@@ -13,14 +14,14 @@
 #'
 PDB_pairwise_interaction <-
   function(pdb_file,
-           comparison = "protein",
-           atom_select = "noh") {
+           comparison,
+           atom_select) {
     # Select information of all the atoms of the pdb file
     all_chains <- pdb_file$atom
     # Select position of protein chains in PDB file
     pdb_protChains <-
-      combine.select(atom.select(pdb_file, atom_select),
-                     atom.select(pdb_file, "protein"))
+      combine.select(atom.select(pdb_file, atom_select, verbose=F),
+                     atom.select(pdb_file, "protein", verbose=F))
     # Select protein chains
     protein_chains <- all_chains[pdb_protChains$atom , ]
     if (atom_select == "calpha") {
@@ -79,7 +80,7 @@ PDB_pairwise_interaction <-
     ### PROTEIN -DNA
     else if (comparison == "nucleic") {
       # Select position in PDB file of nucleic chains
-      pdb_nucleicChains <- atom.select(pdb_file, string = "nucleic")
+      pdb_nucleicChains <- atom.select(pdb_file, string = "nucleic", verbose = F)
       # If there are nucleic chains in the PDB file
       if (length(pdb_nucleicChains$atom) > 0) {
         # Select nucleic chains
@@ -107,7 +108,7 @@ PDB_pairwise_interaction <-
     ### PROTEIN - LIGAND
     else if (comparison == "ligand") {
       # Select position in PDB file of ligand chains
-      pdb_ligandChains <- atom.select(pdb_file, string = "ligand")
+      pdb_ligandChains <- atom.select(pdb_file, string = "ligand", verbose = F)
       # If there are ligand chains in the PDB file
       if (length(pdb_ligandChains$atom) > 0) {
         # Select ligand chains

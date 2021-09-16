@@ -10,14 +10,14 @@ from .run_subprocess import call_subprocess
 from .logger import get_logger
 
 
-def translate_ensembl(protid, log_dir,dict_geneprot=None, isoform_filter=None):
+def translate(id, log_dir,dict_geneprot=None, isoform_filter=None):
     '''
-    gene-protein Ensembl id translator.
+    gene-transcript-protein id translator.
 
     Parameters
     ----------
-    protid : str
-        Input Ensembl ID corresponding to a gene or protein.
+    id : str
+        Input ID corresponding to a gene, transcript or protein.
 
     Returns
     -------
@@ -36,7 +36,7 @@ def translate_ensembl(protid, log_dir,dict_geneprot=None, isoform_filter=None):
         # get col names
         cols = f.readline().rstrip().split(',')
         # command line for grep (very fast)
-        cmd = 'grep \'' + protid + '\' ' + dict_geneprot
+        cmd = 'grep \'' + id + '\' ' + dict_geneprot
         # call shell process
         out, err = call_subprocess(cmd)
         line = out.decode('utf-8')

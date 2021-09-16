@@ -8,9 +8,9 @@ import re
 from subprocess import call
 import itertools
 from .logger import get_logger
-from .translate_ensembl import translate_ensembl
+from .translate import translate
 from .db_parser import parser
-from .PDBmapper import PDBmapper
+from .mapper import mapper
 from .decorator import tags
 from .run_subprocess import call_subprocess
 from .writefile import writefile
@@ -23,36 +23,34 @@ DNA = '\U0001F9EC'
 detect_column = "grep -v '##' {} | awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' "
 
-# @tags(text_start="Running PDBmapper...",
-#       text_succeed=" Running PDBmapper...done.",
-#       text_fail=" Running PDBmapper...failed!",
+# @tags(text_start="Running 3Dmapper...",
+#       text_succeed=" Running 3Dmapper...done.",
+#       text_fail=" Running 3Dmapper...failed!",
 #       emoji=DNA)
-def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc, index_file, dict_geneprot, varid=None, csv = False, hdf = False):
+def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc, index_file, dict_geneprot, varid=None, csv = False, hdf = False):
     
     # logging
     logger = get_logger('wrapper', out_dir)
     # translate ensembl id
     try:
-        if ensemblid == '-': 
+        if id == '-': 
             raise IOError()
-        ensemblIDs = translate_ensembl(
-            ensemblid,  out_dir, dict_geneprot, isoform)
+        ids = translate(
+            id,  out_dir, dict_geneprot, isoform)
 
-        geneid = ensemblIDs['geneID']
-        protid = ensemblIDs['protID']
-        transcriptid = ensemblIDs['transcriptID']
-        if 'APPRIS' in ensemblIDs.keys():
-            APPRIS = ensemblIDs['APPRIS']
+        gene_id, prot_id, transcript_id = ids['geneID'], ids['protID'], ids['transcriptID']
+        
+        if 'APPRIS' in ids.keys():
+            APPRIS = ids['APPRIS']
         else:
-            APPRIS = list(itertools.repeat(None, len(geneid))) # change to list with same length as protid
-       # if uniprot is True:
-       #     protid = UniprotID
-        # run PDBmapper
-        for i in range(0, len(protid)):
+            APPRIS = list(itertools.repeat(None, len(gene_id))) # change to list with same length as protid
+
+        # run 3Dmapper
+        for i in range(0, len(prot_id)):
             try:
-                PDBmapper(protid[i],
-                          geneid[i],
-                          transcriptid[i],
+                mapper(prot_id[i],
+                          gene_id[i],
+                          transcript_id[i],
                           psdb,
                           vardb,
                           out_dir,
@@ -60,7 +58,6 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
                           evalue,
                           isoform,
                           APPRIS[i],
-                         # UniprotID[i],
                           consequence,
                           loc,
                           varid,
@@ -70,7 +67,7 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
             except IOError:
                 if varid is None:
                     logger.error(
-                        ('Warning: {} has no mapping variants.'.format(ensemblid)))
+                        ('Warning: {} has no mapping variants.'.format(id)))
                 else:
                     logger.error(
                         ('Warning: {} has no mapping variants.'.format(str(varid))))
@@ -80,10 +77,10 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
     except IOError:
         if loc:
             try: 
-                if ensemblid == '-':
-                    transcriptid = '-'
+                if id == '-':
+                    transcript_id = '-'
                 else: 
-                    cmd = ('grep -w \'{}\' {}').format(ensemblid, index_file)
+                    cmd = ('grep -w \'{}\' {}').format(id, index_file)
                     # call subprocess
                     out, err = call_subprocess(cmd)
                     #print(out, err)
@@ -96,12 +93,12 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
                         # error handling
                         if err2 is None and out2 != b'':
                             col_index_trasncriptid = re.findall('\d+', out2.decode('utf8'))[0]
-                            transcriptid = toprocess.split("")[col_index_trasncriptid]
-                        #transcriptid = [s for s in toprocess.split(
+                            transcript_id = toprocess.split("")[col_index_trasncriptid]
+                        #transcript_id = [s for s in toprocess.split(
                         #                    " ") if 'ENST' in s][0]
-                annovars_left = parser(transcriptid, vardb)
+                annovars_left = parser(transcript_id, vardb)
                 
-                    #annovars_left = annovars[annovars['Feature']==ensemblid]
+                    #annovars_left = annovars[annovars['Feature']==id]
                             # filter by variant type if one or more selected
                 if varid is not None:
                     if 'Existing_variation' in annovars_left.columns:
@@ -130,7 +127,7 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
                 if noncoding_variants is not False:
                     noncoding_variants['APPRIS_isoform'] = ''
                     noncoding_variants['Mapping_position'] = 'Noncoding'
-                    writefile(transcriptid, out_dir, pident, isoform, consequence, noncoding_variants, 'NoncodingVariants', csv, hdf)
+                    writefile(transcript_id, out_dir, pident, isoform, consequence, noncoding_variants, 'NoncodingVariants', csv, hdf)
                     unmapped_variants = annovars_left.loc[~noncoding_variants_index]
                 else: 
                     unmapped_variants = annovars_left
@@ -140,7 +137,7 @@ def wrapper(ensemblid, psdb, vardb, out_dir, pident, evalue, isoform, consequenc
                     unmapped_variants.drop_duplicates(inplace=True)
                     unmapped_variants['APPRIS_isoform'] = ''
                     unmapped_variants['Mapping_position'] = 'Unmapped'
-                    writefile(transcriptid, out_dir, pident, isoform, consequence, unmapped_variants, 'UnmappedVariants', csv, hdf)
+                    writefile(transcript_id, out_dir, pident, isoform, consequence, unmapped_variants, 'UnmappedVariants', csv, hdf)
             except:
                 pass
-        logger.error('Warning: {} has no matching ensembl ids.'.format(ensemblid))
+        logger.error('Warning: {} has no matching ensembl ids.'.format(id))
