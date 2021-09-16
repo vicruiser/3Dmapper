@@ -29,7 +29,7 @@ class git_clone_external(DistutilsInstall):
 
     def internet_on(self):
         try:
-            urlopen('http://216.58.192.142', timeout=1)
+            urlopen('http://python.org/', timeout=1)
             return True
         except urlopen.URLError as err:
             return False
@@ -46,8 +46,8 @@ class git_clone_external(DistutilsInstall):
 
     def run(self):
 
-        connection = self.internet_on()
-        if connection is True:
+        #connection = self.internet_on()
+        #if connection is True:
             d = os.path.dirname(os.path.realpath(__file__))
             bcftools_dir = os.path.dirname(
                 os.path.realpath(__file__)) + "/bcftools"
