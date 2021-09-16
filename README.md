@@ -1,8 +1,9 @@
-<img src= "./docs/LogoPDBcopy2.png" width = "600" heigh = "300">
+<img src= "./docs/LogoPDBcopy22.png" width = "600" heigh = "300">
 
 # Overview
 
 3Dmapper is a tool to map annotated genomic positions to protein structures.
+<img src= "./docs/pdbmapper_methods.png" width = "600" heigh = "300">
 
 # Quickstart
 
