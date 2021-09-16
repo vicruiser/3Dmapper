@@ -21,62 +21,68 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 # Get the requirements of the packages
-with open('pdbmapper/dependencies/requirements.txt') as f:
+with open('dependencies.txt') as f:
     requirements = f.read().splitlines()
 
 
 class git_clone_external(DistutilsInstall):
 
-    # def internet_on(self):
-    #     try:
-    #         urlopen('http://216.58.192.142', timeout=1)
-    #         return True
-    #     except urlopen.URLError as err:
-    #         return False
+    def internet_on(self):
+        try:
+            urlopen('http://216.58.192.142', timeout=1)
+            return True
+        except urlopen.URLError as err:
+            return False
 
-    # def run_command(self, command):
-    #     import subprocess
-    #     # print("about to execute command `{0}`. sources = {1}"
-    #     # .format(command, sources))
-    #     proc = subprocess.Popen(command, stderr=subprocess.STDOUT, shell=True)
-    #     output, stderr = proc.communicate(input)
-    #     status = proc.wait()
-    #     if status:
-    #         raise Exception("command = {0} failed with output = {1} status {2:d}\n"
-    #                         .format(command, output, status))
+    def run_command(self, command, cwd):
+        # print("about to execute command `{0}`. sources = {1}"
+        # .format(command, sources))
+        proc = subprocess.Popen(command,cwd = cwd,  stderr=subprocess.STDOUT, shell=True)
+        output, stderr = proc.communicate(input)
+        status = proc.wait()
+        if status:
+            raise Exception("command = {0} failed with output = {1} status {2:d}\n"
+                            .format(command, output, status))
 
     def run(self):
 
-        # connection = self.internet_on()
-        bcftools_dir = os.path.dirname(
-            os.path.realpath(__file__)) + "/bcftools"
-        htslib_dir = os.path.dirname(os.path.realpath(__file__))+" /htslib"
-        # if connection is True:
-        if not os.path.exists(htslib_dir):
-            command1 = ['git', 'clone',
-                        'git://github.com/samtools/htslib.git', ]
-            subprocess.call(command1, cwd=os.path.dirname(
-                os.path.realpath(__file__)))
+        connection = self.internet_on()
+        if connection is True:
+            d = os.path.dirname(os.path.realpath(__file__))
+            bcftools_dir = os.path.dirname(
+                os.path.realpath(__file__)) + "/bcftools"
+            htslib_dir = os.path.dirname(os.path.realpath(__file__))+" /htslib"
+            
+            if not os.path.exists(htslib_dir):
+                cmd1 = ['git', 'clone',
+                            'git://github.com/samtools/htslib.git', ]
+                self.run_command(self, cmd1, d)
+                #subprocess.call(command1, cwd=os.path.dirname(
+                #    os.path.realpath(__file__)))
 
-        if not os.path.exists(path.join(bcftools_dir, 'bcftools')):
-            command2 = ['git', 'clone',
-                        'git://github.com/samtools/bcftools.git']
+            if not os.path.exists(path.join(bcftools_dir, 'bcftools')):
+                cmd2 = ['git', 'clone',
+                            'git://github.com/samtools/bcftools.git']
 
-            subprocess.call(
-                command2, cwd=os.path.dirname(os.path.realpath(__file__)))
+                self.run_command(self, cmd2, d)
+                #subprocess.call(
+                #    command2, cwd=os.path.dirname(os.path.realpath(__file__)))
 
-        subprocess.call(
-            ["make", "clean"], cwd=bcftools_dir)
+            self.run_command(self, ["make", "clean"], bcftools_dir)
+            self.run_command(self, ["make"], bcftools_dir)
+            #subprocess.call(
+            #    ["make", "clean"], cwd=bcftools_dir)
 
-        subprocess.call(['make'], cwd=bcftools_dir)
+            #subprocess.call(['make'], cwd=bcftools_dir)
+            self.run_command(self, ["cp", "bcftools", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], bcftools_dir)
+            self.run_command(self, ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], bcftools_dir)
+            #subprocess.call(
+            #    ["cp", "bcftools", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
 
-        subprocess.call(
-            ["cp", "bcftools", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
+            #subprocess.call(
+            #    ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
 
-        subprocess.call(
-            ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
-
-        DistutilsInstall.run(self)
+            DistutilsInstall.run(self)
 
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
@@ -94,7 +100,7 @@ setup(
     # There are some restrictions on what makes a valid project name
     # specification here:
     # https://packaging.python.org/specifications/core-metadata/#name
-    name='pdbmapper',  # Required
+    name='3dmapper',  # Required
 
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
@@ -110,12 +116,12 @@ setup(
 
     # This should be a valid email address corresponding to the author listed
     # above.
-    author_email='victoria.ruizserra@bsc.es',  # Optional
+    author_email='victoria.ruiz.serra@gmail.es',  # Optional
 
     # This should be a valid link to your project's main homepage.
     #
     # This field corresponds to the "Home-Page" metadata field:
-    url="git@github.com:vicruiser/PDBmapper.git",  # Optional
+    url="git@github.com:vicruiser/3Dmapper.git",  # Optional
 
     # You have previously uploaded your project to your github repository. Now,
     #  we create a new release version of your project on github. This release
@@ -172,7 +178,7 @@ setup(
     # project page. What does your project relate to?
     #
     # Note that this is a string of words separated by whitespace, not a list.
-    keywords=["mapping tool", "gene variation", "protein 3D"],  # Optional
+    keywords=["mapping tool", "genetic positions", "protein structure", "PDB"],  # Optional
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
@@ -187,8 +193,9 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages=['pdbmapper', 'makepsdb',
-              'makevariantsdb', 'makechimera'],  # Required!!!!!
+
+    packages=['mapper', 'makepsdb',
+              'makevariantsdb', 'makeinterfacedb', 'makechimera' ],  # Required!!!!!
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -211,8 +218,10 @@ setup(
     package_data={
         # And include any *.dat files found in the 'data' subdirectory
         # of the 'mypkg' package, also:
-        'pdbmapper': ['data/*']
+        '': ['data/*']#,
+        #'makeinterfacedb': ['data/*']
     },
+    include_package_data = True, 
 
     # If your project depends on packages that don’t exist on PyPI, you may
     # still be able to depend on them, as long as they are available for
@@ -236,10 +245,12 @@ setup(
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
     entry_points={
-        "console_scripts": ['pdbmapper=pdbmapper.__main__:main',
+        "console_scripts": ['mapper=mapper.__main__:main',
                             'makepsdb=makepsdb.__main__:main',
                             'makevariantsdb=makevariantsdb.__main__:main',
-                            'makechimera=makechimera.__main__:main']
+                            'makechimera=makechimera.__main__:main',
+                           'makeinterfacedb=makeinterfacedb.__main__:main']
+
     },
 
     # List additional URLs that are relevant to your project as a dict.
@@ -252,10 +263,10 @@ setup(
     # maintainers, and where to support the project financially. The key is
     # what's used to render the link text on PyPI.
     project_urls={  # Optional
-        'Bug Reports': 'https://github.com/vicruiser/PDBmapper/issues',
+        'Bug Reports': 'https://github.com/vicruiser/3Dmapper/issues',
         # 'Funding': 'https://donate.pypi.org',
         # 'Say Thanks!': 'http://saythanks.io/to/example',
-        'Source': 'https://github.com/vicruiser/PDBmapper/',
+        'Source': 'https://github.com/vicruiser/3Dmapper/',
     },
 
 

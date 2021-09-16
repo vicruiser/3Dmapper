@@ -7,23 +7,25 @@ import time
 from halo import Halo
 from .decorator import tags
 from .logger import get_logger
+from .run_subprocess import call_subprocess
 
-detect_column = "awk -F ' ' '{{for(i=1;i<=NF;i++) \
+import pandas as pd
+import glob
+import os
+
+
+sort_cmd="awk 'NR==1; NR>1{{print $0 | \"sort -n\"}}' {0} > {0}.sorted"
+
+detect_column = "awk -F '\t' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
 
 split_cmd = "awk -v ci=\"{1}\" \
 -v od=\"{2}/\" \
 -F '\t' 'NR==1 {{h=$0; next}}; \
-!seen[$ci]++{{f=od$ci\".{3}\"; print h >> f}}; \
-{{f=od$ci\".{3}\"; print >> f; close(f)}}' {0}"
+!seen[$ci]++{{f=od$ci\".{3}\"; print h > f}}; \
+{{f=od$ci\".{3}\"; print >> f}}' {0}"
 
-split_cmd_parallel = "gawk -v ci=\"{1}\" \
--v od=\"{2}/\" \
--F '\t' 'NR==1 {{h=$0; next}}; \
-!seen[$ci]++{{f=od$ci\".{3}\"; print h >> f}}; \
-{{f=od$ci\".{3}\"; print >> f; close(f)}}' {0}"
-
-def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False):
+def request(prefix, input_file, out_dir, out_extension, log_dir, sort=False):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -48,40 +50,31 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
     logger.info('Splitting input file.')
     # First command
     cmd1 = detect_column.format(prefix, input_file)
-    # execute process
-    p1 = subprocess.Popen(cmd1, stdout=subprocess.PIPE,
-                          stderr=subprocess.STDOUT,
-                          shell=True)
-    # get output
-    out1, err1 = p1.communicate()
+    out1, err1 = call_subprocess(cmd1)
     # error handling
     if err1 is None and out1 != b'':
+        col_index = re.findall('\d+', out1.decode('utf8'))[0]
         logger.info('This file contains protein ids')
     else:
         logger.error(err1)
         logger.error(
             'This file could not be splitted. Check the format of your input file.')
         raise IOError()
-    # detect if there is output
-    col_index = re.findall('\d+', out1.decode('utf8'))[0]
     # stop if no ENSP id detected
     if col_index != '':
         # write log file
         logger.info('Splitting interfaces file...')
-        # Second command
-        if parallel is True:
-            cmd2 = split_cmd_parallel.format(input_file, col_index,
-                                             out_dir, out_extension)
-        else:
-            cmd2 = split_cmd.format(input_file, col_index,
+        if sort is True: 
+            cmds= sort_cmd.format(input_file)
+            out_sorted, err_sorted = call_subprocess(cmds)
+            if err_sorted is None and out_sorted != b'':
+                input_file = input_file + '.sorted'
+        
+        cmd2 = split_cmd.format(input_file, col_index,
                                     out_dir, out_extension)
         # register process
-        p2 = subprocess.Popen(cmd2,
-                              stdout=subprocess.PIPE,
-                              stderr=subprocess.STDOUT,
-                              shell=True)
-        # error handling
-        out2, err2 = p2.communicate()
+        out2, err2 = call_subprocess(cmd2)
+   
         if err2 is None:
             logger.info('This file was splitted successfully.')
         else:
@@ -98,7 +91,7 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
       text_succeed="Creating protein structures DB...done.",
       text_fail="Creating protein structures DB...failed!. Check the format of your input file.",
       emoji="\U00002702")
-def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, parallel=False):
+def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, sort=False):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -127,6 +120,6 @@ def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, parall
 
         if overwrite is True:
             request(prefix, input_file, out_dir,
-                    out_extension, log_dir, parallel)
+                    out_extension, log_dir, sort)
     else:
-        request(prefix, input_file, out_dir, out_extension, log_dir, parallel)
+        request(prefix, input_file, out_dir, out_extension, log_dir, sort)
