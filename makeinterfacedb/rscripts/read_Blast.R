@@ -50,5 +50,7 @@ read.Blast <- function(pdb_id, blast_outfiles_dir) {
   blast_output$prot.id <-
     sub("\\..*", "", blast_output$prot.id)
   
+  blast_output$qseq = as.character(blast_output$qseq)
+  
   return(blast_output)
 }

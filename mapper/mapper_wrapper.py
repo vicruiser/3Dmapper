@@ -67,10 +67,10 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
             except IOError:
                 if varid is None:
                     logger.error(
-                        ('Warning: {} has no mapping variants.'.format(id)))
+                        ('Warning: {} has no mapping positions.'.format(id)))
                 else:
                     logger.error(
-                        ('Warning: {} has no mapping variants.'.format(str(varid))))
+                        ('Warning: {} has no mapping positions.'.format(str(varid))))
                 continue
         
      # error handling
@@ -99,7 +99,7 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
                 annovars_left = parser(transcript_id, vardb)
                 
                     #annovars_left = annovars[annovars['Feature']==id]
-                            # filter by variant type if one or more selected
+                            # filter by position type if one or more selected
                 if varid is not None:
                     if 'Existing_variation' in annovars_left.columns:
                         annovars_left =  annovars_left[
@@ -108,36 +108,36 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
                     else:
                         annovars_left =  annovars_left[
                             ( annovars_left.Uploaded_variation.astype(str) == str(varid))]
-                    logger.info('Variant \'' + str(varid) + '\' has been selected.')
+                    logger.info('position \'' + str(varid) + '\' has been selected.')
                     # if filter returns an empty df, raise error
                     if annovars_left.empty:
                         logger.error(
-                            'Variants could not be filtered by variant id \'' + str(varid) + '\'')
+                            'positions could not be filtered by position id \'' + str(varid) + '\'')
                         raise IOError()
                 try: 
-                    noncoding_variants_index = annovars_left.Amino_acids.str.contains('\.|\-', regex=True, na = True)
-                    noncoding_variants = annovars_left.loc[noncoding_variants_index]
+                    noncoding_positions_index = annovars_left.Amino_acids.str.contains('\.|\-', regex=True, na = True)
+                    noncoding_positions = annovars_left.loc[noncoding_positions_index]
                 except: 
-                    noncoding_variants = False 
+                    noncoding_positions = False 
                 if isoform is None:
                     isoform = ['all']
                 if consequence is None:
                     consequence = ['all']  
                 # non-protein coding mutations
-                if noncoding_variants is not False:
-                    noncoding_variants['APPRIS_isoform'] = ''
-                    noncoding_variants['Mapping_position'] = 'Noncoding'
-                    writefile(transcript_id, out_dir, pident, isoform, consequence, noncoding_variants, 'NoncodingVariants', csv, hdf)
-                    unmapped_variants = annovars_left.loc[~noncoding_variants_index]
+                if noncoding_positions is not False:
+                    noncoding_positions['APPRIS_isoform'] = ''
+                    noncoding_positions['Mapping_position'] = 'Noncoding'
+                    writefile(transcript_id, out_dir, pident, isoform, consequence, noncoding_positions, 'NoncodingPositions', csv, hdf)
+                    unmapped_positions = annovars_left.loc[~noncoding_positions_index]
                 else: 
-                    unmapped_variants = annovars_left
+                    unmapped_positions = annovars_left
                         
-                if unmapped_variants.empty is False:
-                    #unmapped_variants = unmapped_variants.iloc[:, 0:16]
-                    unmapped_variants.drop_duplicates(inplace=True)
-                    unmapped_variants['APPRIS_isoform'] = ''
-                    unmapped_variants['Mapping_position'] = 'Unmapped'
-                    writefile(transcript_id, out_dir, pident, isoform, consequence, unmapped_variants, 'UnmappedVariants', csv, hdf)
+                if unmapped_positions.empty is False:
+                    #unmapped_positions = unmapped_positions.iloc[:, 0:16]
+                    unmapped_positions.drop_duplicates(inplace=True)
+                    unmapped_positions['APPRIS_isoform'] = ''
+                    unmapped_positions['Mapping_position'] = 'Unmapped'
+                    writefile(transcript_id, out_dir, pident, isoform, consequence, unmapped_positions, 'UnmappedPositions', csv, hdf)
             except:
                 pass
         logger.error('Warning: {} has no matching ensembl ids.'.format(id))

@@ -88,6 +88,7 @@ PDB_iter_atom_distances <- function(pdb_filename,
            })
   
   distList <- list()
+  struct = list()
   i = 1
   while (i <= length(CompareInteractionChains.Vector)) {
     try(#distList[[paste("iter", i, sep = "")]] <-
@@ -112,7 +113,7 @@ PDB_iter_atom_distances <- function(pdb_filename,
       #add identifier of the PDB structure
       PDB_ID <- sub("\\.gz+", "", biounit_filename)
       pdb_atom_inter_df$pdb.id <-  PDB_ID
-      
+
       # Eliminate dummy columns
       if (type_of_interaction == "protein") {
         pdb_atom_inter_df <- pdb_atom_inter_df[, c(
@@ -129,11 +130,14 @@ PDB_iter_atom_distances <- function(pdb_filename,
           "resid.1",
           "resno.1",
           "distance",
+          "b",
+          "b.1",
           "interaction",
           "pdb.id",
           "real.pos",
           "real.pos.1"
         )]
+        struct[[i]] = unique(pdb_atom_inter_df[,c ("chain", "resno")])
       } else {
         pdb_atom_inter_df <- pdb_atom_inter_df[, c(
           "type",
@@ -149,6 +153,8 @@ PDB_iter_atom_distances <- function(pdb_filename,
           "resid.1",
           "resno.1",
           "distance",
+          "b",
+          "b.1",
           "interaction",
           "pdb.id",
           "real.pos"
@@ -182,4 +188,9 @@ PDB_iter_atom_distances <- function(pdb_filename,
       
     }
   }
+
+  if (type_of_interaction == "protein"){
+    return(rbindlist(struct))  
+  }
+  
 }

@@ -61,11 +61,11 @@ def parse_commandline():
     parser.set_defaults(evalue=10e-8)                  
     
     parser.add_argument("-pi", "--pident", metavar="<float>", dest="pident",
-                        help="percent identity threshold between query (pdb chain) and hit (protein) sequences. Default is 20%")
+                        help="percent identity threshold between query (pdb chain) and hit (protein) sequences. Default is 20 percent")
     parser.set_defaults(pident=20)
 
     parser.add_argument("-c", "--coverage", metavar="<float>", dest="coverage",
-                        help="percent coverage threshold of the protein sequence (how much of the protein sequence is covered by the PDB sequence). Default is 10%")
+                        help="percent coverage threshold of the protein sequence (how much of the protein sequence is covered by the PDB sequence). Default is 10 percent")
     parser.set_defaults(coverage=10)
 
     parser.add_argument("-i", "--interaction", metavar="<String>", dest="int",

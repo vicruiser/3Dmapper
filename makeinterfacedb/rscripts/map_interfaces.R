@@ -63,6 +63,8 @@ if (nrow(new_mpi) > 0) {
     "resno.1",
     "resid.1",
     "distance",
+    "b",
+    "b.1",
     "qstart",
     "qend",
     "sstart",
@@ -101,7 +103,9 @@ if (nrow(new_mpi) > 0) {
           interaction == "protein", aa321(resid.1), resid.1
         ),
         collapse = "-"),
-        distance = paste(round(distance, 2), collapse = "-")
+        distance = paste(round(distance, 2), collapse = "-"),
+        b = paste(b, collapse = "-"),
+        b.1 = paste(b.1,  collapse = "-")
       )
   ))#,
   
@@ -125,6 +129,8 @@ if (nrow(new_mpi) > 0) {
     "resno.1",
     "resid.1",
     "distance",
+    "b",
+    "b.1",
     "sstart",
     "send",
     "qstart",
@@ -152,6 +158,8 @@ if (nrow(new_mpi) > 0) {
       "PDB_interacting_3D_position",
       "PDB_interacting_aa",
       "Interface_min_distance",
+      "PDB_B_factor",
+      "PDB_interacting_B_factor",
       "Protein_alignment_start",
       "Protein_alignment_end",
       "PDB_alignment_start",

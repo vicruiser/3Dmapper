@@ -19,7 +19,7 @@ def isfile(arg):
                     raise IOError
                 
         # check if infile is a txt file
-        except IOError:
+        except (UnicodeDecodeError, IOError, OSError):
             normpath = os.path.normpath(infile)
             abspath = os.path.abspath(normpath)
             if os.path.isfile(abspath) is True:

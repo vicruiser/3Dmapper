@@ -227,7 +227,7 @@ def main():
     start= start_spinner(args.verbose, logger, time_format)
     if args.varid:
 
-        # find variants index file
+        # find positions index file
         for ids in args.varid:
             # run PDBmapper
             if isfile(ids) == 'yes':
@@ -236,7 +236,7 @@ def main():
                     for id in list_varids:
                         # remove \n from the end
                         id = id.replace('\n', '')
-                        # grep variant in index file created with makevariantsdb
+                        # grep position in index file created with makepositionsdb
                         cmd = ('grep \'\\b{}\\b\' {}').format(id, index_file)
                         out, err = call_subprocess(cmd)
                         if err is None and out != b'':
@@ -262,7 +262,7 @@ def main():
                                                        for t in transcriptid)
                         else:
                             logger.error(
-                                'Wrong input: {} is not a recognizable variant id'.format(id))
+                                'Wrong input: {} is not a recognizable position id'.format(id))
                             continue
 
             elif isfile(ids) == "no":
@@ -294,12 +294,12 @@ def main():
                                                for t in transcriptid)
                 else:
                     logger.error(
-                        'Wrong input: {} is not a recognizable variant id'.format(id))
+                        'Wrong input: {} is not a recognizable position id'.format(id))
                     continue
 
             else:
                 logger.error(
-                    'The input variants ids provided are not in a valid format.')
+                    'The input positions ids provided are not in a valid format.')
                 spinner.fail(" Running 3Dmapper...failed!")
                 report.write(time_format + " Running 3Dmapper...failed!")
                 raise IOError
@@ -314,7 +314,7 @@ def main():
                 input = 'file'
                 with open(ids) as list_prot_ids:
                     logger.info(
-                        'Input variants file contains a list of ensembl ids to process.')
+                        'Input positions file contains a list of ensembl ids to process.')
                     # for every ensembl id
                     Parallel(n_jobs=num_cores)(delayed(wrapper)(prot_id.replace('\n', ''),
                                                                 args.psdb,
@@ -366,9 +366,9 @@ def main():
 
         if not any(fname.endswith('.txt') for fname in os.listdir(args.out)):
             logger.warning(
-                'Error: Input ensembl ids has no mapping variants.')
+                'Error: Input ensembl ids has no mapping positions.')
             spinner.warn(
-                text=' Input ensembl ids has no mapping variants.')
+                text=' Input ensembl ids has no mapping positions.')
             exit(-1)
 
         # Compute execution time

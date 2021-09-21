@@ -54,7 +54,7 @@ if (file.size(INPUT_FILE) > 0) {
     )
     # split pdb.id and chain variables into two columsn
     blast_out_filtered <-
-      separate(blast_out_filtered, qseqid, c("pdbid", "chain"), sep = "_")
+      separate(blast_out_filtered, qseqid, c("pdbid", "chain"), sep = "chain")
     # write new file
     write.table(
       blast_out_filtered,

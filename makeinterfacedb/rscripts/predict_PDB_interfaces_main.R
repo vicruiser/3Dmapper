@@ -2,7 +2,7 @@
 ################################################################
 warn.conflicts = FALSE
 library(veriNA3d)
-requiredPackages = c('tidyr', 'stringr', 'bio3d',  'plyr','dplyr') #'parallel',
+requiredPackages = c('tidyr', 'stringr', 'bio3d',  'plyr','dplyr', 'data.table') #'parallel',
 for (p in requiredPackages) {
   if (!require(p, character.only = TRUE))
     install.packages(p)
@@ -44,10 +44,49 @@ tryCatch({
   cat("ERROR :", conditionMessage(e), "\n")
 })
 
+########################
+## TO MAP TO STRUCTURE
+#########################
+# Select information of all the atoms of the pdb file
+all_chains <- pdb_file$atom
+# Select position of protein chains in PDB file
+pdb_protChains <-
+  combine.select(
+    atom.select(pdb_file, ATOMS_INTERACTION, verbose = F),
+    atom.select(pdb_file, "protein", verbose = F)
+  )
+# Select protein chains
+protein_chains <- all_chains[pdb_protChains$atom ,]
+if (ATOMS_INTERACTION == "calpha") {
+  protein_chains = subset(protein_chains , elety == "CA")
+}
+if (ATOMS_INTERACTION == "cbeta") {
+  df = rbind(
+    subset(protein_chains, resid == "GLY" & elety == "CA"),
+    subset(protein_chains , elety == "CB")
+  )
+  protein_chains = df[order(df$eleno),]
+}
+protein_chains <-
+  split(protein_chains, f = protein_chains$chain)
+protein_chains <-
+  lapply(protein_chains, function(x) {
+    respos <-
+      unique(x[, c("resno", "insert")])  # take into account insertions of residues
+    df <-
+      data.frame(respos, real.pos = 1:nrow(respos))
+    left_join(x, df, by = c("resno", "insert"))
+  })
+protein_chains <- ldply(protein_chains, data.frame)
+
+PDB_ID <- basename(sub("\\.gz+", "", PDB_FILENAME))
+
+
 for (j in 1:length(INT)) {
+  
   skip_to_next <- FALSE
-    tryCatch({
-    PDB_iter_atom_distances(
+  tryCatch({
+    interfaces = PDB_iter_atom_distances(
       PDB_FILENAME,
       pdb_file,
       atom_select = ATOMS_INTERACTION,
@@ -55,9 +94,74 @@ for (j in 1:length(INT)) {
       dist_threshold = DIST_THRESHOLD,
       output_dir = OUTPUT_DIR,
       ROOT,
-      biolip = BIOLIP
-    )},error = function(e) { skip_to_next <<- TRUE})
-  if(skip_to_next) { next } 
+      biolip = BIOLIP)
+    if (INT[j] == "protein"){
+    struct <<- anti_join(unique(protein_chains[, c(
+      "chain",
+      "resid",
+      "resno",
+      "real.pos",
+      "b")]), interfaces, by=c("chain", "resno"))
+    } else { skip_to_next <<- TRUE}
+    # test if works
+   },error = function(e) { 
+      
+    if (INT[j] == "protein"){
+      struct <<- unique(protein_chains[, c(
+       "chain",
+       "resid",
+       "resno",
+       "real.pos",
+       "b")])
+    } else{ skip_to_next <<- TRUE }
+  })
+  
+  if(skip_to_next) { next }  
+  
+   struct = unique(
+     data.frame(type = "ATOM", 
+                eleno = "NA", 
+                elety = "NA",
+                struct[, c(
+                  "chain",
+                  "resid",
+                  "resno")], 
+                          type.1 = 'NA',
+                          eleno.1 = 'NA',
+                          elety.1 = 'NA',
+                          chain.1 = 'NA',
+                          resid.1 = "NA",
+                          resno.1 = "NA",
+                          distance = "NA",
+                          b = struct[,"b"],
+                          b.1 = 'NA',
+                          interaction = "NA",
+                          pdb.id = PDB_ID,
+                          real.pos = struct[,"real.pos"],
+                          real.pos.1 ="NA"))
+    output_filePath <-
+      file.path(
+        OUTPUT_DIR,
+        paste(
+          PDB_ID,
+          "_",
+          INT[j],
+          "_",
+          "predicted_interfaces.txt",
+          sep = ""
+        )
+      ) 
+    write.table(
+      struct,
+      file = output_filePath,
+      append = TRUE,
+      quote = FALSE,
+      sep = "\t",
+      row.names = F,
+      col.names = !file.exists(output_filePath)
+    )  
+    
+
 }
   
 

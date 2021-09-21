@@ -7,7 +7,7 @@ import re
 import glob
 import pandas as pd
 import numpy as np
-import dask.dataframe as dd
+#import dask.dataframe as dd
 
 from .db_parser import parser
 from .decorator import tags
@@ -18,7 +18,7 @@ from .writefile import writefile
 
 def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalue, isoform, APPRIS, consequence, loc, var_id=None, csv=False, hdf=False):
     '''
-    Map interfaces and genomic anntoated variants and returns a
+    Map interfaces and genomic anntoated positions and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
     another file with detailed information regarding the maped areas.
 
@@ -31,7 +31,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
     psdb : str
         Directory where to find interface database
     vardb : str
-        Directory where to find variants database
+        Directory where to find positions database
     out_dir : str
         Output directory
     pident : int
@@ -41,14 +41,14 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
     -------
     setID.File
         txt file containing a data frame two columns corresponding to the
-        analyzed interface id and the corresponding annotated genomic variants.
-    MappedVariants.File
+        analyzed interface id and the corresponding annotated genomic positions.
+    InterfacePositions
         Same as setID.File but with additional information describing the
-        interfaces and the variants.
+        interfaces and the positions.
     '''
     # log file
     logger = get_logger(' 3dmapper', out_dir)
-    # parse variants corresponding to the selected protein ID
+    # parse positions corresponding to the selected protein ID
     try:
         annovars = parser(transcript_id, vardb)     
         if consequence is not None:
@@ -59,7 +59,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
             # if filter returns an empty df, raise error
             if annovars.empty is True:
                 logger.error(
-                    'Variants could not be filtered by feature type = ' + consequence)
+                    'positions could not be filtered by feature type = ' + consequence)
                 raise IOError()
         else:
             consequence = ['all']
@@ -67,7 +67,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         if isoform is None:
             isoform = ['all']
 
-        # filter by variant type if one or more selected
+        # filter by position type if one or more selected
         if var_id is not None:
             if 'Existing_variation' in annovars.columns:
                 annovars = annovars[
@@ -76,20 +76,20 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
             else:
                 annovars = annovars[
                     (annovars.Uploaded_variation.astype(str) == str(var_id))]
-            logger.info('Variant \'' + str(var_id) + '\' has been selected.')
+            logger.info('position \'' + str(var_id) + '\' has been selected.')
             # if filter returns an empty df, raise error
             if annovars.empty:
                 logger.error(
-                    'Variants could not be filtered by variant id \'' + str(var_id) + '\'')
+                    'positions could not be filtered by position id \'' + str(var_id) + '\'')
                 raise IOError()
-        # for variants with high impact affecting several aminoacidic positions,
+        # for positions with high impact affecting several aminoacidic positions,
         # the protein position is a range. split the range to have each position
         # individually
         if any(annovars['Protein_position'].astype(str).str.contains(r'[0-9]-[0-9]')):
-            # subset hight impact variants
+            # subset hight impact positions
             sub_df = annovars[annovars['Protein_position'].astype(str).str.contains(
                 r'[0-9]-[0-9]')]
-            # subset the remaining variants to concatenate afterwards
+            # subset the remaining positions to concatenate afterwards
             remaining_df = annovars.drop(sub_df.index)
             # split the range or interval
             sub_df[['start', 'end']] = sub_df['Protein_position'].str.split(
@@ -194,36 +194,36 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
 
     elif psdf is not False and annovars is False:
         logger.error('Protein ' +
-                     prot_id + 'has no mapping variants.')
+                     prot_id + 'has no mapping positions.')
         raise IOError
 
     elif psdf is False and annovars is not False:
 
         if loc:
-            # remove non protein coding variants
+            # remove non protein coding positions
             annovars.drop_duplicates(inplace=True)
             try:
-                noncoding_variants_index = annovars.Amino_acids.str.contains(
+                noncoding_positions_index = annovars.Amino_acids.str.contains(
                     '\.|\-', regex=True, na=False)
-                noncoding_variants = annovars.loc[noncoding_variants_index]
+                noncoding_positions = annovars.loc[noncoding_positions_index]
             except:
-                noncoding_variants = False
+                noncoding_positions = False
             # non-protein coding mutations
-            if noncoding_variants is not False:
-                noncoding_variants['APPRIS_isoform'] = ''
-                noncoding_variants['Mapping_position'] = 'Noncoding'
+            if noncoding_positions is not False:
+                noncoding_positions['APPRIS_isoform'] = ''
+                noncoding_positions['Mapping_position'] = 'Noncoding'
                 writefile(prot_id, out_dir, pident, isoform, consequence,
-                          noncoding_variants, 'NoncodingVariants', csv, hdf)
-                unmapped_variants = annovars.loc[~noncoding_variants_index]
+                          noncoding_positions, 'NoncodingPositions', csv, hdf)
+                unmapped_positions = annovars.loc[~noncoding_positions_index]
             else:
-                unmapped_variants = annovars
+                unmapped_positions = annovars
 
-            if unmapped_variants.empty is False:
-                unmapped_variants.drop_duplicates(inplace=True)
-                unmapped_variants['APPRIS_isoform'] = ''
-                unmapped_variants['Mapping_position'] = 'Unmapped'
+            if unmapped_positions.empty is False:
+                unmapped_positions.drop_duplicates(inplace=True)
+                unmapped_positions['APPRIS_isoform'] = ''
+                unmapped_positions['Mapping_position'] = 'Unmapped'
                 writefile(prot_id, out_dir, pident, isoform, consequence,
-                          unmapped_variants, 'UnmappedVariants', csv, hdf)
+                          unmapped_positions, 'UnmappedPositions', csv, hdf)
         
     elif psdf is not False and annovars is not False:
         # for sucessful merge, Protein_position column must be str type
@@ -232,7 +232,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         annovars['APPRIS_isoform'] = APPRIS
        # annovars['Uniprot_accession'] = Uniprot_id
         # Merge them both files
-        mapped_variants = annovars.join(
+        mapped_positions = annovars.join(
             psdf.set_index('Protein_position'), on='Protein_position', how='inner')
 
         if isoform is None:
@@ -240,29 +240,30 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         if consequence is None:
             consequence = ['all']
         ###########################################################################
-        # Locate rest of variants (mapping to a structure or not)
+        # Locate rest of positions (mapping to a structure or not)
         ###########################################################################
         if loc:
-            # remove already mapped variants
+            # remove already mapped positions
             try:
-                left_variants = annovars.drop(list(set(mapped_variants.index)))
+                left_positions = annovars.drop(list(set(mapped_positions.index)))
             except:
-                left_variants = annovars
-            # remove non protein coding variants
-            if left_variants.empty is False:
-                left_variants.drop_duplicates(inplace=True)
-                noncoding_variants_index = left_variants.Amino_acids.str.contains(
+                left_positions = annovars
+            # remove non protein coding positions
+            if left_positions.empty is False:
+                left_positions.drop_duplicates(inplace=True)
+                noncoding_positions_index = left_positions.Amino_acids.str.contains(
                     '\.|\-', regex=True, na=False)
-                noncoding_variants = left_variants.loc[noncoding_variants_index]
+                noncoding_positions = left_positions.loc[noncoding_positions_index]
                 # non-protein coding mutations
-                if noncoding_variants.empty is False:
-                   # noncoding_variants = noncoding_variants.drop(
+                if noncoding_positions.empty is False:
+                   # noncoding_positions = noncoding_positions.drop(
                    #     columns=['Uniprot_accession'])  # not needed
-                    noncoding_variants['Mapping_position'] = 'Noncoding'
+                    noncoding_positions['Mapping_position'] = 'Noncoding'
                     writefile(prot_id, out_dir, pident, isoform, consequence,
-                              noncoding_variants, 'NoncodingVariants', csv, hdf)
-                    left_variants = left_variants.loc[~noncoding_variants_index]
-                left_variants['Protein_accession'] = prot_id
+                              noncoding_positions, 'NoncodingPositions', csv, hdf)
+                    left_positions = left_positions.loc[~noncoding_positions_index]
+                left_positions['Protein_accession'] = prot_id
+
                 # remove protein position since we know there are no matching positions
                 # and will reduce the maximum number of combinations of rows
                 #pdb.id ensembl.prot.id temp.chain int.chain 
@@ -272,62 +273,67 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                                       'PDB_alignment_end', 'Pident']]
                 #psdf = psdf.iloc[:, np.r_[0:3, 4:9]]
                 psdf.drop_duplicates(inplace=True)
-                # merge rest of variants with protein structures
-                left_variants = left_variants.join(
+                # merge rest of positions with protein structures
+                unmapped_positions = left_positions.join(
                     psdf.set_index('Protein_accession'), on='Protein_accession', how='inner')
                 # convert col to numeric to make comparison
-                left_variants['Protein_position'] = pd.to_numeric(
-                    left_variants['Protein_position'], errors='coerce')
-                left_variants['Protein_position'] = left_variants.Protein_position.values.astype(
+                unmapped_positions['Protein_position'] = pd.to_numeric(
+                    unmapped_positions['Protein_position'], errors='coerce')
+                unmapped_positions['Protein_position'] = unmapped_positions.Protein_position.values.astype(
                     int)
-                # mapped variant is on the rest of the structure
-                structure_variants = left_variants[(left_variants.Protein_position.values >= left_variants.Protein_alignment_start.values) & (
-                    (left_variants.Protein_position <= left_variants.Protein_alignment_end))]
+                unmapped_positions[(unmapped_positions.Protein_position.values >= unmapped_positions.Protein_alignment_start.values) & (
+                    (unmapped_positions.Protein_position <= unmapped_positions.Protein_alignment_end))]
+                # mapped position is on the rest of the structure
+                structure_positions = mapped_positions[mapped_positions['Interaction_type'].isna()]
+                structure_positions = structure_positions.drop(['Chimera_interacting_position', 'Chimera_3D_position',
+                                                              'PDB_interacting_3D_position','PDB_interacting_aa',
+                                                              'Interface_min_distance', 'PDB_interacting_B_factor'], axis=1)
                 # do proper arragenments if no resulst are retrieved
-                if structure_variants.empty is False:
-                    structure_variants.drop_duplicates(inplace=True)
-                    structure_variants['PDB_seq_position'] = structure_variants['Protein_position'] - \
-                     structure_variants['Protein_alignment_start'] + structure_variants['PDB_alignment_start']
-                    structure_variants['Mapping_position'] = 'Structure'
+                if structure_positions.empty is False:
+                    structure_positions.drop_duplicates(inplace=True)
+                    #structure_positions['PDB_seq_position'] = structure_positions['Protein_position'] - \
+                    # structure_positions['Protein_alignment_start'] + structure_positions['PDB_alignment_start']
+                    structure_positions['Mapping_position'] = 'Structure'
                     writefile(prot_id, out_dir, pident, isoform, consequence,
-                              structure_variants, 'StructureVariants', csv, hdf)
-                    unmapped_variants = left_variants[~left_variants.index.isin(structure_variants.index)]
+                              structure_positions, 'StructurePositions', csv, hdf)
+                    #unmapped_positions = left_positions#[~left_positions.index.isin(structure_positions.index)]
 
-                    if unmapped_variants.empty is False:
-                        cs = annovars.columns.values.tolist()
-                        cs.append("Protein_accession")  
-                        unmapped_variants = unmapped_variants[[c for c in unmapped_variants.columns if c in cs]]
-                        unmapped_variants.drop_duplicates(inplace=True)
-                        unmapped_variants['Mapping_position'] = 'Unmapped'
-                        writefile(prot_id, out_dir, pident, isoform, consequence,
-                                  unmapped_variants, 'UnmappedVariants', csv, hdf)
-                else:
-                    try:
-                        unmapped_variants = left_variants
-                        if unmapped_variants.empty is False:
-                            unmapped_variants.drop_duplicates(inplace=True)
-                            unmapped_variants['Mapping_position'] = 'Unmapped'
-                            writefile(prot_id, out_dir, pident, isoform, consequence,
-                                      unmapped_variants, 'UnmappedVariants', csv, hdf)
-                    except:
-                        pass
-                del (structure_variants, left_variants,
-                     noncoding_variants, noncoding_variants_index)  
+                if unmapped_positions.empty is False:
+                    cs = annovars.columns.values.tolist()
+                    cs.append("Protein_accession")  
+                    unmapped_positions = unmapped_positions[[c for c in unmapped_positions.columns if c in cs]]
+                    unmapped_positions.drop_duplicates(inplace=True)
+                    unmapped_positions['Mapping_position'] = 'Unmapped'
+                    writefile(prot_id, out_dir, pident, isoform, consequence,
+                            unmapped_positions, 'UnmappedPositions', csv, hdf)
+                # else:
+                #     try:
+                #         unmapped_positions = left_positions
+                #         if unmapped_positions.empty is False:
+                #             unmapped_positions.drop_duplicates(inplace=True)
+                #             unmapped_positions['Mapping_position'] = 'Unmapped'
+                #             writefile(prot_id, out_dir, pident, isoform, consequence,
+                #                       unmapped_positions, 'Unmappedpositions', csv, hdf)
+                #     except:
+                #         pass
+                del (structure_positions, left_positions,
+                     noncoding_positions, noncoding_positions_index)  
         ###########################################################################
         # stop if there are no results
-        if mapped_variants.empty:
+        if mapped_positions.empty:
             # report results
             logger.warning('Warning: ' + prot_id +
-                           ' does not map with any annotated variant.\n')
+                           ' does not map with any annotated position.\n')
         # if merging was successful, create setID file and
         # save the merged dataframe as well
         else:
             
-            mapped_variants['Mapping_position'] = 'Mapped'
-            setID_file = mapped_variants[['Structure_feature_id',
+            mapped_positions['Mapping_position'] = 'Interface'
+            mapped_positions = mapped_positions[mapped_positions['Interaction_type'].notna()]
+            setID_file = mapped_positions[['Structure_feature_id',
                                           'Uploaded_variation']]
             setID_file.drop_duplicates(inplace=True)
-            mapped_variants.drop_duplicates(inplace=True)
+            mapped_positions.drop_duplicates(inplace=True)
             # Save the merged dataframe, appending results and not
             #  reapeting headers
             with open(os.path.join(out_dir, ('setID_pident' + str(pident) + '_isoform_' +
@@ -335,7 +341,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                 setID_file.to_csv(f, sep=',', index=False,
                                   header=f.tell() == 0)
             writefile(prot_id, out_dir, pident, isoform, consequence,
-                      mapped_variants, 'MappedVariants', csv, hdf)
+                      mapped_positions, 'InterfacePositions', csv, hdf)
 
-            del(mapped_variants)
+            del(mapped_positions)
         del(psdf, annovars)

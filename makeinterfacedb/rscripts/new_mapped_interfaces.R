@@ -27,7 +27,7 @@ new.Mapped.Interfaces <-
         fread(x, header = T))
     pi         <-
       as.data.frame(rbindlist(pi_df_list, use.names = TRUE, fill = TRUE))
-    
+
     
     # subset ligand interactions and change chain id and use residue id instead
     if (nrow(pi) > 0) {
@@ -45,7 +45,9 @@ new.Mapped.Interfaces <-
       
       # rearrange dataframe so column "chain" contains info of all possible
       # combination of all existing chains
-      pi_protein <- subset(pi, interaction == "protein")
+      pi_protein <- subset(pi, interaction == "protein" )
+      
+      pi_struct <- subset(pi, is.na(interaction) )
       
       if (nrow(pi_protein) > 0) {
         pi_reversed <-
@@ -63,6 +65,8 @@ new.Mapped.Interfaces <-
             "resid" ,
             "resno" ,
             "distance" ,
+            "b",
+            "b.1",
             "interaction" ,
             "pdb.id" ,
             "real.pos.1",
@@ -82,6 +86,8 @@ new.Mapped.Interfaces <-
           "resid.1" ,
           "resno.1" ,
           "distance" ,
+          "b.1",
+          "b",
           "interaction" ,
           "pdb.id" ,
           "real.pos",
@@ -113,6 +119,8 @@ new.Mapped.Interfaces <-
           resid = character() ,
           resno = integer() ,
           distance = numeric() ,
+          b.1= numeric(),
+          b= numeric(),
           interaction = character() ,
           pdb.id = character() ,
           real.pos.1 = integer(),
@@ -129,17 +137,25 @@ new.Mapped.Interfaces <-
       pi_all$chain.1 <- as.character(pi_all$chain.1)
       
       # Calculate the min distance between each interacting residue pair
-      dist <- pi_all[, c("resno", "resno.1", "distance")]
+      dist <- pi_all[, c("resno", "resno.1", "distance", "b", "b.1")]
       min_dist <-
         lapply(split(dist, by = c("resno", "resno.1")), function(x)
           min(x$distance))
+      min_b<-
+        lapply(split(dist, by = c("resno", "resno.1")), function(x)
+          min(x$b))
+      min_b.1<-
+        lapply(split(dist, by = c("resno", "resno.1")), function(x)
+          min(x$b.1))
       
       
       min_max_mean_dist <-
         data.frame(
           resno = as.numeric(sub("\\..*", "", names(min_dist))),
           resno.1 = as.numeric(sub(".*\\.", "", names(min_dist))),
-          distance = unlist(min_dist)
+          distance = unlist(min_dist),
+          b =unlist(min_b),
+          b.1= unlist(min_b.1)
         )
       
       rownames(min_max_mean_dist) <- NULL
@@ -165,8 +181,30 @@ new.Mapped.Interfaces <-
         merge(pi_all_unique,
               unique(min_max_mean_dist),
               by = c("resno", "resno.1"))
+      # add struct info
+      if (nrow(pi_all_unique) >0){
+      pi_all_unique = rbind(pi_all_unique, unique(pi_struct[, c(
+        "type" ,
+        "chain" ,
+        "resid" ,
+        "resno" ,
+        "type.1" ,
+        "chain.1" ,
+        "resid.1" ,
+        "resno.1" ,
+        "interaction" ,
+        "pdb.id",
+        "real.pos",
+        "distance",
+        "b",
+        "b.1"
+      )]))
+      } else {
+        pi_all_unique = pi_struct
+      }
       # merge BLAST info and new mapped pi
       new_mpi <- merge(blast_output, pi_all_unique, by = "chain")
+
       ###############################################################################################
       # Eliminate those residues that do not map to the protein of reference (Ensembl)              #
       ###############################################################################################

@@ -1,0 +1,7 @@
+[console_scripts]
+makechimera = makechimera.__main__:main
+makeinterfacedb = makeinterfacedb.__main__:main
+makepsdb = makepsdb.__main__:main
+makevariantsdb = makevariantsdb.__main__:main
+mapper = mapper.__main__:main
+
