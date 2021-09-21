@@ -1,6 +1,6 @@
 [![build status](
   http://img.shields.io/travis/vicruiser/3Dmapper/master.svg?style=flat)](
- https://travis-ci.org/username/vicruiser/3Dmapper)
+ https://travis-ci.com/username/vicruiser/3Dmapper)
  
 <img src= "./docs/LogoPDBcopy22.png" width = "600" heigh = "300">
 
