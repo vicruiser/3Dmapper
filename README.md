@@ -39,6 +39,7 @@ Per each PDB file downloaded, run makeinterfacedb will do the following:
 ## Example
 ```markdown
 makeinterfacedb -pdb file.pdb --blast-db proteins_db  -b
+```
 
 ## Results
 The output interfaces database is a XXXX column tab-delimited containing the following
