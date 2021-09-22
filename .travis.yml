@@ -7,8 +7,8 @@ python:
   - 3.7
 
 install:
-#   - pip install wheel
-   - python setup.py bdist_wheel
+   - pip install . #wheel
+   #- python setup.py bdist_wheel
 
 branches:
   only:

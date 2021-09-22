@@ -34,15 +34,15 @@ class git_clone_external(DistutilsInstall):
         except urlopen.URLError as err:
             return False
 
-    def run_command(self, command, cwd):
-        # print("about to execute command `{0}`. sources = {1}"
-        # .format(command, sources))
-        proc = subprocess.Popen(command,cwd = cwd,  stderr=subprocess.STDOUT, shell=True)
-        output, stderr = proc.communicate(input)
-        status = proc.wait()
-        if status:
-            raise Exception("command = {0} failed with output = {1} status {2:d}\n"
-                            .format(command, output, status))
+    # def run_command(self, command, cwd):
+    #     # print("about to execute command `{0}`. sources = {1}"
+    #     # .format(command, sources))
+    #     proc = subprocess.Popen(command,cwd = cwd,  stderr=subprocess.STDOUT, shell=True)
+    #     output, stderr = proc.communicate(input)
+    #     status = proc.wait()
+    #     if status:
+    #         raise Exception("command = {0} failed with output = {1} status {2:d}\n"
+    #                         .format(command, output, status))
 
     def run(self):
 
@@ -56,31 +56,32 @@ class git_clone_external(DistutilsInstall):
             if not os.path.exists(htslib_dir):
                 cmd1 = ['git', 'clone',
                             'git://github.com/samtools/htslib.git']
-                self.run_command(self, cmd1, d)
-                #subprocess.call(command1, cwd=os.path.dirname(
-                #    os.path.realpath(__file__)))
+
+                #self.run_command( cmd1, d)
+                subprocess.call(cmd1, cwd=os.path.dirname(
+                    os.path.realpath(__file__)))
 
             if not os.path.exists(path.join(bcftools_dir, 'bcftools')):
                 cmd2 = ['git', 'clone',
                             'git://github.com/samtools/bcftools.git']
 
-                self.run_command(self, cmd2, d)
-                #subprocess.call(
-                #    command2, cwd=os.path.dirname(os.path.realpath(__file__)))
+                #self.run_command(self, cmd2, d)
+                subprocess.call(
+                    cmd2, cwd=os.path.dirname(os.path.realpath(__file__)))
 
-            self.run_command(self, ["make", "clean"], bcftools_dir)
-            self.run_command(self, ["make"], bcftools_dir)
-            #subprocess.call(
-            #    ["make", "clean"], cwd=bcftools_dir)
+            #self.run_command(self, ["make", "clean"], bcftools_dir)
+            #self.run_command(self, ["make"], bcftools_dir)
+            subprocess.call(
+                ["make", "clean"], cwd=bcftools_dir)
 
-            #subprocess.call(['make'], cwd=bcftools_dir)
-            self.run_command(self, ["cp", "bcftools", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], bcftools_dir)
-            self.run_command(self, ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], bcftools_dir)
-            #subprocess.call(
-            #    ["cp", "bcftools", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
+            subprocess.call(['make'], cwd=bcftools_dir)
+            #self.run_command(self, ["cp", "bcftools", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], bcftools_dir)
+            #self.run_command(self, ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], bcftools_dir)
+            subprocess.call(
+                ["cp", "bcftools", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
 
-            #subprocess.call(
-            #    ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
+            subprocess.call(
+                ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
 
             DistutilsInstall.run(self)
 
