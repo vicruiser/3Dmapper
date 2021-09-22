@@ -55,7 +55,7 @@ class git_clone_external(DistutilsInstall):
             
             if not os.path.exists(htslib_dir):
                 cmd1 = ['git', 'clone',
-                            'git://github.com/samtools/htslib.git', ]
+                            'git://github.com/samtools/htslib.git']
                 self.run_command(self, cmd1, d)
                 #subprocess.call(command1, cwd=os.path.dirname(
                 #    os.path.realpath(__file__)))
