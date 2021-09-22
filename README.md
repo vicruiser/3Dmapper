@@ -1,33 +1,35 @@
 [![build status](
   http://img.shields.io/travis/vicruiser/3Dmapper/master.svg?style=flat)](
  https://travis-ci.com/username/vicruiser/3Dmapper)
+ [![Join the chat at https://gitter.im/pdbmapper/community](https://badges.gitter.im/pdbmapper/community.svg)](https://gitter.im/pdbmapper/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
  
 <img src= "./docs/LogoPDBcopy22.png" width = "600" heigh = "300">
 
 # Overview
 
-[![Join the chat at https://gitter.im/pdbmapper/community](https://badges.gitter.im/pdbmapper/community.svg)](https://gitter.im/pdbmapper/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-3Dmapper is a tool to map annotated genomic positions to protein structures.
+3Dmapper is a Python tool to map annotated genomic variants or positions to protein structures.
 <img src= "./docs/pdbmapper_methods.png" width = "600" heigh = "300">
+
 
 # Quickstart
 
 ## Install 
 
 ```bash
-pip install 3dmapper.git
+git clone https://github.com/vicruiser/3Dmapper.git
+cd 3Dmapper
+pip install . 
 ```
 
 ## Generation of local interfaces database
-
-If you need to map 
 
 ### Requirements 
  - Your own structural database. 3Dmapper only accepts coordinate files (either real structures or models) in *PDB or CIF format*. To avoid redundancy, we recommend to use biological assemblies of the structures. 
  - BLAST standalone software. Follow this [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use the command line tool.
  - A target proteome. This is easly done running the command "makeblastdb" from BLAST with the set of protein sequences of your choice.
- 
+```markdown
+makeblastdb -in target_proteome.fasta -db_type protein -out proteins_db
+``` 
 ### Overview
 
 Per each PDB file downloaded, run makeinterfacedb will do the following:  
@@ -36,17 +38,48 @@ Per each PDB file downloaded, run makeinterfacedb will do the following:
   3) Predict interfaces
   4) Map sequence and PDB positions. 
 
-
-## Just mapping
+### Example
 ```markdown
-makepsdb -psdb p53_ep300_intdb.dat --out out/path/dir 
-makevariantsdb -vcf PDBmapper/pdbmapper/data/p53_ep300_ExACvariants.vep -out ./test_pdbmapper/
-pdbmapper -vardb test_pdbmapper/DBs/varDB/ -intdb test_pdbmapper/DBs/intDB/ -protid ENSP00000263253 ENSP00000482258 -out test_pdbmapper/ 
+makeinterfacedb -pdb file.pdb --blast-db proteins_db  -b
+
+### Result
+The output interfaces database is a XXXX column tab-delimited containing the following
+
+| Column name               | Notes                                                                                                                                          |
+| :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PDB_code**              | Biological Assembly PDB ID                                                                                                                     |
+| **Protein_accession**     | Ensembl protein ID                                                                                                                             |
+| **PDB_chain**             | Template chain (only protein)                                                                                                                  |
+| **PDB_interacting_chain** | Interacting chain (protein, ligand or DNA)                                                                                                     |
+| **Protein_length**        | Length of the Ensembl protein sequence (without including the gaps of the alignment)                                                           |
+| **Protein_start_pos**     | Start of alignment in the Ensembl protein sequence (template chain)                                                                            |
+| **Protein_end_pos**       | End of alignment in the Ensembl protein sequence (template chain)                                                                              |
+| **Length_align**          | Length of the alignment between Ensembl protein sequence (subject) and PDB chain sequence (query)                                              |
+| **Pident**                | Sequence Identity percent. This parameter serves as threshold. Only results with pident equal or higher to 50% are included                    |
+| **Interaction**           | Type of interfacial interaction, i.e., “protein”,”nucleic” or “ligand”                                                                         |
+| **PDB_aa**                | residues of aligned query (PDB chain) sequence (i.e.: only aligned and includes gaps.)                                                         |
+| **Protein_aa**            | residues of aligned subject (Ensembl) sequence (i.e.: only aligned and includes gaps.)                                                         |
+| **PDB_pos**               | index position of each residue of the aligned query (PDB chain) sequence starting from 1                                                       |
+| **Protein_pos**           | index position of each residue of the aligned subject (Ensembl) sequence starting from 1                                                       |
+| **PDB_align_pos**         | real index position of each residue of the aligned query (PDB chain) sequence                                                                  |
+| **Protein_align_pos**     | Position of the interfacial residues on the Ensembl protein sequence. This is the column of your interest! (Protein position in the MC3 file). |
+| **PDB_pos**               | Corresponding position of the interfacial residues on the PDB chain sequence                                                                   |
+
+```
+## Split variants / position files
+```markdown
+makevariantsdb -vf variants.vep 
 ```
 
+## Split interface DB
+```markdown
+makepsdb -psdb interfaces/interfacesDB.txt -s
+```
 
-
-
+## Map variants
+```markdown
+mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f 
+```
 
 
 # Dependencies
@@ -78,15 +111,12 @@ pdbmapper -vardb test_pdbmapper/DBs/varDB/ -intdb test_pdbmapper/DBs/intDB/ -pro
 | [Trace](docs/using-cli.md#trace-flag)           | `command -- --trace`                    | Gets a Fire trace for the command.                       |
 | [Verbose](docs/using-cli.md#verbose-flag)       | `command -- --verbose`                  | -->                                                      | --> --> |
 
-### Paralellization
+## Paralellization
 
-PDBmapper has an option to speed up the running time by means of parallelization. While `makepsdb` and `makevariantsdb` run with GNU parallel [ref], `pdbmapper` has an algorithm in python. 
+3Dmapper has an option to speed up the running time by means of parallelization. While `makepsdb` and `makevariantsdb` run with GNU parallel [ref], `mapper` has an algorithm in python. 
 
-An alternative to parallelaize pdbmapper is to is to give as input the protein ids in individual tasks to perform a job array in a cluster computer?. The first task should write the initial files. The rest set the option `-force n` to prevent repeating innecesary steps. 
+An alternative to parallelaize 3Dmapper is to is to give as input the protein ids in individual tasks to perform a job array in a cluster computer?. The first task should write the initial files. The rest set the option `-force n` to prevent repeating innecesary steps. 
 
-**Explain better or implemen a parallel option** 
-
-# PDBmapper databases
 
 ## Protein structural features input format
 
@@ -112,27 +142,7 @@ Put an example here:
 
 ## Interfaces database 
 
-For our own research, a pre-computed database was used. We did generate this by following the protocol described in [ref to paper]. The format is a  10 column tab-delimited file: 
 
-| Column name               | Notes                                                                                                                                          |
-| :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| **PDB_code**              | Biological Assembly PDB ID                                                                                                                     |
-| **Protein_accession**     | Ensembl protein ID                                                                                                                             |
-| **PDB_chain**             | Template chain (only protein)                                                                                                                  |
-| **PDB_interacting_chain** | Interacting chain (protein, ligand or DNA)                                                                                                     |
-| **Protein_length**        | Length of the Ensembl protein sequence (without including the gaps of the alignment)                                                           |
-| **Protein_start_pos**     | Start of alignment in the Ensembl protein sequence (template chain)                                                                            |
-| **Protein_end_pos**       | End of alignment in the Ensembl protein sequence (template chain)                                                                              |
-| **Length_align**          | Length of the alignment between Ensembl protein sequence (subject) and PDB chain sequence (query)                                              |
-| **Pident**                | Sequence Identity percent. This parameter serves as threshold. Only results with pident equal or higher to 50% are included                    |
-| **Interaction**           | Type of interfacial interaction, i.e., “protein”,”nucleic” or “ligand”                                                                         |
-| **PDB_aa**                | residues of aligned query (PDB chain) sequence (i.e.: only aligned and includes gaps.)                                                         |
-| **Protein_aa**            | residues of aligned subject (Ensembl) sequence (i.e.: only aligned and includes gaps.)                                                         |
-| **PDB_pos**               | index position of each residue of the aligned query (PDB chain) sequence starting from 1                                                       |
-| **Protein_pos**           | index position of each residue of the aligned subject (Ensembl) sequence starting from 1                                                       |
-| **PDB_align_pos**         | real index position of each residue of the aligned query (PDB chain) sequence                                                                  |
-| **Protein_align_pos**     | Position of the interfacial residues on the Ensembl protein sequence. This is the column of your interest! (Protein position in the MC3 file). |
-| **PDB_pos**               | Corresponding position of the interfacial residues on the PDB chain sequence                                                                   |
 
 ## Variant annotated files
 
