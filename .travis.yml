@@ -6,7 +6,7 @@ sudo: false
 python:
   - 3.7
 
-install:
+script:
    - pip install . #wheel
    #- python setup.py bdist_wheel
 
