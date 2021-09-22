@@ -10,7 +10,6 @@ before_install:
   - pip install wheel
 
 install:
-   - pip install -r dependencies.txt
    - pip install .
 
 branches:
