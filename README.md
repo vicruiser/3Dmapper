@@ -44,7 +44,6 @@ makeinterfacedb -pdb file.pdb --blast-db proteins_db  -b
 ## Results
 The output interfaces database is a XXXX column tab-delimited containing the following
 
-```
 | Column name               | Notes                                                                                                                                          |
 | :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
 | **PDB_code**              | Biological Assembly PDB ID                                                                                                                     |
@@ -64,7 +63,6 @@ The output interfaces database is a XXXX column tab-delimited containing the fol
 | **PDB_align_pos**         | real index position of each residue of the aligned query (PDB chain) sequence                                                                  |
 | **Protein_align_pos**     | Position of the interfacial residues on the Ensembl protein sequence. This is the column of your interest! (Protein position in the MC3 file). |
 | **PDB_pos**               | Corresponding position of the interfacial residues on the PDB chain sequence                                                                   |
-```
 
 # Split variants / position files
 ```markdown
