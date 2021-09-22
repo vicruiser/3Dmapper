@@ -11,9 +11,7 @@
 <img src= "./docs/pdbmapper_methods.png" width = "600" heigh = "300">
 
 
-# Quickstart
-
-## Install 
+# Install 
 
 ```bash
 git clone https://github.com/vicruiser/3Dmapper.git
@@ -21,16 +19,16 @@ cd 3Dmapper
 pip install . 
 ```
 
-## Generation of local interfaces database
+# Generation of local interfaces database
 
-### Requirements 
+## Requirements 
  - Your own structural database. 3Dmapper only accepts coordinate files (either real structures or models) in *PDB or CIF format*. To avoid redundancy, we recommend to use biological assemblies of the structures. 
  - BLAST standalone software. Follow this [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use the command line tool.
  - A target proteome. This is easly done running the command "makeblastdb" from BLAST with the set of protein sequences of your choice.
 ```markdown
 makeblastdb -in target_proteome.fasta -db_type protein -out proteins_db
 ``` 
-### Overview
+## Overview
 
 Per each PDB file downloaded, run makeinterfacedb will do the following:  
   1) Extract their protein chains. 
@@ -38,13 +36,14 @@ Per each PDB file downloaded, run makeinterfacedb will do the following:
   3) Predict interfaces
   4) Map sequence and PDB positions. 
 
-### Example
+## Example
 ```markdown
 makeinterfacedb -pdb file.pdb --blast-db proteins_db  -b
 
-### Result
+## Results
 The output interfaces database is a XXXX column tab-delimited containing the following
 
+```
 | Column name               | Notes                                                                                                                                          |
 | :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
 | **PDB_code**              | Biological Assembly PDB ID                                                                                                                     |
@@ -64,63 +63,19 @@ The output interfaces database is a XXXX column tab-delimited containing the fol
 | **PDB_align_pos**         | real index position of each residue of the aligned query (PDB chain) sequence                                                                  |
 | **Protein_align_pos**     | Position of the interfacial residues on the Ensembl protein sequence. This is the column of your interest! (Protein position in the MC3 file). |
 | **PDB_pos**               | Corresponding position of the interfacial residues on the PDB chain sequence                                                                   |
-
 ```
-## Split variants / position files
+
+# Split variants / position files
 ```markdown
 makevariantsdb -vf variants.vep 
 ```
 
-## Split interface DB
+# Split interface DB
 ```markdown
 makepsdb -psdb interfaces/interfacesDB.txt -s
 ```
 
-## Map variants
-```markdown
-mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f 
-```
-
-
-# Dependencies
-- samtools
-
-
-### Test
-
-<!-- More details in ./test -->
-
-## Reference
-
-| <!--    | Setup                   | Command | Notes |
-| :------ | :---------------------- | :------ |
-| install | `pip install pdbmapper` | -->     |
-<!-- 
-| <!--   | Creating a CLI         | Command                                   | Notes |
-| :----- | :--------------------- | :---------------------------------------- |
-| import | `import fire`          |
-| Call   | `fire.Fire()`          | Turns the current module into a Fire CLI. |
-| Call   | `fire.Fire(component)` | Turns `component` into a Fire CLI. -->    |
-<!-- 
-| <!-- Using a CLI                                | Command                                 | Notes                                                    |
-| :---------------------------------------------- | :-------------------------------------- | :------------------------------------------------------- |
-| [Help](docs/using-cli.md#help-flag)             | `command --help` or `command -- --help` |
-| [REPL](docs/using-cli.md#interactive-flag)      | `command -- --protid`                   | Protein id ensembl.                                      |
-| [Separator](docs/using-cli.md#separator-flag)   | `command -- --separator=X`              | Sets the separator to `X`. The default separator is `-`. |
-| [Completion](docs/using-cli.md#completion-flag) | `command -- --completion [shell]`       | Generates a completion script for the CLI.               |
-| [Trace](docs/using-cli.md#trace-flag)           | `command -- --trace`                    | Gets a Fire trace for the command.                       |
-| [Verbose](docs/using-cli.md#verbose-flag)       | `command -- --verbose`                  | -->                                                      | --> --> |
-
-## Paralellization
-
-3Dmapper has an option to speed up the running time by means of parallelization. While `makepsdb` and `makevariantsdb` run with GNU parallel [ref], `mapper` has an algorithm in python. 
-
-An alternative to parallelaize 3Dmapper is to is to give as input the protein ids in individual tasks to perform a job array in a cluster computer?. The first task should write the initial files. The rest set the option `-force n` to prevent repeating innecesary steps. 
-
-
-## Protein structural features input format
-
-The default format is a simple whitespace-separated format (columns may be separated by space or tab characters), containing six required columns. Any extra columns will be included in the results. Empty values are denoted by '-'.
+The default input format is a simple whitespace-separated format (columns may be separated by space or tab characters), containing six required columns. Any extra columns will be included in the results. Empty values are denoted by '-'.
 
 - PROTEIN_ACCESION: Ensembl or Uniprot accesion identifier. 
 - TRANSCRIPT_ACCESION: Ensembl identifier. 
@@ -134,17 +89,14 @@ Optional but recommendable for downstream analysis:
 - PDB_AMINO_ACIDS: original residue in the PDB file. 
 - PIDENT: sequence identity percentage between the protein sequence and the PDB chain. When available, this can be moludated as a filter parameter with the option `--pident`. 
 
-Put an example here:
+Example
 
 `ENSP0000023123  ENST0000023123  123    1wqs    A   ep300_1wqs_A`
 
-
-
-## Interfaces database 
-
-
-
-## Variant annotated files
+# Map variants
+```markdown
+mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f 
+```
 
 The input annotated genomic variants file must be either in [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format), [VEP](https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout) or [MAF] (https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/) default format. Additionally, a VEP-like format is admisible. This is in question same as VEP but not all the files are needed: 
 
@@ -156,53 +108,15 @@ The input annotated genomic variants file must be either in [VCF](https://en.wik
 - Amino_acids (optional but recommedable)
 
 
-## Custom
-
-Para poner tus propias databases han de cumplir con los siguientes requisitos de formato. 
-
-
 # 3D visualization with ChimeraX
 
 soon available
 
-# FAQs
+# Dependencies
+- samtools
 
-is not intended as a interface generator. 
+# Paralellization
 
+3Dmapper can be parallelized parallelization. While `makepsdb` and `makevariantsdb` run with GNU parallel [ref], `mapper` uses the python module joblib. 
 
-You can use the [editor on GitHub](https://github.com/vicruiser/PDBmapper/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/vicruiser/PDBmapper/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
-
+An alternative to parallelaize 3Dmapper is to is to give as input the protein ids in individual tasks to perform a job array in a cluster computer?. The first task should write the initial files. The rest set the option `-force n` to prevent repeating innecesary steps. 
