@@ -101,7 +101,7 @@ setup(
     # specification here:
     # https://packaging.python.org/specifications/core-metadata/#name
     name='3dmapper',  # Required
-
+    
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
     #
@@ -211,6 +211,7 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=requirements,
+    setup_requires=['wheel'],
     # External requirements
     cmdclass={'install': git_clone_external},
     # ext_modules=[module1],

@@ -4,12 +4,10 @@ language: python
 sudo: false
 
 python:
-  - 3.8
-
-before_install: 
-  - pip install wheel
+  - 3.7
 
 install:
+#   - pip install wheel
    - python setup.py bdist_wheel
 
 branches:
