@@ -1,4 +1,3 @@
--e git+git+ssh://git@github.com/vicruiser/3Dmapper.git@bcf693c824b8601dab7dd41dbcea373bd0a9c1b6#egg=3dmapper
 certifi==2021.5.30
 charset-normalizer==2.0.6
 colorama==0.4.4
