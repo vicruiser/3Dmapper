@@ -111,7 +111,11 @@ The input annotated genomic variants file must be either in [VCF](https://en.wik
 
 # 3D visualization with ChimeraX
 
-soon available
+Results can be visualized running
+
+```markdown
+makechimera xxxx
+```
 
 # Dependencies
 - samtools
