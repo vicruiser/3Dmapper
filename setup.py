@@ -121,7 +121,7 @@ setup(
     # This should be a valid link to your project's main homepage.
     #
     # This field corresponds to the "Home-Page" metadata field:
-    url="https://github.com/vicruiser/3Dmapper.git",  # Optional
+    url="https://github.com/vicruiser/3Dmapper",  # Optional
 
     # You have previously uploaded your project to your github repository. Now,
     #  we create a new release version of your project on github. This release
