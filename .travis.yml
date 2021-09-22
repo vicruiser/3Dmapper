@@ -10,7 +10,7 @@ before_install:
   - pip install wheel
 
 install:
-   - python setup.py install
+   - pip install .
 
 branches:
   only:
