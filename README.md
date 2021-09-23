@@ -8,7 +8,7 @@
 # Overview
 
 3Dmapper is a Python tool to map annotated genomic variants or positions to protein structures.
-<img src= "./docs/pdbmapper_methods.png" width = "600" heigh = "300">
+<img src= "./docs/pdbmapper_methods.png" width = "800" heigh = "400">
 
 
 # Install 
