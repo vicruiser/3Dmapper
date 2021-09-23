@@ -2,14 +2,16 @@
   http://img.shields.io/travis/vicruiser/3Dmapper/master.svg?style=flat)](
  https://travis-ci.com/username/vicruiser/3Dmapper)
  [![Join the chat at https://gitter.im/pdbmapper/community](https://badges.gitter.im/pdbmapper/community.svg)](https://gitter.im/pdbmapper/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
- 
-<img src= "./docs/LogoPDBcopy22.png" width = "600" heigh = "300">
 
+<p align="center">
+<img src= "./docs/LogoPDBcopy22.png" width = "600" heigh = "300">
+<p align="center">
 # Overview
 
-3Dmapper is a Python tool to map annotated genomic variants or positions to protein structures.
+3Dmapper is a Python and R tool to map annotated genomic variants or positions to protein structures.
+ <p align="center">
 <img src= "./docs/pdbmapper_methods.png" width = "800" heigh = "400">
-
+<p align="center">
 
 # Install 
 
