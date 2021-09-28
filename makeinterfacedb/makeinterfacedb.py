@@ -3,7 +3,8 @@ import subprocess
 import os
 import glob
 from joblib import Parallel, delayed, parallel_backend
-import multiprocessing as mp
+import multiprocessing as mp7
+import sys
 
 from .parse_argv import parse_commandline
 from .input_isfile import isfile
@@ -18,7 +19,22 @@ def parallel(parallel, njobs):
         num_cores = njobs
     return(num_cores)
 
+# by @Six in stackoverflow
+def is_tool(name):
+    """Check whether `name` is on PATH and marked as executable."""
+
+    # from whichcraft import which
+    from shutil import which
+
+    return which(name) is not None
+
+
 def pipeline(f): 
+    # check if R and BLAST are available
+    if is_tool('R') is False: 
+        sys.exit("Error: R not found or not executable.") 
+    if is_tool('blastp') is False:
+        sys.exit("Error: BLAST not found or not executable.") 
     # parse command line options
     args = parse_commandline()
 
@@ -45,27 +61,29 @@ def pipeline(f):
     if not os.path.exists(blast_outdir):
         os.makedirs(blast_outdir)
     for file in glob.glob(os.path.join(chainseqs_outdir  ,"*_chain*.fasta")): 
-
         process2 = subprocess.Popen(["blastp -query %s -db %s -outfmt '6 qseqid qlen sseqid slen qstart qend sstart send evalue length pident nident qseq sseq gaps' \
-        -out %s.blast" % (file, args.blastdb, os.path.join(blast_outdir , os.path.basename(file)))] , shell =True)
+        -out %s.blast" % (file, args.blastdb, os.path.join(blast_outdir , os.path.basename(file)))] , shell =True, stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
         out2, err2 = process2.communicate() 
-    
         # filter blast results
-        process3 = subprocess.call(["Rscript %s %s %s %s %s %s %s.filtered" %(rscript2, os.path.join(blast_outdir , os.path.basename(file)+ '.blast'),
-        args.pident, args.evalue, args.coverage, blast_outdir, os.path.basename(file))+ '.blast'], shell =True,
-        stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
-        #out3, err3 = process3.communicate() 
-  
-    # Predict interfaces # To be included? ideally hidrophobicity, ss type and full structure
-    interfaces_outdir = os.path.join(args.out, 'predicted_interfaces')
-    if not os.path.exists(interfaces_outdir):
-        os.makedirs(interfaces_outdir)
-    process4 = subprocess.Popen(["R --slave --quiet --no-restore --file=%s --args %s %s %s %s %s %s %s" % (rscript3, root, f, interfaces_outdir, args.dist, args.type, args.int, args.biolip)] , shell =True)
-    out4, err4 = process4.communicate() 
+        if err2 is None and out2 == b'':
+            process3 = subprocess.call(["Rscript %s %s %s %s %s %s %s.filtered" %(rscript2, os.path.join(blast_outdir , os.path.basename(file)+ '.blast'),
+            args.pident, args.evalue, args.coverage, blast_outdir, os.path.basename(file))+ '.blast'], shell =True,
+            stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+            #out3, err3 = process3.communicate() 
+        else:
+            sys.exit(out2.decode('utf8')) 
+    
+        # Predict interfaces # To be included? ideally hidrophobicity, ss type and full structure
+        interfaces_outdir = os.path.join(args.out, 'predicted_interfaces')
+        if not os.path.exists(interfaces_outdir):
+            os.makedirs(interfaces_outdir)
+        process4 = subprocess.Popen(["R --slave --quiet --no-restore --file=%s --args %s %s %s %s %s %s %s" % (rscript3, root, f, interfaces_outdir, args.dist, args.type, args.int, args.biolip)] , shell =True)
+        out4, err4 = process4.communicate() 
 
-    # Map PDB and protein information
-    process5 = subprocess.Popen(["Rscript %s %s %s %s %s %s" % (rscript4, root, pdbid, blast_outdir, interfaces_outdir, args.out)], shell=True)
-    out5, err5 = process5.communicate() 
+        # Map PDB and protein information
+        process5 = subprocess.Popen(["Rscript %s %s %s %s %s %s" % (rscript4, root, pdbid, blast_outdir, interfaces_outdir, args.out)], shell=True)
+        out5, err5 = process5.communicate() 
 
 def main():
     # parse command line options
@@ -92,9 +110,3 @@ def main():
         elif isfile(args.pdb) == 'file_not_recognized':
             print(['Error: Not such file: %s',  (f)])
             exit(-1)
-
-    
-    
-
-    
-
