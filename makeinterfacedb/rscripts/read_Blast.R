@@ -18,7 +18,6 @@ read.Blast <- function(pdb_id, blast_outfiles_dir) {
     paste(pdb_id, "*filtered*", sep =
             "")
   )))
-  
   blast_output_list <-
     lapply(blast_outfiles_paths, function(x)
       read.table(x, header = T))

@@ -38,7 +38,6 @@ source(file.path(ROOT,"new_mapped_interfaces.R"))
 new_mpi <-
   new.Mapped.Interfaces(pdb_id , interfaces_dir, blast_filtered)
 
-
 # store the results if the are any results associated to the pdb_id
 if (nrow(new_mpi) > 0) {
   new_mpi = new_mpi[order(new_mpi$spos),]

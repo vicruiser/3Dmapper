@@ -220,7 +220,7 @@ setup(
     package_data={
         # And include any *.dat files found in the 'data' subdirectory
         # of the 'mypkg' package, also:
-        '': ['data/*']#,
+        '': ['data/*','rscripts/*']#,
         #'makeinterfacedb': ['data/*']
     },
     include_package_data = True, 

@@ -43,8 +43,8 @@ if (file.size(INPUT_FILE) > 0) {
   blast_out$qcov = ((blast_out$length - blast_out$gaps) /  blast_out$slen)  * 100
   
   # filter by percentage of sequence identity
-  if (any(blast_out$pident >= SEQIDENT_FILTER) |
-      any(blast_out$qcov >= COVERAGE_FILTER) |
+  if (any(blast_out$pident >= SEQIDENT_FILTER) &
+      any(blast_out$qcov >= COVERAGE_FILTER) &
       any(blast_out$evalue <= EVALUE_FILTER)) {
     blast_out_filtered <- subset(
       blast_out,
@@ -65,6 +65,8 @@ if (file.size(INPUT_FILE) > 0) {
     )
     
     
+  }else{
+    stop("BLAST hits didn't pass the filtering step.")
   }
   
 } else {
@@ -83,5 +85,5 @@ if (file.size(INPUT_FILE) > 0) {
     row.names = F,
     append = T
   )
-  stop("No BLAST hits were found for this chain.")
+  stop("No BLAST hits were found for this chain.",)
 }

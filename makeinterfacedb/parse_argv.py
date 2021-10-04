@@ -58,7 +58,7 @@ def parse_commandline():
 
     parser.add_argument("-e", "--evalue", metavar="<float>", dest="evalue",
                         help="e-value threshold in BLAST. Default is 1e-7.")
-    parser.set_defaults(evalue=10e-8)                  
+    parser.set_defaults(evalue=0.0000001)                  
     
     parser.add_argument("-pi", "--pident", metavar="<float>", dest="pident",
                         help="percent identity threshold between query (pdb chain) and hit (protein) sequences. Default is 20 percent")

@@ -17,11 +17,11 @@ new.Mapped.Interfaces <-
     # read output files of all calculated distances (prot, lig and ac. nuc)
     # corresponding to the selected pdb_id
     # pi stands for "predicted interfaces"
-    pi_paths   <- c(Sys.glob(file.path(
+    pi_paths   <- Sys.glob(file.path(
       interfaces_dir,
       paste("*", pdb_id, "*predicted_interfaces*", sep =
               "")
-    )))
+    ))
     pi_df_list <-
       lapply(pi_paths, function(x)
         fread(x, header = T))
@@ -46,9 +46,9 @@ new.Mapped.Interfaces <-
       # rearrange dataframe so column "chain" contains info of all possible
       # combination of all existing chains
       pi_protein <- subset(pi, interaction == "protein" )
-      
       pi_struct <- subset(pi, is.na(interaction) )
-      
+      pi_struct = as.data.frame(unique(pi_struct%>%group_by(resno)%>%mutate(b = min(b), b.1 = min(b.1))))
+
       if (nrow(pi_protein) > 0) {
         pi_reversed <-
           pi_protein[, c(
@@ -157,7 +157,6 @@ new.Mapped.Interfaces <-
           b =unlist(min_b),
           b.1= unlist(min_b.1)
         )
-      
       rownames(min_max_mean_dist) <- NULL
       
       # unique by number of residues
