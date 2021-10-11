@@ -219,6 +219,10 @@ write.table(
   row.names = F,
   append = T
 )
+if (nChains == 0) {
+  stop('Error: No protein chains found in this PDB file. ')
+}
+
 
 # Turn off output sink
 # sink()

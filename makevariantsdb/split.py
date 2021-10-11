@@ -12,6 +12,10 @@ from .parse_argv import parse_commandline
 from .run_subprocess import call_subprocess
 
 
+# sort file 
+sort_cmd="awk 'NR==1; NR>1{{print $0 | \"sort -n\"}}' {0} > {0}.sorted"
+sort_cmd_parallel="awk 'NR==1; NR>1{{print $0 | \"sort --parallel {1} -n\"}}' {0} > {0}.sorted"
+
 # for all the columns, find the one that matches with the pattern ENSG
 detect_column = "grep -v '##' {} | awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' "
@@ -25,13 +29,12 @@ awk -v ci=\"{1}\" \
 {{f=od$ci\".{3}\"; print >> f; close(f)}}'"
 
 split_cmd_parallel = "grep -v '##' {0} | \
-sed -e '1s/^#//' | parallel --pipe --header '(U.*\n)*' -q \
+sed -e '1s/^#//' | parallel -j {4} --pipe --header '(U.*\n)*' -q \
 awk -v ci=\"{1}\" \
 -v od=\"{2}/\" \
 -F ' ' 'NR==1 {{h=$0; next}}; \
 !seen[$ci]++{{f=od$ci\".{3}\"; print h >> f}}; \
 {{f=od$ci\".{3}\"; print >> f; close(f)}}'"
-
 
 index_file = "grep -v '##' {} | awk -F ' ' '{{print ${}, ${}, ${} , ${}}}' > {} "
 #index_file = "awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' {} | uniq >> {}  "
@@ -49,7 +52,7 @@ index_file = "grep -v '##' {} | awk -F ' ' '{{print ${}, ${}, ${} , ${}}}' > {} 
 #       - {{print >> f; close(f)}}'" print line to file
 
 
-def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False):
+def request(prefix, input_file, out_dir, out_extension, log_dir,sort, parallel, njobs):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -129,13 +132,26 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
     # detect if there is output
     # stop if no ENSG id detected
     if col_index_geneid != '':
-        # command to split files
-        if parallel is True:
-            cmd4 = split_cmd_parallel.format(
-                input_file, col_index_transcriptid, out_dir, out_extension)
+        
+        if sort is True: 
+            if parallel is True:
+                cmds= sort_cmd_parallel.format(input_file, njobs)
+                out_sorted, err_sorted = call_subprocess(cmds)
+                if err_sorted is None and out_sorted != b'':
+                    input_file = input_file + '.sorted'
+            else: 
+                cmds= sort_cmd.format(input_file)
+                out_sorted, err_sorted = call_subprocess(cmds)
+                if err_sorted is None and out_sorted != b'':
+                    input_file = input_file + '.sorted'
 
-        else:
-            cmd4 = split_cmd.format(
+        # command to split files
+        #if parallel is True:
+        #    cmd4 = split_cmd_parallel.format(
+        #        input_file, col_index_transcriptid, out_dir, out_extension, njobs)
+
+        #else:
+        cmd4 = split_cmd.format(
                 input_file, col_index_transcriptid, out_dir, out_extension)
         # register process
         out4, err4 = call_subprocess(cmd4)
@@ -171,7 +187,7 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, parallel=False)
       text_succeed="Split file by selected ensembl id...done.",
       text_fail="Split file by selected ensembl id...failed!",
       emoji="\U00002702")
-def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, parallel=False):
+def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, sort, parallel, njobs):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -201,7 +217,7 @@ def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, parall
 
         if overwrite is True:
             request(prefix, input_file, out_dir,
-                    out_extension, log_dir, parallel)
+                    out_extension, log_dir, sort, parallel, njobs)
 
     else:
-        request(prefix, input_file, out_dir, out_extension, log_dir, parallel)
+        request(prefix, input_file, out_dir, out_extension, log_dir,sort,  parallel, njobs)

@@ -16,6 +16,8 @@ import os
 
 sort_cmd="awk 'NR==1; NR>1{{print $0 | \"sort -n\"}}' {0} > {0}.sorted"
 
+sort_cmd_parallel="awk 'NR==1; NR>1{{print $0 | \"sort --parallel {1} -n\"}}' {0} > {0}.sorted"
+
 detect_column = "awk -F '\t' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
 
@@ -25,7 +27,7 @@ split_cmd = "awk -v ci=\"{1}\" \
 !seen[$ci]++{{f=od$ci\".{3}\"; print h > f}}; \
 {{f=od$ci\".{3}\"; print >> f}}' {0}"
 
-def request(prefix, input_file, out_dir, out_extension, log_dir, sort=False):
+def request(prefix, input_file, out_dir, out_extension, log_dir, sort, parallel, njobs):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -65,10 +67,16 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, sort=False):
         # write log file
         logger.info('Splitting interfaces file...')
         if sort is True: 
-            cmds= sort_cmd.format(input_file)
-            out_sorted, err_sorted = call_subprocess(cmds)
-            if err_sorted is None and out_sorted != b'':
-                input_file = input_file + '.sorted'
+            if parallel is True:
+                cmds= sort_cmd_parallel.format(input_file, njobs)
+                out_sorted, err_sorted = call_subprocess(cmds)
+                if err_sorted is None and out_sorted != b'':
+                    input_file = input_file + '.sorted'
+            else: 
+                cmds= sort_cmd.format(input_file)
+                out_sorted, err_sorted = call_subprocess(cmds)
+                if err_sorted is None and out_sorted != b'':
+                    input_file = input_file + '.sorted'
         
         cmd2 = split_cmd.format(input_file, col_index,
                                     out_dir, out_extension)
@@ -91,7 +99,7 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, sort=False):
       text_succeed="Creating protein structures DB...done.",
       text_fail="Creating protein structures DB...failed!. Check the format of your input file.",
       emoji="\U00002702")
-def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, sort=False):
+def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, sort=False, parallel = False, njobs = 1):
     '''
     VCF to VEP format using the plugin "split-vep" from bcftools.
 
@@ -122,4 +130,4 @@ def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, sort=F
             request(prefix, input_file, out_dir,
                     out_extension, log_dir, sort)
     else:
-        request(prefix, input_file, out_dir, out_extension, log_dir, sort)
+        request(prefix, input_file, out_dir, out_extension, log_dir, sort, parallel, njobs)

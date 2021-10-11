@@ -126,7 +126,7 @@ def main():
                         for int_infile in int_f:
                             # split interface db
                             split('Protein_accession', int_infile, psdb_outdir,
-                                  'txt', args.force, log_dir, args.sort)
+                                  'txt', args.force, log_dir, args.sort, args.parallel, args.njobs)
                             # log info
                             logger.info(
                                 int_infile + ' has been splitted successfully.')
@@ -134,7 +134,7 @@ def main():
                 elif isfile(f) == 'is_file':
                     # split interface db
                     split('Protein_accession', f, psdb_outdir,
-                          'txt', args.force, log_dir, args.sort)
+                          'txt', args.force, log_dir, args.sort, args.parallel, args.njobs)
                     logger.info(
                         f + ' has been splitted successfully.')
                 elif isfile(f) == 'file_not_recognized':

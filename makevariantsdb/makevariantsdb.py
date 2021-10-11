@@ -49,20 +49,20 @@ class generateVarDB:
         logger.info(message)
         report.write(self.time + message + '\n')
 
-    def vcf(self, var_infile, out_dir, out_file, overwrite, log_dir, parallel=False):
+    def vcf(self, var_infile, out_dir, out_file, overwrite, log_dir, sort, parallel, njobs):
         # from vcf to vep
         vcf2vep(var_infile, out_dir,
                 out_file, overwrite, log_dir, parallel)
         # add header to resulting vep file
         add_header(out_file)
 
-    def vep(self, var_infile, vardb_outdir, overwrite, log_dir, parallel=False):
+    def vep(self, var_infile, vardb_outdir, overwrite, log_dir, sort, parallel, njobs):
         # split vep file by protein id to speed up the
         # mapping process
         split('Feature', var_infile, vardb_outdir,
-              'vep', overwrite, log_dir, parallel)
+              'vep', overwrite, log_dir, sort, parallel, njobs)
 
-    def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir, report, logger, parallel=False):
+    def maf(self, var_infile, out_dir, out_file, vardb_outdir, overwrite, log_dir, report, logger,sort, parallel, njobs):
         # from vcf to vep
         maf2vep(var_infile, out_dir,
                 out_file, overwrite, log_dir)
@@ -76,7 +76,7 @@ class generateVarDB:
                  report, logger)
 
     def wrapper(self, input_format, var_infile, out, log_dir,
-                report, logger, spinner, overwrite=False, parallel=False):
+                report, logger, spinner,sort, parallel, njobs, overwrite=False):
         # created by default
         out_dir = os.path.join(out, 'DBs')
         out_file = os.path.join(
@@ -90,13 +90,13 @@ class generateVarDB:
                 # split vcf file
                 self.vcf(var_infile, out_dir,
                          out_file, overwrite,
-                         log_dir, parallel)
+                         log_dir, sort, parallel, njobs)
                 # logging
                 self.log('Input vcf file converted to vep format. Splitting vep file...',
                          report, logger)
                 var_infile = out_file
             self.vep(
-                var_infile, vardb_outdir, overwrite, log_dir, parallel)
+                var_infile, vardb_outdir, overwrite, log_dir, sort, parallel, njobs)
             # logging
             self.log('Splitting process is done.',
                      report, logger)
@@ -209,7 +209,7 @@ def main():
                             try:
                                 makedb.wrapper(
                                     input_format, f, args.out, log_dir, report,
-                                    logger, spinner, args.force, args.parallel)
+                                    logger, spinner, args.sort, args.parallel, args.njobs,args.force)
                             except IOError:
                                 continue
 
@@ -223,7 +223,7 @@ def main():
                     try:
                         makedb.wrapper(
                             input_format, f, args.out, log_dir, report,
-                            logger, spinner, args.force, args.parallel)
+                            logger, spinner, args.sort, args.parallel, args.njobs , args.force)
                     except IOError:
                         continue
 
@@ -253,7 +253,8 @@ def main():
                             try:
                                 makedb.maf(var_infile, out_dir,
                                                            out_file, vardb_outdir,
-                                                           args.force, log_dir, report, logger, args.parallel)
+                                                           args.force, log_dir, report, logger,
+                                                            args.sort, args.parallel, args.njobs)
                             except IOError:
                                 continue
 
@@ -264,7 +265,7 @@ def main():
                     try:
                         makedb.maf(f, out_dir,
                                                    out_file, vardb_outdir,
-                                                   args.force, log_dir,  report, logger, args.parallel)
+                                                   args.force, log_dir,  report, logger, args.sort, args.parallel, args.njobs)
                     except IOError:
                         continue
 
