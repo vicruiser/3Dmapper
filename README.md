@@ -40,7 +40,7 @@ If we were interested in mapping variants or positions to the protein structures
 
 Next, we build the target proteome database for the BLAST search executing the following command:
 ```markdown
-makeblastdb -in target_proteome.fasta -db-type protein -out target_proteome
+makeblastdb -in target_proteome.fasta -dbtype protein -out target_proteome
 ```
 
 Them 
