@@ -21,21 +21,23 @@ pip install .
 # Generation of local interfaces database
 
 ## Requirements 
- - Your own structural database. 3Dmapper only accepts coordinate files (either real structures or models) in *PDB or CIF format*. To avoid redundancy, we recommend to use biological assemblies of the structures. 
+ - A set of *PDB or CIF* files of interest (either real structures or models).  
  - BLAST standalone software. Follow this [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use the command line tool.
- - A target proteome. This is easly done running the command "makeblastdb" from BLAST with the set of protein sequences of your choice.
-```markdown
-makeblastdb -in target_proteome.fasta -db_type protein -out proteins_db
-``` 
+ - A target proteome built running the BLAST command `makeblastdb` with the set of protein sequences of interest.
+ - R version > 3.0.0
+ 
 ## Overview
 
-Per each PDB file downloaded, run makeinterfacedb will do the following:  
-  1) Extract their protein chains. 
-  2) BLAST against the proteome of interest 
-  3) Predict interfaces
-  4) Map sequence and PDB positions. 
+Per each PDB file we consider, `makeinterfacedb` automatically will do the following:  
+  1) Extract its PDB chain sequences. 
+  2) BLAST PDB chain sequences against the proteome of interest. 
+  3) Predict interfaces of hits passing the selected homology filtering. 
+  4) Merge PDB and proteome data. 
 
 ## Example
+
+If we were interested in mapping variants or positions to the protein structures of human, we have to download the human proteome from [UniProt](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) or [Ensembl](http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz) for example. 
+
 ```markdown
 makeinterfacedb -pdb file.pdb --blast-db proteins_db  -b
 ```
