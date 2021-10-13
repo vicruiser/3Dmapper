@@ -36,17 +36,31 @@ For each of the PDB files we are going to consider, `makeinterfacedb` automatica
 
 ## Example
 
-If we were interested in mapping variants or positions to the protein structures of human, we have to download the human proteome from [UniProt](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) or [Ensembl](http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz) for example. 
+If we were interested in mapping variants or positions to the protein structures of human, we have to download the human proteome from [UniProt](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) or [Ensembl](http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz) for example. With this set of protein sequences in fasta format, we build the target proteome database for the BLAST search executing the following command:
 
-Next, we build the target proteome database for the BLAST search executing the following command:
 ```markdown
-makeblastdb -in target_proteome.fasta -dbtype protein -out target_proteome
+makeblastdb -in target_proteome.fasta -dbtype protein -out target_proteome_db
 ```
+This command will generate three files with name "target_proteome_db" and extensions `.phr`, `.pin` and `.psq`.
 
-Them 
+Next, we download the PDB files of interest. If you would like to retrieve interfaces and or structures of proteins that currently do not have structure, relying on sequence homology, we suggest to download all the files in PDB. 
 
+Finally, we build the structural database executing one of the following commands:
+1) Input the PDB files as a list of PDB files. 
 ```markdown
-makeinterfacedb -pdb file.pdb --blast-db proteins_db  -b
+makeinterfacedb -pdb list_pdbs.txt --blast-db target_proteome_db
+```
+2) Input all the PDBs in the same input argument:
+```markdown
+makeinterfacedb -pdb pdb_dir/* --blast-db target_proteome_db
+```
+3) Run `makeinterfacedb` in separate tasks per PDB file. This setting is useful to run jobs in parallel using job arrays or greasy. The output will be written in the same output file. 
+```markdown
+makeinterfacedb -pdb file1.pdb --blast-db target_proteome_db
+makeinterfacedb -pdb file2.pdb --blast-db target_proteome_db
+makeinterfacedb -pdb file3.pdb --blast-db target_proteome_db
+...
+makeinterfacedb -pdb fileN.pdb --blast-db target_proteome_db
 ```
 
 ## Results
