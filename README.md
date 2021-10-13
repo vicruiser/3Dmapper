@@ -22,13 +22,13 @@ pip install .
 
 ## Requirements 
  - A set of *PDB or CIF* files of interest (either real structures or models).  
- - BLAST standalone software. Follow this [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use the command line tool.
+ - BLAST standalone software. Follow these [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use the command line tool.
  - A target proteome built running the BLAST command `makeblastdb` with the set of protein sequences of interest.
  - R version > 3.0.0
  
 ## Overview
 
-Per each PDB file we consider, `makeinterfacedb` automatically will do the following:  
+For each of the PDB files we are going to consider, `makeinterfacedb` automatically will do the following:  
   1) Extract its PDB chain sequences. 
   2) BLAST PDB chain sequences against the proteome of interest. 
   3) Predict interfaces of hits passing the selected homology filtering. 
@@ -37,6 +37,13 @@ Per each PDB file we consider, `makeinterfacedb` automatically will do the follo
 ## Example
 
 If we were interested in mapping variants or positions to the protein structures of human, we have to download the human proteome from [UniProt](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) or [Ensembl](http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz) for example. 
+
+Next, we build the target proteome database for the BLAST search executing the following command:
+```markdown
+makeblastdb -in target_proteome.fasta -db-type protein -out target_proteome
+```
+
+Them 
 
 ```markdown
 makeinterfacedb -pdb file.pdb --blast-db proteins_db  -b
