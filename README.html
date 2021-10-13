@@ -475,140 +475,96 @@ pip install . </code></pre>
 <td align="left">Positions relative to the target protein sequence</td>
 </tr>
 <tr class="even">
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
 <td align="left"><strong>Protein_aa</strong></td>
 <td align="left">Amino acids corresponding to the target protein positions</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>PDB_code</strong></td>
 <td align="left">PDB ID</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>PDB_chain</strong></td>
 <td align="left">ID of the template PDB protein chain</td>
-</tr>
-<tr class="even">
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"><strong>PDB_chain_length</strong></td>
 <td align="left">Length of the PDB chain sequence</td>
 </tr>
 <tr class="even">
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
 <td align="left"><strong>PDB_3D_position</strong></td>
 <td align="left">Position in the PDB chain <strong>structure</strong></td>
-</tr>
-<tr class="even">
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"><strong>PDB_seq_position</strong></td>
 <td align="left">Position in the PDB chain <strong>sequence</strong></td>
 </tr>
 <tr class="even">
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
 <td align="left"><strong>PDB_aa</strong></td>
 <td align="left">Amino acids corresponding to both the PDB sequence and 3D positions</td>
-</tr>
-<tr class="even">
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"><strong>Evalue</strong></td>
 <td align="left">E-value of the alignment between the query or PDB chain sequence and the target protein</td>
 </tr>
 <tr class="even">
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
 <td align="left"><strong>Pident</strong></td>
 <td align="left">Identity percent between the query (PDB chain) and the target sequence (protein).</td>
-</tr>
-<tr class="even">
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"><strong>Protein_coverage</strong></td>
 <td align="left">Coverage (%) of the target protein by the PDB chain sequence</td>
 </tr>
 <tr class="even">
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
 <td align="left"><strong>Length_alignment</strong></td>
 <td align="left">Total length of the alignment between the query or PDB chain sequence and the target protein</td>
-</tr>
-<tr class="even">
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left"><strong>Interaction_type</strong></td>
 <td align="left">Type of interface interaction: “protein”,”nucleic” or “ligand”. NA means no interaction which represents the positions of the rest of the structure</td>
 </tr>
 <tr class="even">
-<td align="left"></td>
-<td align="left"></td>
-</tr>
-<tr class="odd">
 <td align="left"><strong>PDB_interacting_chain</strong></td>
 <td align="left">Interacting PDB chain ID with the template PDB chain. NA means no interaction which represents the positions of the rest of the structure</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>PDB_interacting_3D_position</strong></td>
 <td align="left">Position in the interacting PDB chain <strong>structure</strong></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>PDB_interacting_aa</strong></td>
 <td align="left">Amino acids corresponding to the interacting PDB structure positions</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Interface_min_distance</strong></td>
 <td align="left">Minimum existing distance between the pair of selected positions participating in the interface</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>PDB_B_factor</strong></td>
 <td align="left">Minimum B factor (or pLDDT in the case of AF2 models) observed in each PDB 3D position</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>PDB_interacting_B_factor</strong></td>
 <td align="left">Minimum B factor (or pLDDT in the case of AF2 models) observed in each PDB interacting 3D position</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Protein_alignment_start</strong></td>
 <td align="left">Alignment start position in target protein sequence</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Protein_alignment_end</strong></td>
 <td align="left">Alignment end position in target protein sequence</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>PDB_alignment_start</strong></td>
 <td align="left">Alignment start position in PDB chain protein sequence</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>PDB_alignment_end</strong></td>
 <td align="left">Alignment end position in PDB chain protein sequence</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><strong>Structure_feature_id</strong></td>
-<td align="left">As (PDB_code)<em>(Protein_accession)</em>(PDB_chain)<em>(PDB_interacting_chain)</em>(Interaction_type)</td>
+<td align="left">As <code>PDB_code</code> <span color="blue">blue</span>. <em>(PDB_code)\</em>(Protein_accession)\<em>(PDB_chain)</em>(PDB_interacting_chain)_(Interaction_type)</td>
 </tr>
 </tbody>
 </table>
