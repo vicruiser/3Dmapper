@@ -63,7 +63,7 @@ makeinterfacedb -pdb file3.pdb --blast_db target_proteome_db
 makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db
 ```
 
-Note: it is recommendable to add the option `-b` to remove crystallographic artifacts ( based on the [BioLip list]()) which can be mistaken by real ligands. 
+Note: it is recommendable to add the option `-b` to remove crystallographic artifacts (based on the [BioLiP artifact ligand list](https://zhanggroup.org/BioLiP/ligand_list)) which can be mistaken by real ligands. 
 
 ## Output interfaceDB.txt
 The output interfaces database is a 22 column tab-delimited file. In all cases, **"PDB chain"** refers to the extracted PDB chain or query sequence from each PDB file and **"Protein"** refers to the hit sequence found with the Blast search against the target proteome. A more detailed description of the meaning of each column ID is specified in the table below.
