@@ -70,7 +70,7 @@ The output interfaces database is a 22 column tab-delimited file. In all cases, 
 | **Protein_alignment_end**                | Alignment end position in target protein sequence                   |
 | **PDB_alignment_start**           | Alignment start position in PDB chain protein sequence|
 | **PDB_alignment_end**                | Alignment end position in PDB chain protein sequence |
-| **Structure_feature_id**               | As (PDB_code)_(Protein_accession)_(PDB_chain)_(PDB_interacting_chain)_(Interaction_type) |
+| **Structure_feature_id**               | As (PDB_code)\\_(Protein_accession)\\_(PDB_chain)_(PDB_interacting_chain)_(Interaction_type) |
 
 
 # Split variants / position files
