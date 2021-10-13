@@ -45,11 +45,14 @@ The output interfaces database is a 22 column tab-delimited file. In all cases, 
 
 | Column name               | Notes                                                                                                                                          |
 | :------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Protein_accession**     | Target protein ID |
-| **Protein_length**        | Length of the target protein sequence                                                                    |  
+| **Protein_accession**     | Target protein ID 
+                            |
+| **Protein_length**        | Length of the target protein sequence                                                                    
+                            |  
 | **Protein_position**      | Positions relative to the target protein sequence 
-                                            |
-| **Protein_aa**            | Amino acids corresponding to the target protein positions|                                  
+                            |
+| **Protein_aa**            | Amino acids corresponding to the target protein positions
+                            |                                  
 | **PDB_code**              | PDB ID        |
 | **PDB_chain**             | ID of the template PDB protein chain 
                                             |
