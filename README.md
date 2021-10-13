@@ -48,22 +48,24 @@ Next, we download the PDB files of interest. If you would like to retrieve inter
 Finally, we build the structural database executing one of the following commands:
 1) Input the PDB files as a list of PDB files. 
 ```markdown
-makeinterfacedb -pdb list_pdbs.txt --blast-db target_proteome_db
+makeinterfacedb -pdb list_pdbs.txt --blast_db target_proteome_db
 ```
 2) Input all the PDBs in the same input argument:
 ```markdown
-makeinterfacedb -pdb pdb_dir/* --blast-db target_proteome_db
+makeinterfacedb -pdb pdb_dir/* --blast_db target_proteome_db
 ```
-3) Run `makeinterfacedb` in separate tasks per PDB file. This setting is useful to run jobs in parallel using job arrays or greasy. The output will be written in the same output file. 
+3) Run `makeinterfacedb` in separate tasks per PDB file. This setting is useful when running jobs in parallel using job arrays or greasy as the results will be written in the same output file. 
 ```markdown
-makeinterfacedb -pdb file1.pdb --blast-db target_proteome_db
-makeinterfacedb -pdb file2.pdb --blast-db target_proteome_db
-makeinterfacedb -pdb file3.pdb --blast-db target_proteome_db
+makeinterfacedb -pdb file1.pdb --blast_db target_proteome_db
+makeinterfacedb -pdb file2.pdb --blast_db target_proteome_db
+makeinterfacedb -pdb file3.pdb --blast_db target_proteome_db
 ...
-makeinterfacedb -pdb fileN.pdb --blast-db target_proteome_db
+makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db
 ```
 
-## Results
+Note: it is recommendable to add the option `-b` to remove crystallographic artifacts ( based on the [BioLip list]()) which can be mistaken by real ligands. 
+
+## Output interfaceDB.txt
 The output interfaces database is a 22 column tab-delimited file. In all cases, **"PDB chain"** refers to the extracted PDB chain or query sequence from each PDB file and **"Protein"** refers to the hit sequence found with the Blast search against the target proteome. A more detailed description of the meaning of each column ID is specified in the table below.
 
 | Column name               | Notes                                                                                                                                          |
@@ -96,47 +98,37 @@ The output interfaces database is a 22 column tab-delimited file. In all cases, 
 | **Structure_feature_id**               | As `PDB_code`\_`Protein_accession`\_`PDB_chain`\_`PDB_interacting_chain`\_`Interaction_type` |
 
 
-# Split variants / position files
-```markdown
-makevariantsdb -vf variants.vep 
-```
 
 # Split interface DB
+To reduce the mapping computational workload, the generated  as they split the respective input files into individual smaller files
+
 ```markdown
 makepsdb -psdb interfaces/interfacesDB.txt -s
 ```
 
-The default input format is a simple whitespace-separated format (columns may be separated by space or tab characters), containing six required columns. Any extra columns will be included in the results. Empty values are denoted by '-'.
+# Split variants / position files
 
-- PROTEIN_ACCESION: Ensembl or Uniprot accesion identifier. 
-- TRANSCRIPT_ACCESION: Ensembl identifier. 
-- PROTEIN_POSITION: residue position on the protein. 
-- PDB_CODE
-- PDB_CHAIN
-- PROTEIN_FEATURE_ID : structural identifier made up by the user, e.g.: PROTEIN_POSITION + PDB_CODE + PDB_CHAIN
-
-Optional but recommendable for downstream analysis:
-- AMINO_ACIDS: original residue. 
-- PDB_AMINO_ACIDS: original residue in the PDB file. 
-- PIDENT: sequence identity percentage between the protein sequence and the PDB chain. When available, this can be moludated as a filter parameter with the option `--pident`. 
-
-Example
-
-`ENSP0000023123  ENST0000023123  123    1wqs    A   ep300_1wqs_A`
-
-# Map variants
-```markdown
-mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f 
-```
-
-The input annotated genomic variants file must be either in [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format), [VEP](https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout) or [MAF] (https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/) default format. Additionally, a VEP-like format is admisible. This is in question same as VEP but not all the files are needed: 
+The input annotated genomic variants file must be either in [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format), [VEP](https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout) or [MAF] (https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/) default format. Additionally, a VEP-like format is admissible. This is in question same as VEP but not all the files are needed: 
 
 - Uploaded_variation
 - Gene
 - Feature
 - Consequence
 - Protein_position
-- Amino_acids (optional but recommedable)
+- Amino_acids 
+
+
+```markdown
+makevariantsdb -vf variants.vep 
+```
+
+
+# Map variants
+```markdown
+mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f 
+```
+
+
 
 
 # 3D visualization with ChimeraX
