@@ -56,17 +56,17 @@ The output interfaces database is a 22 column tab-delimited file. In all cases, 
                                             |
 | **PDB_seq_position**      | Position in the PDB chain **sequence** 
                                             | 
-| **PDB_aa**      | Amino acids corresponding to both the PDB sequence and 3D positions
+| **PDB_aa**      | Amino acids corresponding to both the PDB sequence and 3D positions 
                                             |  
 | **Evalue**      | E-value of the alignment between the query or PDB chain sequence and the target protein 
                                             |  
 | **Pident**      | Identity percent between the query (PDB chain) and the target sequence (protein). 
                                             | 
-| **Protein_coverage**      | Coverage (%) of the target protein by the PDB chain sequence
+| **Protein_coverage**      | Coverage (%) of the target protein by the PDB chain sequence 
                                             |     
-| **Length_alignment**      | Total length of the alignment between the query or PDB chain sequence and the target protein
+| **Length_alignment**      | Total length of the alignment between the query or PDB chain sequence and the target protein 
                                             |    
-| **Interaction_type**           | Type of interface interaction: “protein”,”nucleic” or  “ligand”. NA means no interaction which represents the positions of the rest of the structure
+| **Interaction_type**           | Type of interface interaction: “protein”,”nucleic” or  “ligand”. NA means no interaction which represents the positions of the rest of the structure 
                                             |
 | **PDB_interacting_chain** | Interacting PDB chain ID with the template PDB chain. NA means no interaction which represents the positions of the rest of the structure                             |
 | **PDB_interacting_3D_position** | Position in the interacting PDB  chain **structure**            |
