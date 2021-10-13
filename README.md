@@ -54,9 +54,9 @@ The output interfaces database is a 22 column tab-delimited file. In all cases, 
 | **PDB_chain**             | ID of the template PDB protein chain 
                                             |
 | **PDB_chain_length**      | Length of the PDB chain sequence
-                                            |  
+                                            |
 | **PDB_3D_position**       | Position in the PDB chain **structure**
-                                            |   
+                                            |
 | **PDB_seq_position**      | Position in the PDB chain **sequence**
                                             | 
 | **PDB_aa**      | Amino acids corresponding to both the PDB sequence and 3D positions
@@ -74,15 +74,14 @@ The output interfaces database is a 22 column tab-delimited file. In all cases, 
 | **PDB_interacting_chain** | Interacting PDB chain ID with the template PDB chain. NA means no interaction which represents the positions of the rest of the structure                             |
 | **PDB_interacting_3D_position** | Position in the interacting PDB  chain **structure**            |
 | **PDB_interacting_aa** | Amino acids corresponding to the interacting PDB structure positions                              |
-| **Interface_min_distance** | Minimum existing distance between the pair of selected positions participating in the interface                              |
+| **Interface_min_distance** | Minimum existing distance between the pair of selected positions participating in the interface|
 | **PDB_B_factor**     | Minimum B factor (or pLDDT in the case of AF2 models) observed in each PDB 3D position                                                                           |
 | **PDB_interacting_B_factor**       | Minimum B factor (or pLDDT in the case of AF2 models) observed in each PDB interacting 3D position                                                                               |
 | **Protein_alignment_start**          | Alignment start position in target protein sequence                   |
 | **Protein_alignment_end**                | Alignment end position in target protein sequence                   |
-| **PDB_alignment_start**           | Alignment start position in PDB chain protein sequence                                                                           |
-| **PDB_alignment_end**                | Alignment end position in PDB chain protein sequence                                                        |
-
-| **Structure_feature_id**               | As (PDB_code)_(Protein_accession)_(PDB_chain)_(PDB_interacting_chain)_(Interaction_type)
+| **PDB_alignment_start**           | Alignment start position in PDB chain protein sequence|
+| **PDB_alignment_end**                | Alignment end position in PDB chain protein sequence |
+| **Structure_feature_id**               | As (PDB_code)_(Protein_accession)_(PDB_chain)_(PDB_interacting_chain)_(Interaction_type) |
 
 
 # Split variants / position files
