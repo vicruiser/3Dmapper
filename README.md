@@ -10,13 +10,29 @@
 
 </p>
 
+
 # Install
 
+## Dependencies
+3dmapper depends on: 
+
+- Samtools (include version)
+- BLAST command line >= 2.6
+- Python > 3.6
+- R > 3.5
+- R libraries: 
+  - bio3d (version)
+  - ...
+
+## Installing 
+To 
 ``` bash
 git clone https://github.com/vicruiser/3Dmapper.git
 cd 3Dmapper
 pip install . 
 ```
+
+
 
 # Generation of local interfaces database
 
@@ -169,9 +185,7 @@ Results can be visualized running
 makechimera xxxx
 ```
 
-# Dependencies
 
--   samtools
 
 # Paralellization
 
