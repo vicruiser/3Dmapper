@@ -70,7 +70,7 @@ Note: it is recommendable to add the option `-b` to remove crystallographic arti
 
 ## Output interfaceDB.txt
 
-The output interfaces database is a 22 column tab-delimited file. In all cases, **"PDB chain"** refers to the extracted PDB chain or query sequence from each PDB file and **"Protein"** refers to the hit sequence found with the Blast search against the target proteome. A more detailed description of the meaning of each column ID is specified in the table below. FFFFFFFF
+The output interfaces database is a 22 column tab-delimited file. In all cases, **"PDB chain"** refers to the extracted PDB chain or query sequence from each PDB file and **"Protein"** refers to the hit sequence found with the Blast search against the target proteome. A more detailed description of the meaning of each column ID is specified in the table below.
 
 +------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------+
 | Column name                              | Notes                                                                                                                                               |
