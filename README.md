@@ -11,44 +11,40 @@
 </p>
 
 
-# Install
-
-## Dependencies
+# Dependencies
 3dmapper depends on: 
 
 - Samtools (include version)
-- BLAST command line >= 2.6
+- BLAST standalone software version >= 2.6. Follow these [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use the command line tool.
 - Python > 3.6
-- R > 3.5
+- R version > 3.5
 - R libraries: 
   - bio3d (version)
   - ...
 
-## Installing 
-To 
+# Install
+
 ``` bash
 git clone https://github.com/vicruiser/3Dmapper.git
 cd 3Dmapper
 pip install . 
 ```
 
+# 3Dmapper tutorial
 
+## 1. Generation of local interfaces database
 
-# Generation of local interfaces database
-
-## Requirements
+### Requirements
 
 -   A set of *PDB or CIF* files of interest (either real structures or models).\
--   BLAST standalone software. Follow these [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use the command line tool.
 -   A target proteome built running the BLAST command `makeblastdb` with the set of protein sequences of interest.
--   R version > 3.0.0
 
-## Overview
+### Overview
 
 For each of the PDB files we are going to consider, `makeinterfacedb` automatically will do the following:\
 1) Extract its PDB chain sequences. 2) BLAST PDB chain sequences against the proteome of interest. 3) Predict interfaces of hits passing the selected homology filtering. 4) Merge PDB and proteome data.
 
-## Example
+### Example
 
 If we were interested in mapping variants or positions to the protein structures of human, we have to download the human proteome from [UniProt](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) or [Ensembl](http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz) for example. With this set of protein sequences in fasta format, we build the target proteome database for the BLAST search executing the following command:
 
@@ -84,7 +80,7 @@ makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db
 
 Note: it is recommendable to add the option `-b` to remove crystallographic artifacts (based on the [BioLiP artifact ligand list](https://zhanggroup.org/BioLiP/ligand_list)) which can be mistaken by real ligands.
 
-## Output interfaceDB.txt
+### Output interfaceDB.txt
 
 The output interfaces database is a 22 column tab-delimited file. In all cases, **"PDB chain"** refers to the extracted PDB chain or query sequence from each PDB file and **"Protein"** refers to the hit sequence found with the Blast search against the target proteome. A more detailed description of the meaning of each column ID is specified in the table below.
 
@@ -117,7 +113,7 @@ The output interfaces database is a 22 column tab-delimited file. In all cases, 
 | **Structure_feature_id**                 | As `PDB_code`\_`Protein_accession`\_`PDB_chain`\_`PDB_interacting_chain`\_`Interaction_type`                                                        |
 
 
-# Split structural data DB
+## 2. Split structural data DB
 
 To reduce the computational workload during the mapping process, the structural data set generated in the previous step is divided by protein IDs into individual files by executing the following command:
 
@@ -138,13 +134,13 @@ The following directories and files are generated:
 
 Files makepsdb.log and makepsdb.report report the progress of the executed command and then folder psdb contains allthe splitted files.
 
-# Split variants / annotated positions files
+## 3. Split variants / annotated positions files
 
 Similar to the previous step, we will perform a splitting of the variants or annotated positions files.
 
-## Input files format
+### Input files format
 
-### Variants file
+#### Variants file
 The input annotated genomic variants file must be either in [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format), [VEP](https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout) or [MAF](https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/) default format. Additionally, a VEP-like format is admissible. This is in question same as VEP but not all the files are needed:
 
 -   Uploaded_variation
@@ -154,24 +150,24 @@ The input annotated genomic variants file must be either in [VCF](https://en.wik
 -   Protein_position
 -   Amino_acids
 
-### Positions file
+#### Positions file
 We can create a positions file using the the same format as for a variant file
 
-## Example
+### Example
 
 ``` markdown
 makevariantsdb -vf variants.vep 
 ```
 
-# Map variants
+## 4. Map variants
 
-## Example CSV output
+### Example CSV output
 
 ``` markdown
 mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -csv 
 ```
 
-## Example hdf output
+### Example hdf output
 
 ``` markdown
 mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -hdf
@@ -184,8 +180,6 @@ Results can be visualized running
 ``` markdown
 makechimera xxxx
 ```
-
-
 
 # Paralellization
 
