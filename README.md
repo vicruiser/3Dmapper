@@ -72,11 +72,9 @@ Note: it is recommendable to add the option `-b` to remove crystallographic arti
 
 The output interfaces database is a 22 column tab-delimited file. In all cases, **"PDB chain"** refers to the extracted PDB chain or query sequence from each PDB file and **"Protein"** refers to the hit sequence found with the Blast search against the target proteome. A more detailed description of the meaning of each column ID is specified in the table below.
 
-
-| Column name                              | Notes                                                                                                                                               |
-+:=========================================+:====================================================================================================================================================+
+| Column name                              | Notes               |
+|-----------------------------------------:|-----------------------------------------------------------------------------------------------------------------------------------------------------:|
 | **Protein_accession** **Protein_length** | Target protein ID Length of the target protein sequence                                                                                             |
-
 | **Protein_position**                     | Positions relative to the target protein sequence                                                                                                   |
 
 | **Protein_aa**                           | Amino acids corresponding to the target protein positions                                                                                           |
