@@ -73,7 +73,7 @@ Note: it is recommendable to add the option `-b` to remove crystallographic arti
 The output interfaces database is a 22 column tab-delimited file. In all cases, **"PDB chain"** refers to the extracted PDB chain or query sequence from each PDB file and **"Protein"** refers to the hit sequence found with the Blast search against the target proteome. A more detailed description of the meaning of each column ID is specified in the table below.
 
 | Column name                              | Notes               |
-|-----------------------------------------:|-----------------------------------------------------------------------------------------------------------------------------------------------------:|
+|:-----------------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------|
 | **Protein_accession** **Protein_length** | Target protein ID Length of the target protein sequence                                                                                             |
 | **Protein_position**                     | Positions relative to the target protein sequence                                                |
 | **Protein_aa**                           | Amino acids corresponding to the target protein positions       |
@@ -83,37 +83,21 @@ The output interfaces database is a 22 column tab-delimited file. In all cases, 
 | **PDB_3D_position**                      | Position in the PDB chain **structure**                                 |
 | **PDB_seq_position**                     | Position in the PDB chain **sequence**                                  |
 | **PDB_aa**                               | Amino acids corresponding to both the PDB sequence and 3D positions     |
-
 | **Evalue**                               | E-value of the alignment between the query or PDB chain sequence and the target protein                                                             |
-
 | **Pident**                               | Identity percent between the query (PDB chain) and the target sequence (protein).                                                                   |
-
 | **Protein_coverage**                     | Coverage (%) of the target protein by the PDB chain sequence                                                                                        |
-
 | **Length_alignment**                     | Total length of the alignment between the query or PDB chain sequence and the target protein                                                        |
-
 | **Interaction_type**                     | Type of interface interaction: "protein","nucleic" or "ligand". NA means no interaction which represents the positions of the rest of the structure |
-
 | **PDB_interacting_chain**                | Interacting PDB chain ID with the template PDB chain. NA means no interaction which represents the positions of the rest of the structure           |
-
 | **PDB_interacting_3D_position**          | Position in the interacting PDB chain **structure**                                                                                                 |
-
 | **PDB_interacting_aa**                   | Amino acids corresponding to the interacting PDB structure positions                                                                                |
-
 | **Interface_min_distance**               | Minimum existing distance between the pair of selected positions participating in the interface                                                     |
-
 | **PDB_B\_factor**                        | Minimum B factor (or pLDDT in the case of AF2 models) observed in each PDB 3D position                                                              |
-
 | **PDB_interacting_B\_factor**            | Minimum B factor (or pLDDT in the case of AF2 models) observed in each PDB interacting 3D position                                                  |
-
 | **Protein_alignment_start**              | Alignment start position in target protein sequence                                                                                                 |
-
 | **Protein_alignment_end**                | Alignment end position in target protein sequence                                                                                                   |
-
 | **PDB_alignment_start**                  | Alignment start position in PDB chain protein sequence                                                                                              |
-
 | **PDB_alignment_end**                    | Alignment end position in PDB chain protein sequence                                                                                                |
-
 | **Structure_feature_id**                 | As `PDB_code`\_`Protein_accession`\_`PDB_chain`\_`PDB_interacting_chain`\_`Interaction_type`                                                        |
 
 
