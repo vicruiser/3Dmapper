@@ -124,10 +124,11 @@ Files makepsdb.log and makepsdb.report report the progress of the executed comma
 
 # Split variants / annotated positions files
 
-Like in the previous step, we repeat the splitting file process, but this time, using the variants or annotated positions files.
+Similar to the previous step, we will perform a splitting of the variants or annotated positions files.
 
 ## Input files format
 
+### Variants file
 The input annotated genomic variants file must be either in [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format), [VEP](https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout) or [MAF](https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/) default format. Additionally, a VEP-like format is admissible. This is in question same as VEP but not all the files are needed:
 
 -   Uploaded_variation
@@ -137,6 +138,9 @@ The input annotated genomic variants file must be either in [VCF](https://en.wik
 -   Protein_position
 -   Amino_acids
 
+### Positions file
+We can create a positions file using the the same format as for a variant file
+
 ## Example
 
 ``` markdown
@@ -145,8 +149,16 @@ makevariantsdb -vf variants.vep
 
 # Map variants
 
+## Example CSV output
+
 ``` markdown
-mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f 
+mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -csv 
+```
+
+## Example hdf output
+
+``` markdown
+mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -hdf
 ```
 
 # 3D visualization with ChimeraX
