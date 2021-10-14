@@ -30,7 +30,7 @@ cd 3Dmapper
 pip install . 
 ```
 
-# 3Dmapper tutorial
+# Tutorial
 
 ## 1. Generation of local interfaces database
 
