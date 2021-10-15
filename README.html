@@ -215,10 +215,10 @@ pip install . </code></pre>
 </div>
 <div id="tutorial" class="section level1">
 <h1>Tutorial</h1>
-<div id="generate-a-local-database-of-protein-structures" class="section level2">
-<h2>1. Generate a local database of protein structures</h2>
-<div id="requirements" class="section level3">
-<h3>Requirements</h3>
+<div id="generation-of-a-local-database-of-protein-structures-with-makeinterfacedb" class="section level2">
+<h2>1. Generation of a local database of protein structures with <code>makeinterfacedb</code></h2>
+<div id="input-files" class="section level3">
+<h3>Input files</h3>
 <ul>
 <li>A set of <em>PDB or CIF</em> files of interest (either real structures or models).</li>
 <li>A target proteome. This is built running the BLAST command <code>makeblastdb</code> with the set of protein sequences of interest. More details on how to do this can be found in the example below.</li>
@@ -232,24 +232,26 @@ pip install . </code></pre>
 <h3>Example</h3>
 <p>In this example, we are going to map variants or positions to human protein structures.</p>
 <ol style="list-style-type: decimal">
-<li><p>Retrieve the human proteome in FASTA forma This can be done using a public repository such as <a href="https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz">UniProt</a> or <a href="http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz">Ensembl</a>.</p></li>
+<li><p>Retrieve the human proteome in FASTA format. This can be done using a public repository such as <a href="https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz">UniProt</a> or <a href="http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz">Ensembl</a>.</p></li>
 <li><p>Build the target proteome database for the BLAST search. Enter the following in a terminal:</p></li>
 </ol>
 <pre class="markdown"><code>makeblastdb -in target_proteome.fasta -dbtype prot -out target_proteome_db</code></pre>
-<p>This command will generate three files with name “target_proteome_db” and extensions <code>.phr</code>, <code>.pin</code> and <code>.psq</code>.</p>
+<pre><code>This command will generate three files with name &quot;target_proteome_db&quot; and extensions `.phr`, `.pin` and `.psq`.</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li><p>Download a set of PDB files of interest. If you would like to retrieve structural data for proteins that currently do not have structure in PDB, you can download all the files in PDB and rely on sequence homology to find structural homologs.</p></li>
 <li><p>Build the structural database in one of the following ways:</p></li>
 </ol>
-<p>Input the PDB files as a list of PDB files.</p>
+<ul>
+<li>Input the PDB files as a list of PDB files.</li>
+</ul>
 <pre class="markdown"><code>makeinterfacedb -pdb list_pdbs.txt --blast_db target_proteome_db</code></pre>
-<ol start="2" style="list-style-type: decimal">
+<ul>
 <li>Input all the PDBs in the same input argument:</li>
-</ol>
+</ul>
 <pre class="markdown"><code>makeinterfacedb -pdb pdb_dir/* --blast_db target_proteome_db</code></pre>
-<ol start="3" style="list-style-type: decimal">
+<ul>
 <li>Run <code>makeinterfacedb</code> in separate tasks per PDB file. This setting is useful when running jobs in parallel using job arrays or greasy as the results will be written in the same output file.</li>
-</ol>
+</ul>
 <pre class="markdown"><code>makeinterfacedb -pdb file1.pdb --blast_db target_proteome_db
 makeinterfacedb -pdb file2.pdb --blast_db target_proteome_db
 makeinterfacedb -pdb file3.pdb --blast_db target_proteome_db
@@ -394,8 +396,8 @@ makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db</code></pre>
 <div id="split-variants-annotated-positions-files" class="section level2">
 <h2>3. Split variants / annotated positions files</h2>
 <p>Similar to the previous step, we will perform a splitting of the variants or annotated positions files.</p>
-<div id="input-files-format" class="section level3">
-<h3>Input files format</h3>
+<div id="input-files-1" class="section level3">
+<h3>Input files</h3>
 <div id="variants-file" class="section level4">
 <h4>Variants file</h4>
 <p>The input annotated genomic variants file must be either in <a href="https://en.wikipedia.org/wiki/Variant_Call_Format">VCF</a>, <a href="https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout">VEP</a> or <a href="https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/">MAF</a> default format. Additionally, a VEP-like format is admissible. This is in question same as VEP but not all the files are needed:</p>
