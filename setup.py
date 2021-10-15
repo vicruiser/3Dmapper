@@ -55,7 +55,7 @@ class git_clone_external(DistutilsInstall):
             
             if not os.path.exists(htslib_dir):
                 cmd1 = ['git', 'clone',
-                            'git://github.com/samtools/htslib.git --branch 1.13']
+                            'git://github.com/samtools/htslib.git']
 
                 #self.run_command( cmd1, d)
                 subprocess.call(cmd1, cwd=os.path.dirname(
@@ -63,7 +63,7 @@ class git_clone_external(DistutilsInstall):
 
             if not os.path.exists(path.join(bcftools_dir, 'bcftools')):
                 cmd2 = ['git', 'clone',
-                            'git://github.com/samtools/bcftools.git --branch 1.13']
+                            'git://github.com/samtools/bcftools.git']
 
                 #self.run_command(self, cmd2, d)
                 subprocess.call(
@@ -168,9 +168,6 @@ setup(
         # that you indicate whether you support Python 2, Python 3 or both.
         # These classifiers are *not* checked by 'pip install'. See instead
         # 'python_requires' below.
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
