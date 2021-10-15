@@ -109,7 +109,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1.0',  # Required
+    version='1.0.0',  # Required
 
     # This should be your name or the name of the organization which owns the
     # project.
@@ -220,8 +220,8 @@ setup(
     package_data={
         # And include any *.dat files found in the 'data' subdirectory
         # of the 'mypkg' package, also:
-        '': ['data/*','rscripts/*'],
-        'dep': ['dependencies.R']
+        '': ['data/*','rscripts/*']#,
+       # 'dep': ['dependencies.R']
         #'makeinterfacedb': ['data/*']
     },
     include_package_data = True, 

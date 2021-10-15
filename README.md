@@ -34,7 +34,7 @@
 
 
 # Install
-
+In a Linux OS open a terminal and enter the following:
 ``` bash
 git clone https://github.com/vicruiser/3Dmapper.git
 cd 3Dmapper
@@ -43,31 +43,39 @@ pip install .
 
 # Tutorial
 
-## 1. Generation of local interfaces database
+## 1. Generate a local database of protein structures
 
 ### Requirements
 
--   A set of *PDB or CIF* files of interest (either real structures or models).\
--   A target proteome built running the BLAST command `makeblastdb` with the set of protein sequences of interest.
+-   A set of *PDB or CIF* files of interest (either real structures or models).
+-   A target proteome. This is  built running the BLAST command `makeblastdb` with the set of protein sequences of interest. More details on how to do this can be found in the example below. 
 
 ### Overview
 
-For each of the PDB files we are going to consider, `makeinterfacedb` automatically will do the following:\
-1) Extract its PDB chain sequences. 2) BLAST PDB chain sequences against the proteome of interest. 3) Predict interfaces of hits passing the selected homology filtering. 4) Merge PDB and proteome data.
+For each of the considered PDB files, `makeinterfacedb` automatically will do the following:
+1) Extract the PDB chain sequences.
+2) BLAST PDB chain sequences (query) against the target proteome of interest (subject).
+3) Retrieve structural data of hits passing the selected homology filtering.
 
 ### Example
 
-If we were interested in mapping variants or positions to the protein structures of human, we have to download the human proteome from [UniProt](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) or [Ensembl](http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz) for example. With this set of protein sequences in fasta format, we build the target proteome database for the BLAST search executing the following command:
+In this example, we are going to map variants or positions to human protein structures. 
 
+  **1. Retrieve the human proteome in FASTA forma**
+This can be done using a public repository such as  [UniProt](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) or [Ensembl](http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz). 
+
+**2. Build the target proteome database for the BLAST search**. Enter the following in a terminal: 
 ``` markdown
 makeblastdb -in target_proteome.fasta -dbtype prot -out target_proteome_db
 ```
-
 This command will generate three files with name "target_proteome_db" and extensions `.phr`, `.pin` and `.psq`.
 
-Next, we download the PDB files of interest. If you would like to retrieve interfaces and or structures of proteins that currently do not have structure, relying on sequence homology, we suggest to download all the files in PDB.
+3. Download a set of PDB files of interest. 
+If you would like to retrieve structural data  interfaces and or structures of proteins that currently do not have structure, relying on sequence homology, we suggest to download all the files in PDB.
 
-Finally, we build the structural database executing one of the following commands: 1) Input the PDB files as a list of PDB files.
+Finally, we build the structural database executing one of the following commands: 
+
+1) Input the PDB files as a list of PDB files.
 
 ``` markdown
 makeinterfacedb -pdb list_pdbs.txt --blast_db target_proteome_db
