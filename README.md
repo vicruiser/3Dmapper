@@ -180,7 +180,7 @@ By default, a directory called *DBs* is created containing files *makepsdb.log* 
 
 ## <a name="makevardb"></a>  3. Split variants / annotated positions files with `makevariantsdb`
 
-Similar the previous step,to accelerate the mapping process, we need to split variants or annotated positions files by individual transcript ID, 
+Similar the previous step,to accelerate the mapping process, we need to split variants or annotated positions files by individual transcript IDs. 
 
 ### Input files
 
@@ -208,6 +208,7 @@ An example of a position file would be:
     Protein_position: position in the protein sequence
     Amino_acids: corresponding amino acid
 
+This file it is not only useful to map positions or variants to protein structures, but also to find analogous positions of one protein in other protein structures across evolution. For example, if we have identified interesting positions in the spike protein of SARS-CoV-2, we can map this positions not only to the true structure, but also to other protein homologs like the spikes of MERS and SARS-CoV, avoiding the obstacle of manual alignment and mapping. 
 
 ### Split files
 
@@ -215,7 +216,7 @@ If the input is an annotated VCF, VEP or VEP-like file we can split it entering 
 ``` markdown
 makevariantsdb -vf variants.vep 
 ```
-If it's a MAF file, then use: 
+If it is a MAF file, then use: 
 ``` markdown
 makevariantsdb -maf variants.maf 
 ```
@@ -236,14 +237,25 @@ By default, a directory called *DBs* is created containing files *makevariantsdb
 
 ## <a name="mapper"></a>  4. Map variants
 
-
-
-### Basic example 
+Finally, we can map the positions to the protein structures. To this extent, as an example, we can execute the following: 
 
 ``` markdown
-mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -csv 
+mapper -pid protID  -psdb DBs/psdb -vdb DBs/varDB -ids dict.txt  -csv -l
 ```
 
+Input arguments: 
+
+- `-pid`: can be a single or a list of protein, transcripts or gene IDs 
+- `-ids`: takes a **CSV** file with 3 columns, with **fixed column names** that are **"geneID","transcriptID"** and **"protID"** which contains the conversion between these 3 IDs. More specifically, this conversion file must contain the IDs appearing in the structural dataset and the positions/variants files. In other words, if the structural dataset was generated with a UniProt target proteome, then the protID column would contain UniProt IDs. Additionally, if we use a variants file generated with VEP, then the geneID and transcriptID would correspond to Ensembl IDs. 
+- `-csv`: it tells `mapper`to write the results in an output format. `hdf`format is also avaialble. 
+- `-l`, `--location`: maps variants or positions and classify them according to their possible location which are: 
+  - Interface: positions mapping to the computed interfaces
+  - Structure: positions mapping to the rest of the structure, i.e.: it does not include interface residues. 
+  - Unmapped : positions mapping to the protein sequence but not structure was found for this piece of sequence. 
+  - NonCoding: positions that are not in protein coding genes.
+  If the `-l` argument is not included, then `mapper` **only outputs positions mapping to interfaces**.
+
+To learn about additional arguments, run ``` mapper -h ```.
 
 # <a name="makechimera"></a>  3D visualization with ChimeraX
 
