@@ -104,7 +104,7 @@ The output is a 22 column tab-delimited file. In all cases, **"PDB chain"** refe
 
 
 | Column name                              | Notes                                                                                                                                               |
-|:=========================================|:====================================================================================================================================================|
+|:-----------------------------------------|:--------------------------------------------------------------------------------------------------------------------|
 | **Protein_accession** **Protein_length** | Target protein ID Length of the target protein sequence                                                                                             |
 
 | **Protein_position**                     | Positions relative to the target protein sequence                                                                                                   |
