@@ -231,17 +231,17 @@ pip install . </code></pre>
 <div id="example" class="section level3">
 <h3>Example</h3>
 <p>In this example, we are going to map variants or positions to human protein structures.</p>
-<p><strong>1. Retrieve the human proteome in FASTA forma</strong> This can be done using a public repository such as <a href="https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz">UniProt</a> or <a href="http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz">Ensembl</a>.</p>
-<p><strong>2. Build the target proteome database for the BLAST search</strong>. Enter the following in a terminal:</p>
+<ol style="list-style-type: decimal">
+<li><p>Retrieve the human proteome in FASTA forma This can be done using a public repository such as <a href="https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz">UniProt</a> or <a href="http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz">Ensembl</a>.</p></li>
+<li><p>Build the target proteome database for the BLAST search. Enter the following in a terminal:</p></li>
+</ol>
 <pre class="markdown"><code>makeblastdb -in target_proteome.fasta -dbtype prot -out target_proteome_db</code></pre>
 <p>This command will generate three files with name “target_proteome_db” and extensions <code>.phr</code>, <code>.pin</code> and <code>.psq</code>.</p>
 <ol start="3" style="list-style-type: decimal">
-<li>Download a set of PDB files of interest. If you would like to retrieve structural data interfaces and or structures of proteins that currently do not have structure, relying on sequence homology, we suggest to download all the files in PDB.</li>
+<li><p>Download a set of PDB files of interest. If you would like to retrieve structural data for proteins that currently do not have structure in PDB, you can download all the files in PDB and rely on sequence homology to find structural homologs.</p></li>
+<li><p>Build the structural database in one of the following ways:</p></li>
 </ol>
-<p>Finally, we build the structural database executing one of the following commands:</p>
-<ol style="list-style-type: decimal">
-<li>Input the PDB files as a list of PDB files.</li>
-</ol>
+<p>Input the PDB files as a list of PDB files.</p>
 <pre class="markdown"><code>makeinterfacedb -pdb list_pdbs.txt --blast_db target_proteome_db</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Input all the PDBs in the same input argument:</li>

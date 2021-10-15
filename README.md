@@ -61,25 +61,24 @@ For each of the considered PDB files, `makeinterfacedb` automatically will do th
 
 In this example, we are going to map variants or positions to human protein structures. 
 
-  **1. Retrieve the human proteome in FASTA forma**
+  1) Retrieve the human proteome in FASTA forma
 This can be done using a public repository such as  [UniProt](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) or [Ensembl](http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz). 
 
-**2. Build the target proteome database for the BLAST search**. Enter the following in a terminal: 
+  2)  Build the target proteome database for the BLAST search. Enter the following in a terminal: 
 ``` markdown
 makeblastdb -in target_proteome.fasta -dbtype prot -out target_proteome_db
 ```
-This command will generate three files with name "target_proteome_db" and extensions `.phr`, `.pin` and `.psq`.
+  This command will generate three files with name "target_proteome_db" and extensions `.phr`, `.pin` and `.psq`.
 
-3. Download a set of PDB files of interest. 
-If you would like to retrieve structural data  interfaces and or structures of proteins that currently do not have structure, relying on sequence homology, we suggest to download all the files in PDB.
+  3) Download a set of PDB files of interest. If you would like to retrieve structural data for proteins that currently do not have structure in PDB, you can download all the files in PDB and rely on sequence homology to find structural homologs. 
 
-Finally, we build the structural database executing one of the following commands: 
+  4) Build the structural database in one of the following ways: 
 
-1) Input the PDB files as a list of PDB files.
+  Input the PDB files as a list of PDB files.
 
-``` markdown
-makeinterfacedb -pdb list_pdbs.txt --blast_db target_proteome_db
-```
+  ``` markdown
+  makeinterfacedb -pdb list_pdbs.txt --blast_db target_proteome_db
+  ```
 
 2)  Input all the PDBs in the same input argument:
 
