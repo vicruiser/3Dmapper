@@ -55,7 +55,7 @@ class git_clone_external(DistutilsInstall):
             
             if not os.path.exists(htslib_dir):
                 cmd1 = ['git', 'clone',
-                            'git://github.com/samtools/htslib.git']
+                            'git://github.com/samtools/htslib.git --branch 1.13']
 
                 #self.run_command( cmd1, d)
                 subprocess.call(cmd1, cwd=os.path.dirname(
@@ -63,7 +63,7 @@ class git_clone_external(DistutilsInstall):
 
             if not os.path.exists(path.join(bcftools_dir, 'bcftools')):
                 cmd2 = ['git', 'clone',
-                            'git://github.com/samtools/bcftools.git']
+                            'git://github.com/samtools/bcftools.git --branch 1.13']
 
                 #self.run_command(self, cmd2, d)
                 subprocess.call(
@@ -220,7 +220,8 @@ setup(
     package_data={
         # And include any *.dat files found in the 'data' subdirectory
         # of the 'mypkg' package, also:
-        '': ['data/*','rscripts/*']#,
+        '': ['data/*','rscripts/*'],
+        'dep': ['dependencies.R']
         #'makeinterfacedb': ['data/*']
     },
     include_package_data = True, 

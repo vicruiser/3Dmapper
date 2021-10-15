@@ -2,7 +2,7 @@
 
 # Overview
 
-3Dmapper is a Python and R tool to map annotated genomic variants or positions to protein structures.
+3Dmapper is a command line tool based on R and Python programming languages that maps annotated genomic variants or positions to protein structures.
 
 <p align="center">
 
@@ -12,15 +12,26 @@
 
 
 # Dependencies
-3dmapper depends on: 
 
-- Samtools (include version)
+## Installed by user
 - BLAST standalone software version >= 2.6. Follow these [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use the command line tool.
 - Python > 3.6
 - R version > 3.5
-- R libraries: 
-  - bio3d (version)
-  - ...
+
+## Automatically installed
+- BCFtools 1.13
+- HTSlib 1.13
+- R packages: 
+  - seqinr 4.2-4
+  - reshape2 1.4.4
+  - data.table 1.13.6 
+  - dplyr 1.0.4 
+  - plyr 1.8.6
+  - bio3d 2.4-2
+  - stringr 1.4.0
+  - tidyr 1.1.2      
+  - veriNA3d 1.0.3  
+
 
 # Install
 
