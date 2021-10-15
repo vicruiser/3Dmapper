@@ -33,7 +33,7 @@
     -   plyr 1.8.6
     -   bio3d 2.4-2
     -   stringr 1.4.0
-    -   tidyr 1.1.2\
+    -   tidyr 1.1.2
     -   veriNA3d 1.0.3
 
 # Install
@@ -48,26 +48,30 @@ pip install .
 
 # Index of tools
 
-  · [makeinterfacedb](#pookie)
+  - [`makeinterfacedb`](#makeintdb): Create a protein structure database which includes protein-protein, protein-ligand and protein-nucleic interfaces.
 ``` markdown
 makeinterfacedb -pdb pdb_dir/* --blast_db target_proteome_db
 ```
-
+  - [`makepsdb`](#makepsdb): Split the protein structure database. 
 ``` markdown
 makepsdb -psdb makeinterfacedb_output.txt -s
 ```
-
+  - [`makevariantsdb`](#makevardb): Split a variants file or positions file. 
 ``` markdown
 makevariantsdb -vf variants.vep 
 ```
-
+  - [`mapper`](#mapper): Map variants or protein positions to the structure of proteins, including their interfaces. 
 ``` markdown
-mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -hdf
+mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -csv
+```
+  - [`makechimera`](#makechim): Generate [ChimeraX](https://www.rbvi.ucsf.edu/chimerax/) scripts to visualize the mapping results. 
+``` markdown
+makechimera 
 ```
 
 # Tutorial
 
-## <a name="pookie"></a> 1. Generation of a local protein structures database with `makeinterfacedb`
+## <a name="makeintdb"></a> 1. Generation of a local protein structures database with `makeinterfacedb`
 
 For each of the considered PDB files, `makeinterfacedb` automatically will: 
 1) Extract the PDB chain sequences. 
@@ -149,7 +153,7 @@ The output is a 22 column tab-delimited file. In all cases, **"PDB chain"** refe
 | **PDB_alignment_end**                    | Alignment end position in PDB chain protein sequence                                                                                                |
 | **Structure_feature_id**                 | As `PDB_code`\_`Protein_accession`\_`PDB_chain`\_`PDB_interacting_chain`\_`Interaction_type`                                                        |
 
-## 2. Split structural data DB with `makepsdb`
+## <a name="makepsdb"></a>  2. Split structural data DB with `makepsdb`
 
 To reduce the computational workload during the mapping process, the structural data set generated in the previous step is divided, by protein IDs, into individual files by executing the following command:
 
@@ -172,7 +176,7 @@ The following directories and files are generated:
 
 By default, a directory called *DBs* is created containing files *makepsdb.log* and *makepsdb.report*, which inform about the the executed command and the *psdb* directory which contains the splitted files.
 
-## 3. Split variants / annotated positions files
+## <a name="makevardb"></a>  3. Split variants / annotated positions files
 
 Similar to the previous step, we will perform a splitting of the variants or annotated positions files.
 
@@ -199,7 +203,7 @@ We can create a positions file using the the same format as for a variant file
 makevariantsdb -vf variants.vep 
 ```
 
-## 4. Map variants
+## <a name="mapper"></a>  4. Map variants
 
 ### Example CSV output
 
@@ -213,7 +217,7 @@ mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GR
 mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -hdf
 ```
 
-# 3D visualization with ChimeraX
+# <a name="makechimera"></a>  3D visualization with ChimeraX
 
 Results can be visualized running
 
