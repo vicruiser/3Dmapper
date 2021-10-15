@@ -46,11 +46,28 @@ cd 3Dmapper
 pip install . 
 ```
 
+# Index of tools
+
+  · [makeinterfacedb](#pookie)
+``` markdown
+makeinterfacedb -pdb pdb_dir/* --blast_db target_proteome_db
+```
+
+``` markdown
+makepsdb -psdb makeinterfacedb_output.txt -s
+```
+
+``` markdown
+makevariantsdb -vf variants.vep 
+```
+
+``` markdown
+mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -hdf
+```
+
 # Tutorial
 
-## 1. Generation of a local protein structures database with `makeinterfacedb`
-
-### Overview
+## <a name="pookie"></a> 1. Generation of a local protein structures database with `makeinterfacedb`
 
 For each of the considered PDB files, `makeinterfacedb` automatically will: 
 1) Extract the PDB chain sequences. 
@@ -98,7 +115,7 @@ makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db
 ```
 Note: Crystallographic artifacts can be removed with the option `-b`, based on the [BioLiP artifact ligand list](https://zhanggroup.org/BioLiP/ligand_list).
 
-### Output interfaceDB.txt
+### Output
 
 The output is a 22 column tab-delimited file. In all cases, **"PDB chain"** refers to the extracted PDB chain or query sequence from each PDB file and **"Protein"** refers to the hit sequence found with the BLAST search against the target proteome. A more detailed description of the meaning of each column ID is specified in the table below.
 
@@ -132,14 +149,16 @@ The output is a 22 column tab-delimited file. In all cases, **"PDB chain"** refe
 | **PDB_alignment_end**                    | Alignment end position in PDB chain protein sequence                                                                                                |
 | **Structure_feature_id**                 | As `PDB_code`\_`Protein_accession`\_`PDB_chain`\_`PDB_interacting_chain`\_`Interaction_type`                                                        |
 
-## 2. Split structural data DB
+## 2. Split structural data DB with `makepsdb`
 
-To reduce the computational workload during the mapping process, the structural data set generated in the previous step is divided by protein IDs into individual files by executing the following command:
+To reduce the computational workload during the mapping process, the structural data set generated in the previous step is divided, by protein IDs, into individual files by executing the following command:
 
 ``` markdown
-makepsdb -psdb interfaces/interfacesDB.txt
+makepsdb -psdb makeinterfacedb_output.txt -s
 ```
+The option `-s` indicates that the makeinterfacedb_output.txt will be sorted, which accelerates the splitting process when the structural database is big. 
 
+### Output
 The following directories and files are generated:
 
     |__DBs
@@ -151,7 +170,7 @@ The following directories and files are generated:
                 |_____...        
                 |_____prot_IDn.txt        
 
-Files makepsdb.log and makepsdb.report report the progress of the executed command and then folder psdb contains allthe splitted files.
+By default, a directory called *DBs* is created containing files *makepsdb.log* and *makepsdb.report*, which inform about the the executed command and the *psdb* directory which contains the splitted files.
 
 ## 3. Split variants / annotated positions files
 
