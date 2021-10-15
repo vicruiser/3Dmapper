@@ -248,12 +248,12 @@ Input arguments:
 - `-pid`: can be a single or a list of protein, transcripts or gene IDs 
 - `-ids`: takes a **CSV** file with 3 columns, with **fixed column names** that are **"geneID","transcriptID"** and **"protID"** which contains the conversion between these 3 IDs. More specifically, this conversion file must contain the IDs appearing in the structural dataset and the positions/variants files. In other words, if the structural dataset was generated with a UniProt target proteome, then the protID column would contain UniProt IDs. Additionally, if we use a variants file generated with VEP, then the geneID and transcriptID would correspond to Ensembl IDs. 
 - `-csv`: it tells `mapper`to write the results in an output format. `hdf`format is also avaialble. 
-- `-l`, `--location`: maps variants or positions and classify them according to their possible location which are: 
+- `-l`, `--location`: maps variants or positions and classify them according to their possible location. If this argument is not True, results are reported only in then  which are: 
   - Interface: positions mapping to the computed interfaces
   - Structure: positions mapping to the rest of the structure, i.e.: it does not include interface residues. 
   - Unmapped : positions mapping to the protein sequence but not structure was found for this piece of sequence. 
   - NonCoding: positions that are not in protein coding genes.
-If the `-l` argument is not included, then `mapper` **only outputs positions mapping to interfaces**.
+
 
 To learn about additional arguments, run ``` mapper -h ```.
 
