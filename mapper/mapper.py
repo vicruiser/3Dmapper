@@ -186,7 +186,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                 raise IOError()       
     except IOError:
         psdf = False
-        
+
     if psdf is False and annovars is False:
         logger.error('Protein ' +
                      prot_id + 'could not be parsed.')
@@ -234,7 +234,6 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         # Merge them both files
         mapped_positions = annovars.join(
             psdf.set_index('Protein_position'), on='Protein_position', how='inner')
-
         if isoform is None:
             isoform = ['all']
         if consequence is None:
@@ -248,6 +247,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                 left_positions = annovars.drop(list(set(mapped_positions.index)))
             except:
                 left_positions = annovars
+
             # remove non protein coding positions
             if left_positions.empty is False:
                 left_positions.drop_duplicates(inplace=True)
@@ -327,7 +327,6 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         # if merging was successful, create setID file and
         # save the merged dataframe as well
         else:
-            
             mapped_positions['Mapping_position'] = 'Interface'
             mapped_positions = mapped_positions[mapped_positions['Interaction_type'].notna()]
             setID_file = mapped_positions[['Structure_feature_id',
@@ -342,6 +341,5 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                                   header=f.tell() == 0)
             writefile(prot_id, out_dir, pident, isoform, consequence,
                       mapped_positions, 'InterfacePositions', csv, hdf)
-
             del(mapped_positions)
         del(psdf, annovars)

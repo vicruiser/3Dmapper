@@ -25,7 +25,7 @@ split_cmd = "awk -v ci=\"{1}\" \
 -v od=\"{2}/\" \
 -F '\t' 'NR==1 {{h=$0; next}}; \
 !seen[$ci]++{{f=od$ci\".{3}\"; print h > f}}; \
-{{f=od$ci\".{3}\"; print >> f}}' {0}"
+{{f=od$ci\".{3}\"; print >> f ; close(f)}}' {0}"
 
 def request(prefix, input_file, out_dir, out_extension, log_dir, sort, parallel, njobs):
     '''

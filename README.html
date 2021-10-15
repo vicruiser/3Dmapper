@@ -234,6 +234,7 @@ pip install . </code></pre>
 <li><a href="#makechim"><code>makechimera</code></a>: Generate <a href="https://www.rbvi.ucsf.edu/chimerax/">ChimeraX</a> scripts to visualize the mapping results.</li>
 </ul>
 <pre class="markdown"><code>makechimera </code></pre>
+<p>The complete list of input arguments for each of the commands is available when typing <code>-h</code>.</p>
 </div>
 <div id="tutorial" class="section level1">
 <h1>Tutorial</h1>
@@ -420,46 +421,77 @@ makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db</code></pre>
 <p>By default, a directory called <em>DBs</em> is created containing files <em>makepsdb.log</em> and <em>makepsdb.report</em>, which inform about the the executed command and the <em>psdb</em> directory which contains the splitted files.</p>
 </div>
 </div>
-<div id="split-variants-annotated-positions-files" class="section level2">
-<h2><a name="makevardb"></a> 3. Split variants / annotated positions files</h2>
-<p>Similar the previous step,to accelerate the mapping process, we need to split variants or annotated positions files by individual transcript ID,</p>
+<div id="split-variants-annotated-positions-files-with-makevariantsdb" class="section level2">
+<h2><a name="makevardb"></a> 3. Split variants / annotated positions files with <code>makevariantsdb</code></h2>
+<p>Similar the previous step,to accelerate the mapping process, we need to split variants or annotated positions files by individual transcript IDs.</p>
 <div id="input-files-1" class="section level3">
 <h3>Input files</h3>
 <div id="variants-file" class="section level4">
 <h4>Variants file</h4>
 <p>The input annotated genomic variants file must be either in <a href="https://en.wikipedia.org/wiki/Variant_Call_Format">VCF</a>, <a href="https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout">VEP</a> or <a href="https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/">MAF</a> default format. Additionally, a VEP-like format is admissible which must contain at least the following columns:</p>
-<pre><code>-   Uploaded_variation
--   Gene
--   Feature
--   Consequence
--   Protein_position
--   Amino_acids</code></pre>
+<pre><code>Uploaded_variation
+Gene
+Feature
+Consequence
+Protein_position
+Amino_acids</code></pre>
 </div>
 <div id="positions-file" class="section level4">
 <h4>Positions file</h4>
-<p>If we want to <em>map a set of positions to protein structures that are NOT mutations</em>, we have to create a “positions” file, which format imitates the one of the variants files. More specifically, the easiest would be to replicate the VEP-like format, keeping the same column names but adding some modifications.</p>
-<p>An example of a positions file would be: - Uploaded_variation: position ID. - Gene: gene, transcript or protein id. - Feature: gene, transcript or rotein ID. - Consequence: description of the position, if any. For example: it can be conserved position, function position, etc. - Protein_position: - Amino_acids:</p>
+<p>If we want to <em>map a set of positions to protein structures that are NOT mutations</em>, we have to create a “positions” file. Its format imitates the one of variants files. More specifically, the easiest way to generate a “positions file” is to replicate the VEP-like format, keeping the same column names but adding some modifications.</p>
+<p>An example of a position file would be:</p>
+<pre><code>Uploaded_variation: contains the position ID
+Gene: can be aprotein ID
+Feature: can be a protein ID
+Consequence: description of this position, if any. Examples could be &quot;conserved_position&quot;, &quot;functional_position&quot;, etc 
+Protein_position: position in the protein sequence
+Amino_acids: corresponding amino acid</code></pre>
+<p>This file it is not only useful to map positions or variants to protein structures, but also to find analogous positions of one protein in other protein structures across evolution. For example, if we have identified interesting positions in the spike protein of SARS-CoV-2, we can map this positions not only to the true structure, but also to other protein homologs like the spikes of MERS and SARS-CoV, avoiding the obstacle of manual alignment and mapping.</p>
 </div>
 </div>
-<div id="example-1" class="section level3">
-<h3>Example</h3>
+<div id="split-files" class="section level3">
+<h3>Split files</h3>
+<p>If the input is an annotated VCF, VEP or VEP-like file we can split it entering the following:</p>
 <pre class="markdown"><code>makevariantsdb -vf variants.vep </code></pre>
+<p>If it is a MAF file, then use:</p>
+<pre class="markdown"><code>makevariantsdb -maf variants.maf </code></pre>
+</div>
+<div id="output-2" class="section level3">
+<h3>Output</h3>
+<p>The following directories and files are generated:</p>
+<pre><code>|__DBs
+     |_____makevariantsdb.log
+     |_____makevariantsdb.report
+     |_____varDB
+            |_____transcript_ID1.txt
+            |_____transcript_ID2.txt        
+            |_____...        
+            |_____transcript_IDn.txt        </code></pre>
+<p>By default, a directory called <em>DBs</em> is created containing files <em>makevariantsdb.log</em> and <em>makevaraintsdb.report</em>, which inform about the the executed command and the <em>varDB</em> directory which contains the splitted files by individual transcript ID.</p>
 </div>
 </div>
 <div id="map-variants" class="section level2">
 <h2><a name="mapper"></a> 4. Map variants</h2>
-<div id="example-csv-output" class="section level3">
-<h3>Example CSV output</h3>
-<pre class="markdown"><code>mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -csv </code></pre>
+<p>Now we are ready to map positions or variants to protein structures. To this extent, as an example, we can execute the following:</p>
+<pre class="markdown"><code>mapper -pid protID  -psdb DBs/psdb -vdb DBs/varDB -ids dict.txt  -csv -l</code></pre>
+<p>Input arguments:</p>
+<ul>
+<li><code>-pid</code>: can be a single or a list of protein, transcripts or gene IDs</li>
+<li><code>-ids</code>: takes a <strong>CSV</strong> file with 3 columns, with <strong>fixed column names</strong> that are <strong>“geneID”,“transcriptID”</strong> and <strong>“protID”</strong> which contains the conversion between these 3 IDs. More specifically, this conversion file must contain the IDs appearing in the structural dataset and the positions/variants files. In other words, if the structural dataset was generated with a UniProt target proteome, then the protID column would contain UniProt IDs. Additionally, if we use a variants file generated with VEP, then the geneID and transcriptID would correspond to Ensembl IDs.</li>
+<li><code>-csv</code>: it tells <code>mapper</code>to write the results in an output format. <code>hdf</code>format is also avaialble.</li>
+<li><code>-l</code>, <code>--location</code>: maps variants or positions and classify them according to their possible location which are:
+<ul>
+<li>Interface: positions mapping to the computed interfaces</li>
+<li>Structure: positions mapping to the rest of the structure, i.e.: it does not include interface residues.</li>
+<li>Unmapped : positions mapping to the protein sequence but not structure was found for this piece of sequence.</li>
+<li>NonCoding: positions that are not in protein coding genes. If the <code>-l</code> argument is not included, then <code>mapper</code> <strong>only outputs positions mapping to interfaces</strong>.</li>
+</ul></li>
+</ul>
+<p>To learn about additional arguments, run <code>mapper -h</code>.</p>
 </div>
-<div id="example-hdf-output" class="section level3">
-<h3>Example hdf output</h3>
-<pre class="markdown"><code>mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -hdf</code></pre>
 </div>
-</div>
-</div>
-<div id="d-visualization-with-chimerax" class="section level1">
-<h1><a name="makechimera"></a> 3D visualization with ChimeraX</h1>
+<div id="results-visualization-with-chimerax" class="section level1">
+<h1><a name="makechimera"></a> Results visualization with ChimeraX</h1>
 <p>Results can be visualized running</p>
 <pre class="markdown"><code>makechimera xxxx</code></pre>
 </div>

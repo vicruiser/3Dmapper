@@ -1,3 +1,25 @@
+Metadata-Version: 2.1
+Name: 3dmapper
+Version: 1.0.0
+Summary: Map annotated genomic variants to protein interfaces data in 3D.
+Home-page: https://github.com/vicruiser/3Dmapper
+Author: Victoria Ruiz-Serra
+Author-email: victoria.ruiz.serra@gmail.es
+License: UNKNOWN
+Project-URL: Bug Reports, https://github.com/vicruiser/3Dmapper/issues
+Project-URL: Source, https://github.com/vicruiser/3Dmapper/
+Keywords: mapping tool,genetic positions,protein structure,PDB
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
+Classifier: License :: GPLv3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Requires-Python: >=3.6, <4
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 [![build status](http://img.shields.io/travis/vicruiser/3Dmapper/master.svg?style=flat)](https://travis-ci.com/username/vicruiser/3Dmapper) [![Join the chat at https://gitter.im/pdbmapper/community](https://badges.gitter.im/pdbmapper/community.svg)](https://gitter.im/pdbmapper/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Overview
@@ -270,3 +292,5 @@ makechimera xxxx
 3Dmapper can be parallelized parallelization. While `makepsdb` and `makevariantsdb` run with GNU parallel \[ref\], `mapper` uses the python module joblib.
 
 An alternative to parallelaize 3Dmapper is to is to give as input the protein ids in individual tasks to perform a job array in a cluster computer?. The first task should write the initial files. The rest set the option `-force n` to prevent repeating innecesary steps.
+
+
