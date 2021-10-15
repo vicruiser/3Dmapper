@@ -199,8 +199,7 @@ pre code {
 <li>plyr 1.8.6</li>
 <li>bio3d 2.4-2</li>
 <li>stringr 1.4.0</li>
-<li>tidyr 1.1.2<br />
-</li>
+<li>tidyr 1.1.2</li>
 <li>veriNA3d 1.0.3</li>
 </ul></li>
 </ul>
@@ -213,10 +212,33 @@ pre code {
 cd 3Dmapper
 pip install . </code></pre>
 </div>
+<div id="index-of-tools" class="section level1">
+<h1>Index of tools</h1>
+<ul>
+<li><a href="#makeintdb"><code>makeinterfacedb</code></a>: Create a protein structure database which includes protein-protein, protein-ligand and protein-nucleic interfaces.</li>
+</ul>
+<pre class="markdown"><code>makeinterfacedb -pdb pdb_dir/* --blast_db target_proteome_db</code></pre>
+<ul>
+<li><a href="#makepsdb"><code>makepsdb</code></a>: Split the protein structure database.</li>
+</ul>
+<pre class="markdown"><code>makepsdb -psdb makeinterfacedb_output.txt -s</code></pre>
+<ul>
+<li><a href="#makevardb"><code>makevariantsdb</code></a>: Split a variants file or positions file.</li>
+</ul>
+<pre class="markdown"><code>makevariantsdb -vf variants.vep </code></pre>
+<ul>
+<li><a href="#mapper"><code>mapper</code></a>: Map variants or protein positions to the structure of proteins, including their interfaces.</li>
+</ul>
+<pre class="markdown"><code>mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -csv</code></pre>
+<ul>
+<li><a href="#makechim"><code>makechimera</code></a>: Generate <a href="https://www.rbvi.ucsf.edu/chimerax/">ChimeraX</a> scripts to visualize the mapping results.</li>
+</ul>
+<pre class="markdown"><code>makechimera </code></pre>
+</div>
 <div id="tutorial" class="section level1">
 <h1>Tutorial</h1>
 <div id="generation-of-a-local-protein-structures-database-with-makeinterfacedb" class="section level2">
-<h2>1) Generation of a local protein structures database with <code>makeinterfacedb</code></h2>
+<h2><a name="makeintdb"></a> 1. Generation of a local protein structures database with <code>makeinterfacedb</code></h2>
 <p>For each of the considered PDB files, <code>makeinterfacedb</code> automatically will: 1) Extract the PDB chain sequences. 2) BLAST PDB chain sequences (query) against the target proteome of interest (subject). 3) Retrieve structural data of hits passing the selected homology filtering.</p>
 <div id="input-files" class="section level3">
 <h3>Input files</h3>
@@ -227,7 +249,7 @@ pip install . </code></pre>
 </div>
 <div id="example" class="section level3">
 <h3>Example</h3>
-<p>In this example, we are going to map variants or positions to human protein structures.</p>
+<p>In this example, we are going to <strong>0generate a structural database of human proteins</strong>.</p>
 <ol style="list-style-type: decimal">
 <li><p>Retrieve the human proteome in FASTA format. This can be done using a public repository such as <a href="https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz">UniProt</a> or <a href="http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz">Ensembl</a>.</p></li>
 <li><p>Build a BLAST protein database for the BLAST search:</p></li>
@@ -379,10 +401,13 @@ makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db</code></pre>
 </table>
 </div>
 </div>
-<div id="split-structural-data-db" class="section level2">
-<h2>2) Split structural data DB</h2>
-<p>To reduce the computational workload during the mapping process, the structural data set generated in the previous step is divided by protein IDs into individual files by executing the following command:</p>
-<pre class="markdown"><code>makepsdb -psdb interfaces/interfacesDB.txt</code></pre>
+<div id="split-structural-data-db-with-makepsdb" class="section level2">
+<h2><a name="makepsdb"></a> 2. Split structural data DB with <code>makepsdb</code></h2>
+<p>To reduce the computational workload during the mapping process, the structural data set generated in the previous step is divided, by protein IDs, into individual files by executing the following command:</p>
+<pre class="markdown"><code>makepsdb -psdb makeinterfacedb_output.txt -s</code></pre>
+<p>The option <code>-s</code> indicates that the makeinterfacedb_output.txt will be sorted, which accelerates the splitting process when the structural database is big.</p>
+<div id="output-1" class="section level3">
+<h3>Output</h3>
 <p>The following directories and files are generated:</p>
 <pre><code>|__DBs
      |_____makepsdb.log
@@ -392,28 +417,28 @@ makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db</code></pre>
             |_____prot_ID2.txt        
             |_____...        
             |_____prot_IDn.txt        </code></pre>
-<p>Files makepsdb.log and makepsdb.report report the progress of the executed command and then folder psdb contains allthe splitted files.</p>
+<p>By default, a directory called <em>DBs</em> is created containing files <em>makepsdb.log</em> and <em>makepsdb.report</em>, which inform about the the executed command and the <em>psdb</em> directory which contains the splitted files.</p>
+</div>
 </div>
 <div id="split-variants-annotated-positions-files" class="section level2">
-<h2>3. Split variants / annotated positions files</h2>
-<p>Similar to the previous step, we will perform a splitting of the variants or annotated positions files.</p>
+<h2><a name="makevardb"></a> 3. Split variants / annotated positions files</h2>
+<p>Similar the previous step,to accelerate the mapping process, we need to split variants or annotated positions files by individual transcript ID,</p>
 <div id="input-files-1" class="section level3">
 <h3>Input files</h3>
 <div id="variants-file" class="section level4">
 <h4>Variants file</h4>
-<p>The input annotated genomic variants file must be either in <a href="https://en.wikipedia.org/wiki/Variant_Call_Format">VCF</a>, <a href="https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout">VEP</a> or <a href="https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/">MAF</a> default format. Additionally, a VEP-like format is admissible. This is in question same as VEP but not all the files are needed:</p>
-<ul>
-<li>Uploaded_variation</li>
-<li>Gene</li>
-<li>Feature</li>
-<li>Consequence</li>
-<li>Protein_position</li>
-<li>Amino_acids</li>
-</ul>
+<p>The input annotated genomic variants file must be either in <a href="https://en.wikipedia.org/wiki/Variant_Call_Format">VCF</a>, <a href="https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout">VEP</a> or <a href="https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/">MAF</a> default format. Additionally, a VEP-like format is admissible which must contain at least the following columns:</p>
+<pre><code>-   Uploaded_variation
+-   Gene
+-   Feature
+-   Consequence
+-   Protein_position
+-   Amino_acids</code></pre>
 </div>
 <div id="positions-file" class="section level4">
 <h4>Positions file</h4>
-<p>We can create a positions file using the the same format as for a variant file</p>
+<p>If we want to <em>map a set of positions to protein structures that are NOT mutations</em>, we have to create a “positions” file, which format imitates the one of the variants files. More specifically, the easiest would be to replicate the VEP-like format, keeping the same column names but adding some modifications.</p>
+<p>An example of a positions file would be: - Uploaded_variation: position ID. - Gene: gene, transcript or protein id. - Feature: gene, transcript or rotein ID. - Consequence: description of the position, if any. For example: it can be conserved position, function position, etc. - Protein_position: - Amino_acids:</p>
 </div>
 </div>
 <div id="example-1" class="section level3">
@@ -422,7 +447,7 @@ makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db</code></pre>
 </div>
 </div>
 <div id="map-variants" class="section level2">
-<h2>4. Map variants</h2>
+<h2><a name="mapper"></a> 4. Map variants</h2>
 <div id="example-csv-output" class="section level3">
 <h3>Example CSV output</h3>
 <pre class="markdown"><code>mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -csv </code></pre>
@@ -434,7 +459,7 @@ makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db</code></pre>
 </div>
 </div>
 <div id="d-visualization-with-chimerax" class="section level1">
-<h1>3D visualization with ChimeraX</h1>
+<h1><a name="makechimera"></a> 3D visualization with ChimeraX</h1>
 <p>Results can be visualized running</p>
 <pre class="markdown"><code>makechimera xxxx</code></pre>
 </div>

@@ -69,6 +69,8 @@ mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GR
 makechimera 
 ```
 
+The complete list of input arguments for each of the commands is available when typing `-h`. 
+
 # Tutorial
 
 ## <a name="makeintdb"></a> 1. Generation of a local protein structures database with `makeinterfacedb`
@@ -85,7 +87,7 @@ For each of the considered PDB files, `makeinterfacedb` automatically will:
 
 ### Example
 
-In this example, we are going to map variants or positions to human protein structures.
+In this example, we are going to **0generate a structural database of human proteins**.
 
 1)  Retrieve the human proteome in FASTA format. This can be done using a public repository such as [UniProt](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) or [Ensembl](http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz).
 
@@ -176,46 +178,72 @@ The following directories and files are generated:
 
 By default, a directory called *DBs* is created containing files *makepsdb.log* and *makepsdb.report*, which inform about the the executed command and the *psdb* directory which contains the splitted files.
 
-## <a name="makevardb"></a>  3. Split variants / annotated positions files
+## <a name="makevardb"></a>  3. Split variants / annotated positions files with `makevariantsdb`
 
-Similar to the previous step, we will perform a splitting of the variants or annotated positions files.
+Similar the previous step,to accelerate the mapping process, we need to split variants or annotated positions files by individual transcript ID, 
 
 ### Input files
 
 #### Variants file
 
-The input annotated genomic variants file must be either in [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format), [VEP](https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout) or [MAF](https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/) default format. Additionally, a VEP-like format is admissible. This is in question same as VEP but not all the files are needed:
+The input annotated genomic variants file must be either in [VCF](https://en.wikipedia.org/wiki/Variant_Call_Format), [VEP](https://www.ensembl.org/info/docs/tools/vep/vep_formats.html#defaultout) or [MAF](https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/) default format. Additionally, a VEP-like format is admissible which must contain at least the following columns: 
 
--   Uploaded_variation
--   Gene
--   Feature
--   Consequence
--   Protein_position
--   Amino_acids
+    Uploaded_variation
+    Gene
+    Feature
+    Consequence
+    Protein_position
+    Amino_acids
 
 #### Positions file
 
-We can create a positions file using the the same format as for a variant file
+If we want to *map a set of positions to protein structures that are NOT mutations*, we have to create a "positions" file. Its format imitates the one of variants files. More specifically, the easiest way to generate a "positions file" is to replicate the VEP-like format, keeping the same column names but adding some modifications. 
 
-### Example
+An example of a position file would be: 
 
+    Uploaded_variation: contains the position ID
+    Gene: can be aprotein ID
+    Feature: can be a protein ID
+    Consequence: description of this position, if any. Examples could be "conserved_position", "functional_position", etc 
+    Protein_position: position in the protein sequence
+    Amino_acids: corresponding amino acid
+
+
+### Split files
+
+If the input is an annotated VCF, VEP or VEP-like file we can split it entering the following: 
 ``` markdown
 makevariantsdb -vf variants.vep 
 ```
+If it's a MAF file, then use: 
+``` markdown
+makevariantsdb -maf variants.maf 
+```
+
+### Output
+The following directories and files are generated:
+
+    |__DBs
+         |_____makevariantsdb.log
+         |_____makevariantsdb.report
+         |_____varDB
+                |_____transcript_ID1.txt
+                |_____transcript_ID2.txt        
+                |_____...        
+                |_____transcript_IDn.txt        
+
+By default, a directory called *DBs* is created containing files *makevariantsdb.log* and *makevaraintsdb.report*, which inform about the the executed command and the *varDB* directory which contains the splitted files by individual transcript ID.
 
 ## <a name="mapper"></a>  4. Map variants
 
-### Example CSV output
+
+
+### Basic example 
 
 ``` markdown
 mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -csv 
 ```
 
-### Example hdf output
-
-``` markdown
-mapper -pid ENSP00000356150 -psdb DBs/psdb -vdb DBs/varDB/ -ids dict_geneprot_GRCh38.txt  -f -hdf
-```
 
 # <a name="makechimera"></a>  3D visualization with ChimeraX
 
