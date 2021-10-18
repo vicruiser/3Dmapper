@@ -37,20 +37,18 @@ def parse_commandline():
     # vcf file
     annovar_group = parser.add_mutually_exclusive_group(required=True)
     annovar_group.add_argument('-vf', '--varfile', nargs='+', metavar="<String>", dest="vf",
-                               help='input directory containing single or \
-                                    multiple annotated variants files is VCF or VEP format')
+                               help='input VCF, VEP or VEP-like file(s)')
     annovar_group.add_argument("-maf", '--maf_file', nargs='+', metavar="<String>", dest="maf",
-                               help="annotated variant file in MAF format.")
-    annovar_group.add_argument("-varmap", action='store_true', dest="varmap",
-                               help="use ClinVar db of annotated variants",
-                               default="varmap")
+                               help="input MAF file(s)")
+
     # force orverwrite files
     parser.add_argument('-f', "--force", dest="force", action='store_true',
-                        help="force to owerwrite? (y/n)", default=False)
+                        help="force to owerwrite? Inactive by default", default=False)
     # create default output directory
-    parser.add_argument('-o', "--out", metavar="<String>", dest="out",
-                        help="output directory")
+    parser.add_argument("-o", "--out", metavar="<String>", dest="out",
+                        help="output directory. Default is current directory.")
     parser.set_defaults(out=".")
+    
     parser.add_argument("-s", "--sort", dest="sort", action='store_true',
                         help="sort input file to split ", default=False)
     # create default output directory
@@ -59,6 +57,7 @@ def parse_commandline():
                         help="Speed up running time. Depends on GNU Parallel. \
                         O. Tange(2011): GNU Parallel - The Command-Line Power Tool, \
                         login: The USENIX Magazine, February 2011: 42-47.")
+    
     parser.add_argument("-j", "--jobs", dest="njobs", metavar="<int>",
                         help="number of jobs to run in parallel", default = 1)
     # store arguments into variable

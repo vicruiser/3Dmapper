@@ -39,7 +39,7 @@ def parse_commandline():
     # protein id, gene id or variant id
     annovar_group = parser.add_mutually_exclusive_group(required=True)
     annovar_group.add_argument('-pid', '--prot-id', nargs='+', metavar="<String>", dest="prot_id",
-                               help='single or list of Ensembl protein/gene ids provided \
+                               help='one or more IDs of protein, transcripts or genes provided \
                                     via command line or from a file')
     annovar_group.add_argument('-vid', '--var-id', nargs='+', metavar="<String>", dest="varid",
                                help='single or list of variants ids provided \
@@ -47,10 +47,6 @@ def parse_commandline():
     # interfaces database file
     parser.add_argument("-psdb",  dest="psdb", metavar="<String>",
                         help="interfaces database directory", required=True)
-
-    # interfaces database file
-    #parser.add_argument('-u', "--uniprot", dest="uniprot", action='store_true',
-    #                    help="protein features are defined by Uniprot IDs", default=False)
 
     # variants db
     parser.add_argument("-vdb", '--vardb', dest="vardb", metavar="<String>",
@@ -62,22 +58,24 @@ def parse_commandline():
     parser.set_defaults(out="./3dmapper_results")
     
     # force overwrite
-    parser.add_argument('-ids', dest="dict_geneprot", metavar="<String>",
-                        help="File that contains protein, transcripts and gene IDs.", required = True)
+    parser.add_argument('--id_mapping', dest="dict_geneprot", metavar="<String>",
+                        help="File that contains the conversion of protein, transcripts and gene IDs \
+                            and optionally APPRIS isoforms IDs. ", required = True)
 
-    # filter results by type of variant
+       # filter by isoforms
+    parser.add_argument('-i', "--isoform", nargs='+', dest="isoform", metavar="<String>",
+                        help="if available in the ID mapping file, this parameter can filter by a single or a list of APPRIS isoforms. \
+                             The principal isoform is set by default. \
+                             Options are: principal1, principal2, ...")
+     # filter results by type of variant
     parser.add_argument('-c', "--consequence", nargs='+', dest="consequence", metavar="<String>",
                         help="filter by consequence type, e.g.:'missense_variant'. \
                             The set of consequences is defined by Sequence Ontology (http://www.sequenceontology.org/).", default=None)
-
-    # filter by isoforms
-    parser.add_argument('-i', "--isoform", nargs='+', dest="isoform", metavar="<String>",
-                        help="filter by a single or a list of APPRIS isoforms. \
-                             The principal isoform is set by default. \
-                             Options are: principal1, principal2, ...")
+    
     # filter by distance (applicable to interfaces)
     parser.add_argument('-d', "--dist", dest="dist", metavar="<float>",
-                        help="threshold of maximum distance allowed in angstroms")
+                        help="threshold of interface maximum distance allowed in angstroms.\
+                            By default, the maximum value will be the one selected in makeinterfacedb ")
 
     # filter by sequence identity percent
     parser.add_argument("--pident", dest="pident", metavar="<int>",
@@ -87,10 +85,24 @@ def parse_commandline():
     # filter by sequence identity percent
     parser.add_argument('-e', "--evalue", dest="evalue", metavar="<int>",
                         help="threshold of evalue", default=None)
+    
+    ########INCLUDE!!!!!!!!!
+    #parser.add_argument("-c", "--coverage", metavar="<float>", dest="coverage",
+    #                    help="percent coverage threshold of the protein sequence (how much of the protein sequence is covered by the PDB sequence). Default is 10 percent")
+    #parser.set_defaults(coverage=10)
+
+   # parser.add_argument("--interaction",
+   #                     metavar="<String>", 
+   #                     dest="int",
+   #                     choices=['protein', 'ligand', 'nucleic', 'all'],
+   #                     help="Interaction type: 'prot', 'ligand', 'nucleic', combination of the previous separated by space, or 'all' (by default)")
+   # parser.set_defaults(int='all')
+    
     # force overwrite
     file_dest = parser.add_mutually_exclusive_group(required=False)
     file_dest.add_argument('-f', "--force", dest="force", action='store_true',
-                        help="force to owerwrite? (y/n)", default=False)
+                        help="force to owerwrite? Inactive by default", default=False)
+    
     file_dest.add_argument('-a', "--append", dest="append", action='store_true',
                         help="Two or more calls to the program write are able to append results to the same output file.",
                         default=False)
@@ -104,6 +116,7 @@ def parse_commandline():
     parser.add_argument("-j", "--jobs", dest="njobs", metavar="<int>",
                         help="number of jobs to run in parallel")
     parser.set_defaults(njobs=1)
+
     # interfaces database file
     parser.add_argument("-v", "--verbose", dest="verbose", action='store_true',
                         help="Print progress.", default=False)
@@ -114,17 +127,21 @@ def parse_commandline():
                         help="Map all variants and detect their location.", default=False)
     
     # save final results in CSV format
-    parser.add_argument('-csv', dest="csv", action='store_true',
+    output_file = parser.add_group(required=True)
+    # in CSV format
+    output_file.add_argument('-csv', dest="csv", action='store_true',
                         help="Write the contained data to a CSV file.", default=False)
+    # in HDF5 format
+    output_file.add_argument('-hdf', dest="hdf", action='store_true',
+                        help="Write the contained data to an HDF5 file using HDFStore.", default=False)
+    
+    
+    #parser.add_argument('-csv', dest="csv", action='store_true',
+    #                    help="Write the contained data to a CSV file.", default=False)
     
     # save final results in HDF5 format
-    parser.add_argument('-hdf', dest="hdf", action='store_true',
-                        help="Write the contained data to an HDF5 file using HDFStore.", default=False)
-
-
-    # create chimera script to visualize the region of interest
-    # parser.add_argument("-chimera", action="store_true", dest="chimera",
-    #                     help="generates chimeraX script")
+    #parser.add_argument('-hdf', dest="hdf", action='store_true',
+    #                    help="Write the contained data to an HDF5 file using HDFStore.", default=False)
 
 
     # store arguments into variable

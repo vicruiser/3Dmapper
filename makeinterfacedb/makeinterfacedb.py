@@ -85,54 +85,6 @@ def pipeline(f):
         process5 = subprocess.call(["Rscript %s %s %s %s %s %s" % (rscript4, root, pdbid, blast_outdir, interfaces_outdir, args.out)], shell=True)
         #out5, err5 = process5.communicate() 
 
-def pipeline_protein(f): 
-    # check if R and BLAST are available
-    if is_tool('R') is False: 
-        sys.exit("Error: R not found or not executable.") 
-    if is_tool('blastp') is False:
-        sys.exit("Error: BLAST not found or not executable.") 
-    # parse command line options
-    args = parse_commandline()
-    pdbf = os.path.basename(f)
-    pdbid = pdbf.strip('.gz')
-
-    root = os.path.join(os.path.dirname (os.path.abspath (__file__)), 'rscripts')
-    rscript1 = os.path.join(root, "extract_pdb_chain_seqs.R")
-    rscript2 = os.path.join(root, "filter_blast_output.R")
-    rscript3 = os.path.join(root, "predict_PDB_interfaces_main.R")
-    rscript4 = os.path.join(root, "map_interfaces.R")
-
-    #process1 = subprocess.call(["Rscript %s %s %s" % (rscript1, f, chainseqs_outdir) ], shell=True)
-    #process1 = subprocess.Popen(["R --slave --quiet --no-restore --file=%s --args %s %s" % (rscript1, f, chainseqs_outdir) ], shell=True)
-    #out, err = process1.communicate()
-
-    # Run BLAST
-    blast_outdir = os.path.join(args.out, 'blast_results')
-    if not os.path.exists(blast_outdir):
-        os.makedirs(blast_outdir)
-    #for file in glob.glob(os.path.join(chainseqs_outdir  ,"*_chain*.fasta")): 
-    process2 = subprocess.Popen(["blastp -query %s -db %s -outfmt '6 sseqid slen qseqid qlen sstart send qstart qend evalue length pident nident sseq qseq gaps' \
-    -out %s.blast" % (f, args.blastdb, os.path.join(blast_outdir , os.path.basename(f)))] , shell =True, stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT)
-    out2, err2 = process2.communicate() 
-    # filter blast results
-    if err2 is None and out2 == b'':
-        process3 = subprocess.call(["Rscript %s %s %s %s %s %s %s.filtered" %(rscript2, os.path.join(blast_outdir , os.path.basename(file)+ '.blast'),
-            args.pident, args.coverage, args.evalue, blast_outdir, os.path.basename(f))+ '.blast'], shell =True)
-            #out3, err3 = process3.communicate() 
-
-        if os.path.isfile(os.path.join(blast_outdir , os.path.basename(f)+ '.filtered.blast')):
-            # Predict interfaces # To be included? ideally hidrophobicity, ss type and full structure
-            interfaces_outdir = os.path.join(args.out, 'predicted_interfaces')
-            if not os.path.exists(interfaces_outdir):
-                os.makedirs(interfaces_outdir)
-            process4 = subprocess.call(["Rscript %s %s %s %s %s %s %s %s" % (rscript3, root, f, interfaces_outdir, args.dist, args.type, args.int, args.biolip)] , shell =True)
-            #out4, err4 = process4.communicate() 
-            # Map PDB and protein information
-            process5 = subprocess.call(["Rscript %s %s %s %s %s %s" % (rscript4, root, pdbid, blast_outdir, interfaces_outdir, args.out)], shell=True)
-            #out5, err5 = process5.communicate() 
-
-
 def main():
     # parse command line options
     args = parse_commandline()

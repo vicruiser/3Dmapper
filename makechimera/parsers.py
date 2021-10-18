@@ -115,9 +115,9 @@ def parse_args() -> argparse.Namespace:
                         metavar='<string>',
                         dest='itf_style')
     
-    parser.add_argument('--overwrite',
+    parser.add_argument('-f', "--force",
                         required=False,
-                        help='Tool will overwrite output file.',
+                        help='Force to overwrite? Active by default.',
                         action='store_true',
                         dest='overwrite')
 

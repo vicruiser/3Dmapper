@@ -17,6 +17,7 @@
 -   BLAST standalone software version >= 2.6. Follow these [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use the command line tool.
 -   Python > 3.6
 -   R version > 3.5
+-   [GNU parallel](https://www.gnu.org/software/parallel/)
 
 ## Automatically installed
 
@@ -110,15 +111,6 @@ makeinterfacedb -pdb pdb_dir/* --blast_db target_proteome_db
 ``` markdown
 makeinterfacedb -pdb list_pdbs.txt --blast_db target_proteome_db
 ``` 
--   As individual tasks (one per PDB file). This setting is useful when running jobs in parallel using job arrays or greasy. The results will be appended to the same output file.
-
-``` markdown
-makeinterfacedb -pdb file1.pdb --blast_db target_proteome_db
-makeinterfacedb -pdb file2.pdb --blast_db target_proteome_db
-makeinterfacedb -pdb file3.pdb --blast_db target_proteome_db
-...
-makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db
-```
 Note: Crystallographic artifacts can be removed with the option `-b`, based on the [BioLiP artifact ligand list](https://zhanggroup.org/BioLiP/ligand_list).
 
 ### Output
@@ -259,7 +251,7 @@ To learn about additional arguments, run ``` mapper -h ```.
 
 # <a name="makechimera"></a>  Results visualization with ChimeraX
 
-Results can be visualized running
+Results can be visualized running...
 
 ``` markdown
 makechimera xxxx
@@ -267,6 +259,27 @@ makechimera xxxx
 
 # Paralellization
 
-3Dmapper can be parallelized parallelization. While `makepsdb` and `makevariantsdb` run with GNU parallel \[ref\], `mapper` uses the python module joblib.
+## with Joblib
+To run `makeinterfacesdb` and `mapper` in parallel, activate the option `-p` or `--parallel` and specify the number of cores you want to use at the same time with `-j` or `--jobs`.
 
-An alternative to parallelaize 3Dmapper is to is to give as input the protein ids in individual tasks to perform a job array in a cluster computer?. The first task should write the initial files. The rest set the option `-force n` to prevent repeating innecesary steps.
+## in a computer cluster
+In cluster computing, the option of using parallelization with joblib is not always the optimal approach. Instead, submitting individual tasks is possible as an strategy of parallelization using job arrays or greasy as the results will be appended to the same output file. In 3Dmapper, this option is avaialble for `makeinterfacesdb` and `mapper`. Below you can find two examples on how to run this 
+
+``` markdown
+makeinterfacedb -pdb file1.pdb --blast_db target_proteome_db
+makeinterfacedb -pdb file2.pdb --blast_db target_proteome_db
+makeinterfacedb -pdb file3.pdb --blast_db target_proteome_db
+...
+makeinterfacedb -pdb fileN.pdb --blast_db target_proteome_db
+```
+
+``` markdown
+mapper -pid protID1  -psdb DBs/psdb -vdb DBs/varDB -ids dict.txt  -csv -l
+mapper -pid protID2  -psdb DBs/psdb -vdb DBs/varDB -ids dict.txt  -csv -l
+mapper -pid protID3  -psdb DBs/psdb -vdb DBs/varDB -ids dict.txt  -csv -l
+...
+mapper -pid protIDN  -psdb DBs/psdb -vdb DBs/varDB -ids dict.txt  -csv -l
+```
+
+## with GNU parallel
+The splitting process of `makepsdb` and `makevariantsdb` can be greatly improved thanks to GNU parallel \nocite{Tange2011a}. Activate this option with `-p` or `--parallel` and specify the number of cores you want to use at the same time with `-j` or `--jobs`. Manual installation of GNU parallel is required for this step. 
