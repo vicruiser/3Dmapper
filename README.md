@@ -88,7 +88,7 @@ For each of the considered PDB files, `makeinterfacedb` automatically will:
 
 ### Example
 
-In this example, we are going to **0generate a structural database of human proteins**.
+In this example, we are going to **generate a structural database of human proteins**.
 
 1)  Retrieve the human proteome in FASTA format. This can be done using a public repository such as [UniProt](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/reference_proteomes/Eukaryota/UP000005640/UP000005640_9606.fasta.gz) or [Ensembl](http://ftp.ensembl.org/pub/release-104/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz).
 

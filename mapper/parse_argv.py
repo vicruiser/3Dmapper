@@ -127,21 +127,21 @@ def parse_commandline():
                         help="Map all variants and detect their location.", default=False)
     
     # save final results in CSV format
-    output_file = parser.add_group(required=True)
-    # in CSV format
-    output_file.add_argument('-csv', dest="csv", action='store_true',
+    # output_file = parser.add_argument_group('Output format')
+    # # in CSV format
+    # output_file.add_argument_group('-csv', dest="csv", action='store_true',
+    #                     help="Write the contained data to a CSV file.", default=False)
+    # # in HDF5 format
+    # output_file.add_argument_group('-hdf', dest="hdf", action='store_true',
+    #                     help="Write the contained data to an HDF5 file using HDFStore.", default=False)
+    
+    
+    parser.add_argument('-csv', dest="csv", action='store_true',
                         help="Write the contained data to a CSV file.", default=False)
-    # in HDF5 format
-    output_file.add_argument('-hdf', dest="hdf", action='store_true',
-                        help="Write the contained data to an HDF5 file using HDFStore.", default=False)
-    
-    
-    #parser.add_argument('-csv', dest="csv", action='store_true',
-    #                    help="Write the contained data to a CSV file.", default=False)
     
     # save final results in HDF5 format
-    #parser.add_argument('-hdf', dest="hdf", action='store_true',
-    #                    help="Write the contained data to an HDF5 file using HDFStore.", default=False)
+    parser.add_argument('-hdf', dest="hdf", action='store_true',
+                        help="Write the contained data to an HDF5 file using HDFStore.", default=False)
 
 
     # store arguments into variable
