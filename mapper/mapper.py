@@ -210,7 +210,8 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                 noncoding_positions = False
             # non-protein coding mutations
             if noncoding_positions is not False:
-                noncoding_positions['APPRIS_isoform'] = ''
+                if APPRIS is not None: 
+                    noncoding_positions['APPRIS_isoform'] = APPRIS
                 noncoding_positions['Mapping_position'] = 'Noncoding'
                 writefile(prot_id, out_dir, pident, isoform, consequence,
                           noncoding_positions, 'NoncodingPositions', csv, hdf)
@@ -220,7 +221,9 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
 
             if unmapped_positions.empty is False:
                 unmapped_positions.drop_duplicates(inplace=True)
-                unmapped_positions['APPRIS_isoform'] = ''
+                if APPRIS is not None: 
+                    unmapped_positions['APPRIS_isoform'] = APPRIS
+                
                 unmapped_positions['Mapping_position'] = 'Unmapped'
                 writefile(prot_id, out_dir, pident, isoform, consequence,
                           unmapped_positions, 'UnmappedPositions', csv, hdf)
@@ -229,7 +232,8 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         # for sucessful merge, Protein_position column must be str type
         psdf['Protein_position'] = psdf['Protein_position'].astype(str)
         annovars['Protein_position'] = annovars['Protein_position'].astype(str)
-        annovars['APPRIS_isoform'] = APPRIS
+        if APPRIS is not None:
+            annovars['APPRIS_isoform'] = APPRIS
        # annovars['Uniprot_accession'] = Uniprot_id
         # Merge them both files
         mapped_positions = annovars.join(
@@ -262,6 +266,8 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                     writefile(prot_id, out_dir, pident, isoform, consequence,
                               noncoding_positions, 'NoncodingPositions', csv, hdf)
                     left_positions = left_positions.loc[~noncoding_positions_index]
+                    del(noncoding_positions, noncoding_positions_index)
+                
                 left_positions['Protein_accession'] = prot_id
 
                 # remove protein position since we know there are no matching positions
@@ -283,21 +289,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                     int)
                 unmapped_positions[(unmapped_positions.Protein_position.values >= unmapped_positions.Protein_alignment_start.values) & (
                     (unmapped_positions.Protein_position <= unmapped_positions.Protein_alignment_end))]
-                # mapped position is on the rest of the structure
-                structure_positions = mapped_positions[mapped_positions['Interaction_type'].isna()]
-                structure_positions = structure_positions.drop(['Chimera_interacting_position', 'Chimera_3D_position',
-                                                              'PDB_interacting_3D_position','PDB_interacting_aa',
-                                                              'Interface_min_distance', 'PDB_interacting_B_factor'], axis=1)
-                # do proper arragenments if no resulst are retrieved
-                if structure_positions.empty is False:
-                    structure_positions.drop_duplicates(inplace=True)
-                    #structure_positions['PDB_seq_position'] = structure_positions['Protein_position'] - \
-                    # structure_positions['Protein_alignment_start'] + structure_positions['PDB_alignment_start']
-                    structure_positions['Mapping_position'] = 'Structure'
-                    writefile(prot_id, out_dir, pident, isoform, consequence,
-                              structure_positions, 'StructurePositions', csv, hdf)
-                    #unmapped_positions = left_positions#[~left_positions.index.isin(structure_positions.index)]
-
+                
                 if unmapped_positions.empty is False:
                     cs = annovars.columns.values.tolist()
                     cs.append("Protein_accession")  
@@ -306,6 +298,32 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                     unmapped_positions['Mapping_position'] = 'Unmapped'
                     writefile(prot_id, out_dir, pident, isoform, consequence,
                             unmapped_positions, 'UnmappedPositions', csv, hdf)
+                
+                    del(left_positions, unmapped_positions)  
+                # mapped position is on the rest of the structure
+            structure_positions = mapped_positions[mapped_positions['Interaction_type'].isna()]
+            structure_positions = structure_positions.drop(['Chimera_interacting_position', 'Chimera_3D_position',
+                                                              'PDB_interacting_3D_position','PDB_interacting_aa',
+                                                              'Interface_min_distance', 'PDB_interacting_B_factor',
+                                                              'PDB_interacting_chain', 'Interaction_type'], axis=1)
+            #do proper arragenments if no resulst are retrieved
+            if structure_positions.empty is False:
+                structure_positions.drop_duplicates(inplace=True)
+                #structure_positions['PDB_seq_position'] = structure_positions['Protein_position'] - \
+                # structure_positions['Protein_alignment_start'] + structure_positions['PDB_alignment_start']
+                structure_positions['Mapping_position'] = 'Structure'
+                writefile(prot_id, out_dir, pident, isoform, consequence,
+                        structure_positions, 'StructurePositions', csv, hdf)
+                    #unmapped_positions = left_positions#[~left_positions.index.isin(structure_positions.index)]
+
+                # if unmapped_positions.empty is False:
+                #     cs = annovars.columns.values.tolist()
+                #     cs.append("Protein_accession")  
+                #     unmapped_positions = unmapped_positions[[c for c in unmapped_positions.columns if c in cs]]
+                #     unmapped_positions.drop_duplicates(inplace=True)
+                #     unmapped_positions['Mapping_position'] = 'Unmapped'
+                #     writefile(prot_id, out_dir, pident, isoform, consequence,
+                #             unmapped_positions, 'UnmappedPositions', csv, hdf)
                 # else:
                 #     try:
                 #         unmapped_positions = left_positions
@@ -316,8 +334,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                 #                       unmapped_positions, 'Unmappedpositions', csv, hdf)
                 #     except:
                 #         pass
-                del (structure_positions, left_positions,
-                     noncoding_positions, noncoding_positions_index)  
+                del (structure_positions)
         ###########################################################################
         # stop if there are no results
         if mapped_positions.empty:

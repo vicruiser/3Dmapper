@@ -171,7 +171,7 @@ def parallel(parallel, njobs):
         num_cores = njobs
     return(num_cores)
 
-def start_spinner(verbose, logger, time_format):
+def start_spinner(verbose, logger, time_format, spinner):
     start = time.time()
     logger.info('Running 3Dmapper...')
     if verbose:
@@ -195,8 +195,6 @@ def main():
     logger.info(out_message)
     # print ascii art
     aesthetis()
-    #print(description)
-    #print(epilog)
     # time message
     time_format = '[' + time.ctime(time.time()) + '] '
 
@@ -224,9 +222,8 @@ def main():
     num_cores  = parallel(args.parallel, args.njobs)
 
     index_file = glob.glob(os.path.join(args.vardb, '*.index'))[0]
-    start= start_spinner(args.verbose, logger, time_format)
+    start= start_spinner(args.verbose, logger, time_format, spinner)
     if args.varid:
-
         # find positions index file
         for ids in args.varid:
             # run PDBmapper
@@ -271,11 +268,7 @@ def main():
                 out, err = call_subprocess(cmd)
                 if err is None and out != b'':
                     toprocess = out.decode('utf-8').split(" ")
-                    # geneid correspond to the 2nd column in the line
-                    transcriptid = [
-                        s for s in toprocess if ('ENST' or '-') in s]
-                    if any(transcriptid) is False and len(toprocess) > 0:
-                        transcriptid = ['-']
+                    transcriptid = toprocess[2].strip()
                     Parallel(n_jobs=num_cores)(delayed(wrapper)(t,
                                                                 args.psdb,
                                                                 args.vardb,
@@ -294,7 +287,7 @@ def main():
                                                for t in transcriptid)
                 else:
                     logger.error(
-                        'Wrong input: {} is not a recognizable position id'.format(id))
+                        'Wrong input: {} is not a recognizable position id'.format(ids))
                     continue
 
             else:

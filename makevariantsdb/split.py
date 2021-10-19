@@ -36,7 +36,7 @@ awk -v ci=\"{1}\" \
 !seen[$ci]++{{f=od$ci\".{3}\"; print h >> f}}; \
 {{f=od$ci\".{3}\"; print >> f; close(f)}}'"
 
-index_file = "grep -v '##' {} | awk -F ' ' '{{print ${}, ${}, ${} , ${}}}' > {} "
+index_file = "grep -v '##' {} | awk -F ' ' '{{print ${}, ${}, ${} }}' > {} "
 #index_file = "awk -F ' ' 'NR>2{{print ${}, ${}, ${} {}}}' {} | uniq >> {}  "
 
 # - grep -v '##': remove lines starting with ##
@@ -115,19 +115,19 @@ def request(prefix, input_file, out_dir, out_extension, log_dir,sort, parallel, 
     
 
     # command
-    cmd3 = detect_column.format( input_file,'Existing_variation')
+    #cmd3 = detect_column.format( input_file,'Existing_variation')
     # execute subprocess
-    out3, err3 = call_subprocess(cmd3)
+    #out3, err3 = call_subprocess(cmd3)
     # error handling
-    if err3 is None and out3 != b'':
-        col_index_namevarid = str(re.findall('\d+', out3.decode('utf8'))[0]) #', $' + \
+    #if err3 is None and out3 != b'':
+    #    col_index_namevarid = str(re.findall('\d+', out3.decode('utf8'))[0]) #', $' + \
             
-        logger.info('\'Existing_variation\' columnd found.')
-    else:
+    #    logger.info('\'Existing_variation\' columnd found.')
+    #else:
         # if 'Existing_variation' column does not exist
-        col_index_namevarid = ' '
-        logger.error(
-            'This file will be indexed without the column \'Existing_variation\' wich contains variants ids.')
+    #    col_index_namevarid = ' '
+    #    logger.error(
+    #        'This file will be indexed without the column \'Existing_variation\' wich contains variants ids.')
 
     # detect if there is output
     # stop if no ENSG id detected
@@ -167,8 +167,9 @@ def request(prefix, input_file, out_dir, out_extension, log_dir,sort, parallel, 
                                  col_index_varid,
                                  col_index_geneid,
                                  col_index_transcriptid,
-                                 col_index_namevarid,
+                                 #col_index_namevarid,
                                  os.path.join(out_dir, 'variants.index'))
+
         # register process
         out5, err5 = call_subprocess(cmd5)
         # error handling

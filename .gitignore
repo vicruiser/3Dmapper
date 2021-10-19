@@ -18,3 +18,5 @@ test
 bcftools
 htslib
 .vscode
+3dmapper.egg-info
+
