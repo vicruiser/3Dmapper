@@ -14,7 +14,6 @@ pics/LogoPDB_PDBmapper_LOGO2.svg
 scripts/leftovers
 scripts/.ipynb_checkpoints
 pdbmapper.egg-info
-test
 bcftools
 htslib
 .vscode
