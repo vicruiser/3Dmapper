@@ -39,12 +39,13 @@
 
 # Install
 
-In a Linux OS open a terminal and enter the following:
+Open a terminal and enter the following:
 
 ``` bash
 git clone https://github.com/vicruiser/3Dmapper.git
 cd 3Dmapper
 pip install . 
+sh r_dependencies.sh
 ```
 
 # Index of tools

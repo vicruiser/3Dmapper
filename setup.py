@@ -14,6 +14,7 @@ import subprocess
 import io
 from os import path
 import os
+import sys
 
 here = path.abspath(path.dirname(__file__))
 # Get the long description from the README file
@@ -44,6 +45,7 @@ class git_clone_external(DistutilsInstall):
     #         raise Exception("command = {0} failed with output = {1} status {2:d}\n"
     #                         .format(command, output, status))
 
+    
     def run(self):
 
         #connection = self.internet_on()
@@ -82,7 +84,7 @@ class git_clone_external(DistutilsInstall):
 
             subprocess.call(
                 ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
-
+            
             DistutilsInstall.run(self)
 
 
@@ -130,7 +132,7 @@ setup(
     # download_url='https://github.com/vicruiser/PDBmapper/archive/v_01.tar.gz',
     # This is a one-line description or tagline of what your project does. This
     # corresponds to the "Summary" metadata field:
-    description='Map annotated genomic variants to protein interfaces data in 3D.',  # Optional
+    description='Map annotated genomic positions to protein interfaces data in 3D.',  # Optional
 
     # This field corresponds to the "Description" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#description-optional
@@ -168,15 +170,17 @@ setup(
         # that you indicate whether you support Python 2, Python 3 or both.
         # These classifiers are *not* checked by 'pip install'. See instead
         # 'python_requires' below.
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
 
     # This field adds keywords for your project which will appear on the
     # project page. What does your project relate to?
     #
     # Note that this is a string of words separated by whitespace, not a list.
-    keywords=["mapping tool", "genetic positions", "protein structure", "PDB"],  # Optional
+    keywords=["mapping","CLI", "genetic positions", "protein structure", "PDB"],  # Optional
 
     # When your source code is in a subdirectory under the project root, e.g.
     # `src/`, it is necessary to specify the `package_dir` argument.
@@ -217,9 +221,7 @@ setup(
     package_data={
         # And include any *.dat files found in the 'data' subdirectory
         # of the 'mypkg' package, also:
-        '': ['data/*','rscripts/*']#,
-       # 'dep': ['dependencies.R']
-        #'makeinterfacedb': ['data/*']
+        '': ['data/*','rscripts/*']
     },
     include_package_data = True, 
 

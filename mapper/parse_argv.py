@@ -69,8 +69,7 @@ def parse_commandline():
                              Options are: principal1, principal2, ...")
      # filter results by type of variant
     parser.add_argument('-c', "--consequence", nargs='+', dest="consequence", metavar="<String>",
-                        help="filter by consequence type, e.g.:'missense_variant'. \
-                            The set of consequences is defined by Sequence Ontology (http://www.sequenceontology.org/).", default=None)
+                        help="filter by variant or position consequence type", default=None)
     
     # filter by distance (applicable to interfaces)
     parser.add_argument('-d', "--dist", dest="dist", metavar="<float>",
@@ -127,21 +126,21 @@ def parse_commandline():
                         help="Map all variants and detect their location.", default=False)
     
     # save final results in CSV format
-    # output_file = parser.add_argument_group('Output format')
+    output_file = parser.add_argument_group(title = 'Output format')
     # # in CSV format
-    # output_file.add_argument_group('-csv', dest="csv", action='store_true',
-    #                     help="Write the contained data to a CSV file.", default=False)
+    output_file.add_argument('-csv', dest="csv", action='store_true',
+                         help="Write the mapped data to a CSV file.", default=False)
     # # in HDF5 format
-    # output_file.add_argument_group('-hdf', dest="hdf", action='store_true',
-    #                     help="Write the contained data to an HDF5 file using HDFStore.", default=False)
+    output_file.add_argument('-hdf', dest="hdf", action='store_true',
+                         help="Write the mappedd data to an HDF5 file using HDFStore.", default=False)
     
     
-    parser.add_argument('-csv', dest="csv", action='store_true',
-                        help="Write the contained data to a CSV file.", default=False)
+    #parser.add_argument('-csv', dest="csv", action='store_true',
+    #                    help="Write the contained data to a CSV file.", default=False)
     
     # save final results in HDF5 format
-    parser.add_argument('-hdf', dest="hdf", action='store_true',
-                        help="Write the contained data to an HDF5 file using HDFStore.", default=False)
+    #parser.add_argument('-hdf', dest="hdf", action='store_true',
+    #                    help="Write the contained data to an HDF5 file using HDFStore.", default=False)
 
 
     # store arguments into variable
