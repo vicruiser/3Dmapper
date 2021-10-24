@@ -82,7 +82,7 @@ For each of the considered PDB files, `makeinterfacedb` automatically will:
 2) BLAST PDB chain sequences (query) against the target proteome of interest (subject). 
 3) Retrieve structural data of hits passing the selected homology filtering.
 
-### Input files
+### Input files 
 
 -   A set of *PDB or CIF* files of interest (either real structures or models).
 -   A target proteome BLAST database. More details on how to do this can be found in the example below.
@@ -111,7 +111,7 @@ makeinterfacedb -pdb pdb_dir/* --blast_db target_proteome_db
 -   As a plain text file (.txt) with one PDB file path per line: 
 ``` markdown
 makeinterfacedb -pdb list_pdbs.txt --blast_db target_proteome_db
-``` 
+```
 Note: Crystallographic artifacts can be removed with the option `-b`, based on the [BioLiP artifact ligand list](https://zhanggroup.org/BioLiP/ligand_list).
 
 ### Output

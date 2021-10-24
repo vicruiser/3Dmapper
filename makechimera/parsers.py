@@ -55,7 +55,7 @@ def parse_args() -> argparse.Namespace:
     
     parser.add_argument('-n', '--name',
                         required=False,
-                        help='Base name for the ChimeraX script.',
+                        help='Base name for the ChimeraX scripts.',
                         action='store',
                         type=str,
                         metavar='<string>',
