@@ -252,7 +252,7 @@ To learn about additional arguments, run ``` mapper -h ```.
 
 # <a name="makechimera"></a>  Results visualization with ChimeraX
 
-Once you you have your positions or variants mapped to protein structures, you can use the CSV files from the `mapper` output to generate ChimeraX scripts to visualize your results in 3D. Find a usage example :
+Once you have your positions or variants mapped to protein structures, you can use the CSV files from the `mapper` output to generate ChimeraX scripts to visualize your results in 3D. Here is a usage example:
 
 ``` markdown
 makechimera -p PDB_code -i InterfacePositions.csv -s StructurePositions.csv -o output/folder/ -n script_base_name
@@ -261,7 +261,7 @@ makechimera -p PDB_code -i InterfacePositions.csv -s StructurePositions.csv -o o
 Input arguments:
 
 - `-p` / `--pdb_code`: PDB code for the protein structure to visualize in ChimeraX. If no biological assembly is provided (i.e. `pdb_code.pdb1` for biological assembly 1), one script will be generated for each biological assembly available in the CSV file/s provided *(Note: more than one PDB code can be provided separated by spaces).* 
-- `--pdb_list`: allows string passed to the `-p` argument to be a TXT file containing any number of PDB codes separated by spaces, tabs or new lines.
+- `--pdb_list`: allows the string passed to the `-p` argument to be a TXT file containing any number of PDB codes separated by spaces, tabs or new lines.
 - `-i` / `--interface_positions`: CSV file resulting from the `mapper` command, containing the positions or variants mapped to protein interfaces. 
 - `-s` / `--structure_positions`: CSV file resulting from the `mapper` command, containing the positions or variants mapped to any part of the protein structure other than the interfaces (*Note:  at least one CSV file containing either the interface positions or the structure positions must be provided*).
 - `-o` / `--output`: the output folder in which the script/s will be written.

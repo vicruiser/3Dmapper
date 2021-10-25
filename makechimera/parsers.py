@@ -117,7 +117,8 @@ def parse_args() -> argparse.Namespace:
     
     parser.add_argument('-f', "--force",
                         required=False,
-                        help='Force to overwrite? Active by default.',
+                        help='Force to overwrite?',
+                        default=False,
                         action='store_true',
                         dest='overwrite')
 
