@@ -1,4 +1,4 @@
-[![build status](http://img.shields.io/travis/vicruiser/3Dmapper/master.svg?style=flat)](https://travis-ci.com/username/vicruiser/3Dmapper) [![Join the chat at https://gitter.im/pdbmapper/community](https://badges.gitter.im/pdbmapper/community.svg)](https://gitter.im/pdbmapper/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![build status](http://img.shields.io/travis/vicruiser/3Dmapper/master.svg?style=flat)](https://travis-ci.com/username/vicruiser/3Dmapper) [![Join the chat at https://gitter.im/3d_mapper/community](https://badges.gitter.im/pdbmapper/community.svg)](https://gitter.im/3d_mapper/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # Overview
 
