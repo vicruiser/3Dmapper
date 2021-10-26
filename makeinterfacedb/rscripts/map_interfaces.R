@@ -4,7 +4,7 @@
 ###############################################################################
 warn.conflicts = FALSE
 #indicate library path
-requiredPackages = c('plyr', 'dplyr','data.table','stringr','reshape2','seqinr','bio3d')
+requiredPackages = c('plyr', 'dplyr','data.table','stringr','reshape2','seqinr','bio3d','flock')
 for (p in requiredPackages) {
   if (!require(p, character.only = TRUE))
     install.packages(p)
@@ -178,15 +178,18 @@ if (nrow(new_mpi) > 0) {
   
   fn = file.path(output_dir, 'interfacesDB.txt')
   
+  lock <- lock(fn)
   write.table(
     individual_new_mpi,
     fn,
     quote = F,
     row.names = F,
     append = T,
-    col.names = !file.exists(fn),
+    col.names = file.info(fn)$size==0,
     sep = "\t"
   )
+  unlock(lock)
+  
 } else{
   #####################################################################################
   # Store pdb ids associated to interfaces that did not map with any Ensembl prot seq #

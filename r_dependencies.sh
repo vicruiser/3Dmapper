@@ -47,6 +47,11 @@ wget https://cran.r-project.org/src/contrib/Archive/tidyr/tidyr_1.1.2.tar.gz
 R CMD INSTALL tidyr_1.1.2.tar.gz
 echo Installing tidyr...Done!
 
+echo Installing flock...
+wget https://cran.r-project.org/src/contrib/Archive/flock/flock_0.5.tar.gz
+R CMD INSTALL flock_0.5.tar.gz
+echo Installing flock...Done!
+
 echo Installing veriNA3d...
 wget mmb.irbbarcelona.org/gitlab/dgallego/veriNA3d-dev/repository/archive.zip?ref=master -O ./veriNA3d_0.99.0.zip
 unzip veriNA3d_0.99.0.zip

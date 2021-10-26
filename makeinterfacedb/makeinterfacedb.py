@@ -65,6 +65,7 @@ def pipeline(f):
         -out %s.blast" % (file, args.blastdb, os.path.join(blast_outdir , os.path.basename(file)))] , shell =True, stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
         out2, err2 = process2.communicate() 
+      #
         # filter blast results
         if err2 is None and out2 == b'':
             process3 = subprocess.call(["Rscript %s %s %s %s %s %s %s.filtered" %(rscript2, os.path.join(blast_outdir , os.path.basename(file)+ '.blast'),
@@ -74,6 +75,8 @@ def pipeline(f):
                 filtered_blast.append(True)
             else: 
                 filtered_blast.append(False)
+        else: 
+            print(out2.decode('utf8'))
     # Predict interfaces # To be included? ideally hidrophobicity, ss type and full structure
     if any(filtered_blast) is True : 
         interfaces_outdir = os.path.join(args.out, 'predicted_interfaces')
