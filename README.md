@@ -35,6 +35,7 @@
     -   bio3d 2.4-2
     -   stringr 1.4.0
     -   tidyr 1.1.2
+    -   flock 0.5
     -   veriNA3d 1.0.3
 
 # Install
