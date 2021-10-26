@@ -11,10 +11,10 @@ import time
 from halo import Halo
 
 # local application imports
-import .helpers
-import .parsers
-import .templates
-import .logger
+import helpers
+import parsers
+import templates
+import logger
 
 
 def main():

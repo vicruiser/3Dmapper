@@ -99,7 +99,7 @@ def check_args(args: argparse.Namespace):
             sys.exit('Error: path to mapped-to-structure file provided is incorrect or file does not exist.')
             
         # check that mapped-to-structure file contains necessary columns
-        necess_cols = ["PDB_code", "PDB_chain", "PDB_seq_position"] 
+        necess_cols = ["PDB_code", "PDB_chain", "PDB_3D_position"] 
         
         with open(args.structure_file, 'r') as f:
             mapped = pd.read_csv(f)
@@ -245,7 +245,7 @@ def get_structure_variants(data: pd.DataFrame) -> list:
     chains = data.PDB_chain.unique().tolist()
     
     for chain in chains:
-        positions = sorted(data[data.PDB_chain == chain].PDB_seq_position.unique().tolist())
+        positions = sorted(data[data.PDB_chain == chain].PDB_3D_position.unique().tolist())
         variants.append(f'/{chain}:{",".join(str(pos) for pos in positions)}')
     
     return variants
@@ -312,7 +312,7 @@ def read_structure_data(map_file: str, cols: list = None) -> pd.DataFrame:
             is specified.
     """ 
     if not cols:
-        cols = ["PDB_code", "PDB_chain", "PDB_seq_position"] 
+        cols = ["PDB_code", "PDB_chain", "PDB_3D_position"] 
     
     with open(map_file, 'r') as f:
         data = pd.read_csv(f)
