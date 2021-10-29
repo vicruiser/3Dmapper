@@ -44,7 +44,6 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
             APPRIS = ids['APPRIS']
         else:
             APPRIS = list(itertools.repeat(None, len(gene_id))) # change to list with same length as protid
-
         # run 3Dmapper
         for i in range(0, len(prot_id)):
             try:

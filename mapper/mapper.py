@@ -128,8 +128,8 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         cols_stack = psdf.apply(lambda x: x.astype(
             str).str.match(r'[a-zA-Z0.-9]+-[a-zA-Z0.-9]+'))
         colsnames_stack = psdf.columns[cols_stack.any()].tolist()
+        print(psdf.loc[psdf['PDB_code'] == '6xa9.pdb1.gz_'][['Protein_position','PDB_3D_position','PDB_code']].head())
         # add column for chimera script
-       
         if 'PDB_interacting_3D_position' in colsnames_stack:
             #psdf['Interface_interacting_positions'] = psdf['PDB_interacting_position']  
             psdf['Chimera_interacting_position'] = psdf['PDB_interacting_3D_position']
@@ -143,14 +143,14 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         if 'Structure_feature_id' in colsnames_stack:
             colsnames_stack.remove('Structure_feature_id')
         if any(colsnames_stack):
-            psdf = explode(psdf , colsnames_stack, '-')
+            psdf = explode(psdf , colsnames_stack, '/')
         elif any(columns_list):
             psdf = explode(
-                psdf, columns_list, '-')
+                psdf, columns_list, '/')
         else:
             psdf[colsnames_stack] = \
                 psdf[colsnames_stack].astype(str)
- 
+        print(psdf.loc[psdf['PDB_code'] == '6xa9.pdb1.gz_'][['Protein_position','PDB_3D_position','PDB_code']].head())
         # if default database is used minor modifications are needed
         if pident is not None:
             logger.info('Filtering interfaces by pident = ' +
@@ -227,7 +227,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                 unmapped_positions['Mapping_position'] = 'Unmapped'
                 writefile(prot_id, out_dir, pident, isoform, consequence,
                           unmapped_positions, 'UnmappedPositions', csv, hdf)
-        
+   
     elif psdf is not False and annovars is not False:
         # for sucessful merge, Protein_position column must be str type
         psdf['Protein_position'] = psdf['Protein_position'].astype(str)

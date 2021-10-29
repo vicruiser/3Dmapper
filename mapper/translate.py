@@ -36,7 +36,7 @@ def translate(id, log_dir,dict_geneprot=None, isoform_filter=None):
         # get col names
         cols = f.readline().rstrip().split(',')
         # command line for grep (very fast)
-        cmd = 'grep \'' + id + '\' ' + dict_geneprot
+        cmd = 'grep -w \'' + id + '\' ' + dict_geneprot
         # call shell process
         out, err = call_subprocess(cmd)
         line = out.decode('utf-8')

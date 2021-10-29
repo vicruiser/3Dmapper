@@ -266,9 +266,10 @@ def main():
                 cmd = ('grep \'\\b{}\\b\' {}').format(ids, index_file)
                 # call subprocess
                 out, err = call_subprocess(cmd)
+                print(out)
                 if err is None and out != b'':
                     toprocess = out.decode('utf-8').split(" ")
-                    transcriptid = toprocess[2].strip()
+                    transcriptid = [toprocess[2].strip()]
                     Parallel(n_jobs=num_cores)(delayed(wrapper)(t,
                                                                 args.psdb,
                                                                 args.vardb,

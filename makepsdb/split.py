@@ -14,9 +14,9 @@ import glob
 import os
 
 
-sort_cmd="awk 'NR==1; NR>1{{print $0 | \"sort -n\"}}' {0} > {0}.sorted"
+sort_cmd="awk 'NR==1; NR>1{{print $0 | \"sort -n -T {1}\"}}' {0} > {0}.sorted"
 
-sort_cmd_parallel="awk 'NR==1; NR>1{{print $0 | \"sort --parallel {1} -n\"}}' {0} > {0}.sorted"
+sort_cmd_parallel="awk 'NR==1; NR>1{{print $0 | \"sort --parallel={1} -T {2} -n\"}}' {0} > {0}.sorted"
 
 detect_column = "awk -F '\t' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' {} "
@@ -68,15 +68,19 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, sort, parallel,
         logger.info('Splitting interfaces file...')
         if sort is True: 
             if parallel is True:
-                cmds= sort_cmd_parallel.format(input_file, njobs)
+                cmds= sort_cmd_parallel.format(input_file, njobs, out_dir+'/tmp')
                 out_sorted, err_sorted = call_subprocess(cmds)
                 if err_sorted is None and out_sorted != b'':
                     input_file = input_file + '.sorted'
+                else:
+                    stop(out_sorted)
             else: 
-                cmds= sort_cmd.format(input_file)
+                cmds= sort_cmd.format(input_file,out_dir+'/tmp')
                 out_sorted, err_sorted = call_subprocess(cmds)
                 if err_sorted is None and out_sorted != b'':
                     input_file = input_file + '.sorted'
+                else:
+                    stop(out_sorted)
         
         cmd2 = split_cmd.format(input_file, col_index,
                                     out_dir, out_extension)
@@ -123,6 +127,8 @@ def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, sort=F
     '''
     # create dir if it doesn't exist
     os.makedirs(out_dir, exist_ok=True)
+    if sort is True:
+        os.makedirs(out_dir + '/tmp', exist_ok=True)
     # execute request function
     if any(f.endswith("." + out_extension) for f in os.listdir(out_dir)):
 

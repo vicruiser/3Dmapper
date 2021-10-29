@@ -92,19 +92,19 @@ if (nrow(new_mpi) > 0) {
         )
       ) %>%
       summarise(
-        spos = paste(spos, collapse = "-"),
-        resid_sseq = paste(resid_sseq, collapse = "-"),
-        resno = paste(resno, collapse = "-"),
-        resid_qseq = paste(resid_qseq, collapse = "-"),
-        qpos = paste(qpos, collapse = "-"),
-        resno.1 = paste(resno.1, collapse = "-"),
+        spos = paste(spos, collapse = "/"),
+        resid_sseq = paste(resid_sseq, collapse = "/"),
+        resno = paste(resno, collapse = "/"),
+        resid_qseq = paste(resid_qseq, collapse = "/"),
+        qpos = paste(qpos, collapse = "/"),
+        resno.1 = paste(resno.1, collapse = "/"),
         resid.1 = paste(ifelse(
           interaction == "protein", aa321(resid.1), resid.1
         ),
-        collapse = "-"),
-        distance = paste(round(distance, 2), collapse = "-"),
-        b = paste(b, collapse = "-"),
-        b.1 = paste(b.1,  collapse = "-")
+        collapse = "/"),
+        distance = paste(round(distance, 2), collapse = "/"),
+        b = paste(b, collapse = "/"),
+        b.1 = paste(b.1,  collapse = "/")
       )
   ))#,
   

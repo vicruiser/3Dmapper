@@ -13,8 +13,8 @@ from .run_subprocess import call_subprocess
 
 
 # sort file 
-sort_cmd="awk 'NR==1; NR>1{{print $0 | \"sort -n\"}}' {0} > {0}.sorted"
-sort_cmd_parallel="awk 'NR==1; NR>1{{print $0 | \"sort --parallel {1} -n\"}}' {0} > {0}.sorted"
+sort_cmd="awk 'NR==1; NR>1{{print $0 | \"sort -n -T {1}\"}}' {0} > {0}.sorted"
+sort_cmd_parallel="awk 'NR==1; NR>1{{print $0 | \"sort --parallel {1} -T {2} -n\"}}' {0} > {0}.sorted"
 
 # for all the columns, find the one that matches with the pattern ENSG
 detect_column = "grep -v '##' {} | awk -F ' ' '{{for(i=1;i<=NF;i++) \
@@ -135,13 +135,13 @@ def request(prefix, input_file, out_dir, out_extension, log_dir,sort, parallel, 
         
         if sort is True: 
             if parallel is True:
-                cmds= sort_cmd_parallel.format(input_file, njobs)
+                cmds= sort_cmd_parallel.format(input_file, njobs, out_dir+'/tmp')
                 out_sorted, err_sorted = call_subprocess(cmds)
                 if err_sorted is None and out_sorted != b'':
                     input_file = input_file + '.sorted'
             else: 
                 cmds= sort_cmd.format(input_file)
-                out_sorted, err_sorted = call_subprocess(cmds)
+                out_sorted, err_sorted = call_subprocess(cmds, out_dir+'/tmp')
                 if err_sorted is None and out_sorted != b'':
                     input_file = input_file + '.sorted'
 
@@ -212,7 +212,8 @@ def split(prefix, input_file, out_dir, out_extension, overwrite, log_dir, sort, 
     '''
     # create dir if it doesn't exist
     os.makedirs(out_dir, exist_ok=True)
-
+    if sort is True:
+        os.makedirs(out_dir + '/tmp', exist_ok=True)
     # execute request function
     if any(f.endswith("." + out_extension) for f in os.listdir(out_dir)):
 
