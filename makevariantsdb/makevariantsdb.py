@@ -70,7 +70,7 @@ class generateVarDB:
         # mapping process
         var_infile = out_file
         self.vep(
-            var_infile, vardb_outdir, overwrite, log_dir, parallel)
+            var_infile, vardb_outdir, overwrite, log_dir, sort, parallel, njobs)
         # logging
         self.log('Splitting process is done.',
                  report, logger)
