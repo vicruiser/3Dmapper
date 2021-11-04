@@ -126,9 +126,8 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
 
         # cols_stack
         cols_stack = psdf.apply(lambda x: x.astype(
-            str).str.match(r'[a-zA-Z0.-9]+-[a-zA-Z0.-9]+'))
+            str).str.match(r'[a-zA-Z0.-9]+/[a-zA-Z0.-9]+'))
         colsnames_stack = psdf.columns[cols_stack.any()].tolist()
-        print(psdf.loc[psdf['PDB_code'] == '6xa9.pdb1.gz_'][['Protein_position','PDB_3D_position','PDB_code']].head())
         # add column for chimera script
         if 'PDB_interacting_3D_position' in colsnames_stack:
             #psdf['Interface_interacting_positions'] = psdf['PDB_interacting_position']  
@@ -150,7 +149,6 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         else:
             psdf[colsnames_stack] = \
                 psdf[colsnames_stack].astype(str)
-        print(psdf.loc[psdf['PDB_code'] == '6xa9.pdb1.gz_'][['Protein_position','PDB_3D_position','PDB_code']].head())
         # if default database is used minor modifications are needed
         if pident is not None:
             logger.info('Filtering interfaces by pident = ' +
@@ -305,7 +303,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
             structure_positions = structure_positions.drop(['Chimera_interacting_position', 'Chimera_3D_position',
                                                               'PDB_interacting_3D_position','PDB_interacting_aa',
                                                               'Interface_min_distance', 'PDB_interacting_B_factor',
-                                                              'PDB_interacting_chain', 'Interaction_type'], axis=1)
+                                                              'PDB_interacting_chain', 'Interaction_type'], axis=1, errors = 'ignore')
             #do proper arragenments if no resulst are retrieved
             if structure_positions.empty is False:
                 structure_positions.drop_duplicates(inplace=True)

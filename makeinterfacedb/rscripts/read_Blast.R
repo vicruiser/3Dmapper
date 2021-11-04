@@ -20,8 +20,9 @@ read.Blast <- function(pdb_id, blast_outfiles_dir) {
   )))
   blast_output_list <-
     lapply(blast_outfiles_paths, function(x)
-      read.table(x, header = T))
+      fread(x, header = F))
   blast_output <- as.data.frame(rbindlist(blast_output_list))
+  
   # change column names conveniently to merge data frames afterwards by colname
   colnames(blast_output) <-
     c(
@@ -50,6 +51,8 @@ read.Blast <- function(pdb_id, blast_outfiles_dir) {
     sub("\\..*", "", blast_output$prot.id)
   
   blast_output$qseq = as.character(blast_output$qseq)
-  
+  blast_output = subset(as.data.frame(blast_output), pdb.id!="pdbid")
+  blast_output$qstart = as.numeric(blast_output$qstart)
+  blast_output$sstart = as.numeric(blast_output$sstart)
   return(blast_output)
 }

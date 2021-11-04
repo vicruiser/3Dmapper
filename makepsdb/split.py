@@ -72,15 +72,12 @@ def request(prefix, input_file, out_dir, out_extension, log_dir, sort, parallel,
                 out_sorted, err_sorted = call_subprocess(cmds)
                 if err_sorted is None and out_sorted != b'':
                     input_file = input_file + '.sorted'
-                else:
-                    stop(out_sorted)
             else: 
                 cmds= sort_cmd.format(input_file,out_dir+'/tmp')
                 out_sorted, err_sorted = call_subprocess(cmds)
                 if err_sorted is None and out_sorted != b'':
                     input_file = input_file + '.sorted'
-                else:
-                    stop(out_sorted)
+
         
         cmd2 = split_cmd.format(input_file, col_index,
                                     out_dir, out_extension)
