@@ -168,7 +168,7 @@ def check_path_available(path: str):
         path (str): path to file to be checked.
     """    
     if os.path.isfile(path):
-        sys.exit("Error: ChimeraX script already exists. To overwrite the existing script add the option '--overwrite'")
+        sys.exit("Error: ChimeraX script already exists. To overwrite the existing script add the option '--force'")
 
 
 def get_assemblies(pdb: str, data: pd.DataFrame) -> tuple:
