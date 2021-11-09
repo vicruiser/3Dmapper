@@ -187,6 +187,7 @@ def get_assemblies(pdb: str, data: pd.DataFrame) -> tuple:
         return pdb.split('.pdb')
     
     bioassemblies = sorted([code[8:] for code in data.PDB_code.unique().tolist()])
+    bioassemblies = [b.split('.')[0] for b in bioassemblies]
     return (pdb[:4], bioassemblies)
   
 
