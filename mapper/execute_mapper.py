@@ -93,7 +93,7 @@ def aesthetis():
 def out_file(out_dir, spinner):
     # create output directory if it doesn't exist
     if not os.path.exists(out_dir):
-        os.mkdir(out_dir)
+        os.makedirs(out_dir)
         spinner.info(text="Directory " + out_dir + " created.\n")
         out_message = "Directory " + out_dir+ ' created.'
     else:
