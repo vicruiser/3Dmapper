@@ -176,7 +176,7 @@ if (nrow(new_mpi) > 0) {
     sep = "_"
   )
   
-  fn = file.path(output_dir, 'interfacesDB.txt')
+  fn = gzfile(file.path(output_dir, 'interfacesDB.txt.gz'))
   
   lock <- lock(fn)
   write.table(
