@@ -48,6 +48,10 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
     '''
     # log file
     logger = get_logger(' 3dmapper', out_dir)
+    # amino acids letters
+    aa = ['I', 'M','T','N', 'K', 'S', 'R', 'L', 
+     'P', 'H', 'Q', 'V','A', 'D',
+     'E','G','F', 'Y', 'C', 'W','X']
     # parse positions corresponding to the selected protein ID
     try:
         annovars = parser(transcript_id, vardb)     
@@ -118,6 +122,10 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
      # parse interfaces corresponding to the selected protein ID
     try:
         psdf = parser(prot_id, psdb)
+        if 'Pident' not in list(psdf.columns):
+            logger.error(' Wrong structural data format. Header is missing')
+            raise IOError()
+        psdf = psdf.loc[psdf.Pident != 'Pident']
         logger.info('Protein features file of ' + prot_id + ' parsed.')
         # Get col PDB_position
         # if database is compacted and explode is needed
@@ -126,10 +134,9 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
 
         # cols_stack
         cols_stack = psdf.apply(lambda x: x.astype(
-            str).str.match(r'[a-zA-Z0.-9]+-[a-zA-Z0.-9]+'))
+            str).str.match(r'[a-zA-Z0.-9]+/[a-zA-Z0.-9]+'))
         colsnames_stack = psdf.columns[cols_stack.any()].tolist()
         # add column for chimera script
-       
         if 'PDB_interacting_3D_position' in colsnames_stack:
             #psdf['Interface_interacting_positions'] = psdf['PDB_interacting_position']  
             psdf['Chimera_interacting_position'] = psdf['PDB_interacting_3D_position']
@@ -143,21 +150,20 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         if 'Structure_feature_id' in colsnames_stack:
             colsnames_stack.remove('Structure_feature_id')
         if any(colsnames_stack):
-            psdf = explode(psdf , colsnames_stack, '-')
+            psdf = explode(psdf , colsnames_stack, '/')
         elif any(columns_list):
             psdf = explode(
-                psdf, columns_list, '-')
+                psdf, columns_list, '/')
         else:
             psdf[colsnames_stack] = \
                 psdf[colsnames_stack].astype(str)
- 
         # if default database is used minor modifications are needed
         if pident is not None:
             logger.info('Filtering interfaces by pident = ' +
                         str(pident) + '%.')
             # filter by pident
-            pident = int(pident)  # from str to int
-            psdf = psdf.loc[psdf.Pident >= pident]
+            pident = float(pident)  # from str to int
+            psdf = psdf.loc[psdf.Pident.astype(float) >= pident]
             # if pident threshold is to high, the next maximum value of pident is
             # notified in log file
             if psdf.empty:
@@ -173,7 +179,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                         str(evalue) + '%.')
             # filter by pident
             evalue = float(evalue)  # from str to int
-            psdf = psdf.loc[psdf.Evalue >= evalue]
+            psdf = psdf.loc[psdf.Evalue.astype(float) >= evalue]
             # if pident threshold is to high, the next maximum value of pident is
             # notified in log file
             if psdf.empty:
@@ -203,9 +209,9 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
             # remove non protein coding positions
             annovars.drop_duplicates(inplace=True)
             try:
-                noncoding_positions_index = annovars.Amino_acids.str.contains(
-                    '\.|\-', regex=True, na=False)
-                noncoding_positions = annovars.loc[noncoding_positions_index]
+                coding_positions_index = annovars.Amino_acids.str.contains(
+                    '|'.join(aa), regex=True, na=False)
+                noncoding_positions = annovars.loc[~coding_positions_index]
             except:
                 noncoding_positions = False
             # non-protein coding mutations
@@ -213,9 +219,9 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                 if APPRIS is not None: 
                     noncoding_positions['APPRIS_isoform'] = APPRIS
                 noncoding_positions['Mapping_position'] = 'Noncoding'
-                writefile(prot_id, out_dir, pident, isoform, consequence,
+                writefile(prot_id, out_dir, float(pident), isoform, consequence,
                           noncoding_positions, 'NoncodingPositions', csv, hdf)
-                unmapped_positions = annovars.loc[~noncoding_positions_index]
+                unmapped_positions = annovars.loc[coding_positions_index]
             else:
                 unmapped_positions = annovars
 
@@ -225,9 +231,9 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                     unmapped_positions['APPRIS_isoform'] = APPRIS
                 
                 unmapped_positions['Mapping_position'] = 'Unmapped'
-                writefile(prot_id, out_dir, pident, isoform, consequence,
+                writefile(prot_id, out_dir, float(pident), isoform, consequence,
                           unmapped_positions, 'UnmappedPositions', csv, hdf)
-        
+   
     elif psdf is not False and annovars is not False:
         # for sucessful merge, Protein_position column must be str type
         psdf['Protein_position'] = psdf['Protein_position'].astype(str)
@@ -255,9 +261,9 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
             # remove non protein coding positions
             if left_positions.empty is False:
                 left_positions.drop_duplicates(inplace=True)
-                noncoding_positions_index = left_positions.Amino_acids.str.contains(
-                    '\.|\-', regex=True, na=False)
-                noncoding_positions = left_positions.loc[noncoding_positions_index]
+                coding_positions_index = left_positions.Amino_acids.str.contains(
+                    '|'.join(aa), regex=True, na=False)
+                noncoding_positions = left_positions.loc[~coding_positions_index]
                 # non-protein coding mutations
                 if noncoding_positions.empty is False:
                    # noncoding_positions = noncoding_positions.drop(
@@ -265,8 +271,8 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                     noncoding_positions['Mapping_position'] = 'Noncoding'
                     writefile(prot_id, out_dir, pident, isoform, consequence,
                               noncoding_positions, 'NoncodingPositions', csv, hdf)
-                    left_positions = left_positions.loc[~noncoding_positions_index]
-                    del(noncoding_positions, noncoding_positions_index)
+                    left_positions = left_positions.loc[coding_positions_index]
+                    del(noncoding_positions, coding_positions_index)
                 
                 left_positions['Protein_accession'] = prot_id
 
@@ -287,8 +293,8 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                     unmapped_positions['Protein_position'], errors='coerce')
                 unmapped_positions['Protein_position'] = unmapped_positions.Protein_position.values.astype(
                     int)
-                unmapped_positions[(unmapped_positions.Protein_position.values >= unmapped_positions.Protein_alignment_start.values) & (
-                    (unmapped_positions.Protein_position <= unmapped_positions.Protein_alignment_end))]
+                unmapped_positions[(unmapped_positions.Protein_position.values >= unmapped_positions.Protein_alignment_start.values.astype(int)) & (
+                    (unmapped_positions.Protein_position <= unmapped_positions.Protein_alignment_end.astype(int)))]
                 
                 if unmapped_positions.empty is False:
                     cs = annovars.columns.values.tolist()
@@ -305,7 +311,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
             structure_positions = structure_positions.drop(['Chimera_interacting_position', 'Chimera_3D_position',
                                                               'PDB_interacting_3D_position','PDB_interacting_aa',
                                                               'Interface_min_distance', 'PDB_interacting_B_factor',
-                                                              'PDB_interacting_chain', 'Interaction_type'], axis=1)
+                                                              'PDB_interacting_chain', 'Interaction_type'], axis=1, errors = 'ignore')
             #do proper arragenments if no resulst are retrieved
             if structure_positions.empty is False:
                 structure_positions.drop_duplicates(inplace=True)

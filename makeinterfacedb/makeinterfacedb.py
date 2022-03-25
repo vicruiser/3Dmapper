@@ -85,7 +85,10 @@ def pipeline(f):
         process4 = subprocess.call(["Rscript %s %s %s %s %s %s %s %s" % (rscript3, root, f, interfaces_outdir, args.dist, args.type, args.int, args.biolip)] , shell =True)
         #out4, err4 = process4.communicate() 
         # Map PDB and protein information
-        process5 = subprocess.call(["Rscript %s %s %s %s %s %s" % (rscript4, root, pdbid, blast_outdir, interfaces_outdir, args.out)], shell=True)
+        mapped_outdir = os.path.join(args.out, 'structuralDB')
+        if not os.path.exists(mapped_outdir):
+            os.makedirs(mapped_outdir)
+        process5 = subprocess.call(["Rscript %s %s %s %s %s %s" % (rscript4, root, pdbid, blast_outdir, interfaces_outdir, mapped_outdir)], shell=True)
         #out5, err5 = process5.communicate() 
 
 def main():

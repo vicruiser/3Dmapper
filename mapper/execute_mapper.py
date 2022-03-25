@@ -93,7 +93,7 @@ def aesthetis():
 def out_file(out_dir, spinner):
     # create output directory if it doesn't exist
     if not os.path.exists(out_dir):
-        os.mkdir(out_dir)
+        os.makedirs(out_dir, exist_ok=True)
         spinner.info(text="Directory " + out_dir + " created.\n")
         out_message = "Directory " + out_dir+ ' created.'
     else:
@@ -138,7 +138,7 @@ def result_format(arg, out, f_format, spinner, logger):
     out_dest = os.path.join(out, f_format)
     if arg is True:
         if not os.path.exists(out_dest):
-            os.mkdir(out_dest )
+            os.makedirs(out_dest, exist_ok=True )
             spinner.info(text="Directory " + out_dest  + " created.\n")
             out_message = "Directory " + out_dest + ' created.'
         else:
@@ -149,7 +149,7 @@ def result_format(arg, out, f_format, spinner, logger):
 
 def report(out, time_format):
     # set up the results report
-    report = open(os.path.join(out, '3dmapper.report'), 'w')
+    report = open(os.path.join(out, '3dmapper.report'), 'a')
     #report.write(description)
     #report.write(epilog)
     report.write('''
@@ -204,7 +204,7 @@ def main():
     result_format(args.csv, args.out, 'csv', spinner, logger)
 
     # set up the results report
-    report = open(os.path.join(args.out, '3dmapper.report'), 'w')
+    report = open(os.path.join(args.out, '3dmapper.report'), 'a')
     #report.write(description)
     #report.write(epilog)
     report.write('''
@@ -266,9 +266,10 @@ def main():
                 cmd = ('grep \'\\b{}\\b\' {}').format(ids, index_file)
                 # call subprocess
                 out, err = call_subprocess(cmd)
+                print(out)
                 if err is None and out != b'':
                     toprocess = out.decode('utf-8').split(" ")
-                    transcriptid = toprocess[2].strip()
+                    transcriptid = [toprocess[2].strip()]
                     Parallel(n_jobs=num_cores)(delayed(wrapper)(t,
                                                                 args.psdb,
                                                                 args.vardb,

@@ -92,19 +92,19 @@ if (nrow(new_mpi) > 0) {
         )
       ) %>%
       summarise(
-        spos = paste(spos, collapse = "-"),
-        resid_sseq = paste(resid_sseq, collapse = "-"),
-        resno = paste(resno, collapse = "-"),
-        resid_qseq = paste(resid_qseq, collapse = "-"),
-        qpos = paste(qpos, collapse = "-"),
-        resno.1 = paste(resno.1, collapse = "-"),
+        spos = paste(spos, collapse = "/"),
+        resid_sseq = paste(resid_sseq, collapse = "/"),
+        resno = paste(resno, collapse = "/"),
+        resid_qseq = paste(resid_qseq, collapse = "/"),
+        qpos = paste(qpos, collapse = "/"),
+        resno.1 = paste(resno.1, collapse = "/"),
         resid.1 = paste(ifelse(
           interaction == "protein", aa321(resid.1), resid.1
         ),
-        collapse = "-"),
-        distance = paste(round(distance, 2), collapse = "-"),
-        b = paste(b, collapse = "-"),
-        b.1 = paste(b.1,  collapse = "-")
+        collapse = "/"),
+        distance = paste(round(distance, 2), collapse = "/"),
+        b = paste(b, collapse = "/"),
+        b.1 = paste(b.1,  collapse = "/")
       )
   ))#,
   
@@ -175,20 +175,24 @@ if (nrow(new_mpi) > 0) {
     individual_new_mpi$Interaction_type,
     sep = "_"
   )
+
   
-  fn = file.path(output_dir, 'interfacesDB.txt')
-  
-  lock <- lock(fn)
-  write.table(
-    individual_new_mpi,
-    fn,
-    quote = F,
-    row.names = F,
-    append = T,
-    col.names = file.info(fn)$size==0,
-    sep = "\t"
-  )
-  unlock(lock)
+  individual_new_mpi_list = split(individual_new_mpi, individual_new_mpi$Protein_accession)
+  for (prot in names(individual_new_mpi_list)){
+    fn = file.path(output_dir, paste(prot, '.txt.gz', sep = ""))
+    file.lock = lock(fn)
+    fwrite(
+      individual_new_mpi_list[[prot]],
+      fn,
+      quote = F,
+      row.names = F,
+      col.names = file.info(fn)$size==0,
+      append = T,
+      sep = "\t",
+      compress = "gzip"
+      )
+    unlock(file.lock)
+  }
   
 } else{
   #####################################################################################

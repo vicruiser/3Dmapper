@@ -11,10 +11,10 @@ import time
 from halo import Halo
 
 # local application imports
-import helpers
-import parsers
-import templates
-import logger
+from makechimera import helpers
+from makechimera import parsers
+from makechimera import templates
+from makechimera import logger
 
 
 def main():

@@ -23,6 +23,10 @@ DNA = '\U0001F9EC'
 detect_column = "grep -v '##' {} | awk -F ' ' '{{for(i=1;i<=NF;i++) \
 {{if ($i ~ /{}/){{print i; exit}}}}}}' "
 
+aa = ['I', 'M','T','N', 'K', 'S', 'R', 'L', 
+     'P', 'H', 'Q', 'V','A', 'D',
+     'E','G','F', 'Y', 'C', 'W']
+
 # @tags(text_start="Running 3Dmapper...",
 #       text_succeed=" Running 3Dmapper...done.",
 #       text_fail=" Running 3Dmapper...failed!",
@@ -44,7 +48,6 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
             APPRIS = ids['APPRIS']
         else:
             APPRIS = list(itertools.repeat(None, len(gene_id))) # change to list with same length as protid
-
         # run 3Dmapper
         for i in range(0, len(prot_id)):
             try:
@@ -115,8 +118,8 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
                             'positions could not be filtered by position id \'' + str(varid) + '\'')
                         raise IOError()
                 try: 
-                    noncoding_positions_index = annovars_left.Amino_acids.str.contains('\.|\-', regex=True, na = True)
-                    noncoding_positions = annovars_left.loc[noncoding_positions_index]
+                    coding_positions_index = annovars_left.Amino_acids.str.contains('|'.join(aa), regex=True, na = True)
+                    noncoding_positions = annovars_left.loc[~coding_positions_index]
                 except: 
                     noncoding_positions = False 
                 if isoform is None:
@@ -127,8 +130,8 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
                 if noncoding_positions is not False:
                     noncoding_positions['APPRIS_isoform'] = ''
                     noncoding_positions['Mapping_position'] = 'Noncoding'
-                    writefile(transcript_id, out_dir, pident, isoform, consequence, noncoding_positions, 'NoncodingPositions', csv, hdf)
-                    unmapped_positions = annovars_left.loc[~noncoding_positions_index]
+                    writefile(transcript_id, out_dir, float(pident), isoform, consequence, noncoding_positions, 'NoncodingPositions', csv, hdf)
+                    unmapped_positions = annovars_left.loc[coding_positions_index]
                 else: 
                     unmapped_positions = annovars_left
                         
@@ -137,7 +140,7 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
                     unmapped_positions.drop_duplicates(inplace=True)
                     unmapped_positions['APPRIS_isoform'] = ''
                     unmapped_positions['Mapping_position'] = 'Unmapped'
-                    writefile(transcript_id, out_dir, pident, isoform, consequence, unmapped_positions, 'UnmappedPositions', csv, hdf)
+                    writefile(transcript_id, out_dir, float(pident), isoform, consequence, unmapped_positions, 'UnmappedPositions', csv, hdf)
             except:
                 pass
         logger.error('Warning: {} has no matching ensembl ids.'.format(id))

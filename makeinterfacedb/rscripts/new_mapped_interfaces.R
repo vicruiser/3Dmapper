@@ -124,7 +124,7 @@ new.Mapped.Interfaces <-
           interaction = character() ,
           pdb.id = character() ,
           real.pos.1 = integer(),
-          real.pos = integer
+          real.pos = integer()
         )
         pi_all <-    data.table(rbind(pi_protein,
                                       pi_ligand,
@@ -133,7 +133,7 @@ new.Mapped.Interfaces <-
         
         
       }
-      
+
       pi_all$chain.1 <- as.character(pi_all$chain.1)
       
       # Calculate the min distance between each interacting residue pair
@@ -202,7 +202,7 @@ new.Mapped.Interfaces <-
         pi_all_unique = pi_struct
       }
       # merge BLAST info and new mapped pi
-      new_mpi <- merge(blast_output, pi_all_unique, by = "chain")
+      new_mpi <- merge(blast_output, pi_all_unique, by = c("chain"))
 
       ###############################################################################################
       # Eliminate those residues that do not map to the protein of reference (Ensembl)              #
@@ -218,7 +218,8 @@ new.Mapped.Interfaces <-
       #    the residues position corresponding to the begining and end of the alignment
       #    between the pdb chain sequence (query) and the ensembl protein sequence (subject)
       #    without taking into account the presence of gaps.
-      
+      new_mpi$qstart = as.numeric(new_mpi$qstart)
+      new_mpi$qend = as.numeric(new_mpi$qend)
       new_mpi <-
         subset(new_mpi, real.pos >= qstart & real.pos <= qend)
       
