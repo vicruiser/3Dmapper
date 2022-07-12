@@ -1,5 +1,6 @@
 #! /usr/bin/Rscript
 ################################################################################
+options(echo = FALSE, verbose = F,warn = -1) 
 #' Title:  INTERACTION PAIRS: select the option for pairs
 #'  between interaction to be find
 #'
@@ -21,7 +22,7 @@ PDB_pairwise_interaction <-
     # Select position of protein chains in PDB file
     pdb_protChains <-
       combine.select(atom.select(pdb_file, atom_select, verbose=F),
-                     atom.select(pdb_file, "protein", verbose=F))
+                     atom.select(pdb_file, "protein", verbose=F), verbose=F)
     # Select protein chains
     protein_chains <- all_chains[pdb_protChains$atom , ]
     if (atom_select == "calpha") {
@@ -71,7 +72,7 @@ PDB_pairwise_interaction <-
         
       } else {
         # Print out number of protein chains
-        print(paste("This PDB file contains", n_prot_chains, "protein chains"))
+        #print(paste("This PDB file contains", n_prot_chains, "protein chains"))
         # Return two sets containing all protein chains
         return(list(SetChains1 = protein_chains, SetChains2 = protein_chains))
       }
@@ -87,15 +88,15 @@ PDB_pairwise_interaction <-
         nucleic_chains <- all_chains[pdb_nucleicChains$atom , ]
         # Count and print out number of protein and DNA chains
         n_nucl_chains <- length(unique(nucleic_chains$chain))
-        print(
-          paste(
-            "This PDB file contains",
-            n_prot_chains,
-            "protein chains and",
-            n_nucl_chains,
-            "nucleic chains."
-          )
-        )
+        #print(
+        #  paste(
+        #    "This PDB file contains",
+        #    n_prot_chains,
+        #    "protein chains and",
+        #    n_nucl_chains,
+        #    "nucleic chains."
+        #  )
+        #)
         # Return two sets of chains, one proteins and nucleics the other
         return(list(SetChains1 = protein_chains, SetChains2 = nucleic_chains))
         
@@ -115,15 +116,15 @@ PDB_pairwise_interaction <-
         ligand_chains <- all_chains[pdb_ligandChains$atom , ]
         # Count and print out number of protein and DNA chains
         n_ligand_chains <- length(unique(ligand_chains$chain))
-        print(
-          paste(
-            "This PDB file contains",
-            n_prot_chains,
-            "protein chains and",
-            n_ligand_chains,
-            "ligand chains."
-          )
-        )
+        # print(
+        #   paste(
+        #     "This PDB file contains",
+        #     n_prot_chains,
+        #     "protein chains and",
+        #     n_ligand_chains,
+        #     "ligand chains."
+        #   )
+        # )
         # Return two sets of chains, one containing proteins and ligands the other
         return(list(SetChains1 = protein_chains, SetChains2 = ligand_chains))
       }# STOP if no nucleic chains are found

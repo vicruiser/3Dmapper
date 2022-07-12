@@ -31,6 +31,8 @@ aa = ['I', 'M','T','N', 'K', 'S', 'R', 'L',
 #       text_succeed=" Running 3Dmapper...done.",
 #       text_fail=" Running 3Dmapper...failed!",
 #       emoji=DNA)
+
+
 def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc, index_file, dict_geneprot, varid=None, csv = False, hdf = False):
     
     # logging
@@ -118,7 +120,7 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
                             'positions could not be filtered by position id \'' + str(varid) + '\'')
                         raise IOError()
                 try: 
-                    coding_positions_index = annovars_left.Amino_acids.str.contains('|'.join(aa), regex=True, na = True)
+                    coding_positions_index = annovars_left.Amino_acids.str.contains('|'.join(aa))
                     noncoding_positions = annovars_left.loc[~coding_positions_index]
                 except: 
                     noncoding_positions = False 
@@ -128,17 +130,17 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
                     consequence = ['all']  
                 # non-protein coding mutations
                 if noncoding_positions is not False:
-                    noncoding_positions['APPRIS_isoform'] = ''
+                    #noncoding_positions['APPRIS_isoform'] = ''
                     noncoding_positions['Mapping_position'] = 'Noncoding'
                     writefile(transcript_id, out_dir, float(pident), isoform, consequence, noncoding_positions, 'NoncodingPositions', csv, hdf)
-                    unmapped_positions = annovars_left.loc[coding_positions_index]
+                    unmapped_positions = annovars_left[coding_positions_index]
                 else: 
                     unmapped_positions = annovars_left
                         
-                if unmapped_positions.empty is False:
+                if len(unmapped_positions) > 0:
                     #unmapped_positions = unmapped_positions.iloc[:, 0:16]
-                    unmapped_positions.drop_duplicates(inplace=True)
-                    unmapped_positions['APPRIS_isoform'] = ''
+                    unmapped_positions.drop_duplicates()
+                   # unmapped_positions['APPRIS_isoform'] = ''
                     unmapped_positions['Mapping_position'] = 'Unmapped'
                     writefile(transcript_id, out_dir, float(pident), isoform, consequence, unmapped_positions, 'UnmappedPositions', csv, hdf)
             except:

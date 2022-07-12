@@ -15,6 +15,7 @@
 #'
 #' @examples
 #'
+options(echo = FALSE, verbose = F,warn = -1) 
 calc_PDB_dist <- function(
                           CompareTemplateChains,
                           CompareInteractionChains,

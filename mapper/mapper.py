@@ -17,6 +17,7 @@ from .logger import get_logger
 from .writefile import writefile
 
 def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalue, isoform, APPRIS, consequence, loc, var_id=None, csv=False, hdf=False):
+    print(prot_id)
     '''
     Map interfaces and genomic anntoated positions and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
@@ -133,30 +134,30 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         columns_list = columns_type.index[columns_type].tolist()
 
         # cols_stack
-        cols_stack = psdf.apply(lambda x: x.astype(
-            str).str.match(r'[a-zA-Z0.-9]+/[a-zA-Z0.-9]+'))
-        colsnames_stack = psdf.columns[cols_stack.any()].tolist()
+        #cols_stack = psdf.apply(lambda x: x.astype(
+        #    str).str.match(r'[a-zA-Z0.-9]+/[a-zA-Z0.-9]+'))
+        #colsnames_stack = psdf.columns[cols_stack.any()].tolist()
         # add column for chimera script
-        if 'PDB_interacting_3D_position' in colsnames_stack:
+        #if 'PDB_interacting_3D_position' in colsnames_stack:
             #psdf['Interface_interacting_positions'] = psdf['PDB_interacting_position']  
-            psdf['Chimera_interacting_position'] = psdf['PDB_interacting_3D_position']
-        if 'Evalue' in colsnames_stack:
-            colsnames_stack.remove('Evalue')
-        if 'PDB_code' in colsnames_stack:
-            colsnames_stack.remove('PDB_code')
-        if 'PDB_3D_position' in colsnames_stack:
+        #    psdf['Chimera_interacting_position'] = psdf['PDB_interacting_3D_position']
+        #if 'Evalue' in colsnames_stack:
+        #    colsnames_stack.remove('Evalue')
+        #if 'PDB_code' in colsnames_stack:
+        #    colsnames_stack.remove('PDB_code')
+        #if 'PDB_3D_position' in colsnames_stack:
             #colsnames_stack.remove('PDB_3D_position')
-            psdf['Chimera_3D_position'] = psdf['PDB_3D_position']
-        if 'Structure_feature_id' in colsnames_stack:
-            colsnames_stack.remove('Structure_feature_id')
-        if any(colsnames_stack):
-            psdf = explode(psdf , colsnames_stack, '/')
-        elif any(columns_list):
-            psdf = explode(
-                psdf, columns_list, '/')
-        else:
-            psdf[colsnames_stack] = \
-                psdf[colsnames_stack].astype(str)
+        #    psdf['Chimera_3D_position'] = psdf['PDB_3D_position']
+        #if 'Structure_feature_id' in colsnames_stack:
+        #    colsnames_stack.remove('Structure_feature_id')
+        #if any(colsnames_stack):
+        #    psdf = explode(psdf , colsnames_stack, '/')
+        #if any(columns_list):
+        #    psdf = explode(
+        #        psdf, columns_list, '/')
+        #else:
+        #    psdf[colsnames_stack] = \
+        #        psdf[colsnames_stack].astype(str)
         # if default database is used minor modifications are needed
         if pident is not None:
             logger.info('Filtering interfaces by pident = ' +
@@ -289,8 +290,8 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                 unmapped_positions = left_positions.join(
                     psdf.set_index('Protein_accession'), on='Protein_accession', how='inner')
                 # convert col to numeric to make comparison
-                unmapped_positions['Protein_position'] = pd.to_numeric(
-                    unmapped_positions['Protein_position'], errors='coerce')
+                #unmapped_positions['Protein_position'] = pd.to_numeric(
+                #    unmapped_positions['Protein_position'], errors='coerce')
                 unmapped_positions['Protein_position'] = unmapped_positions.Protein_position.values.astype(
                     int)
                 unmapped_positions[(unmapped_positions.Protein_position.values >= unmapped_positions.Protein_alignment_start.values.astype(int)) & (

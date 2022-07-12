@@ -1,13 +1,17 @@
 #! /usr/bin/Rscript
 ################################################################
 warn.conflicts = FALSE
-library(veriNA3d)
-requiredPackages = c('tidyr', 'stringr', 'bio3d',  'plyr','dplyr', 'data.table') #'parallel',
-for (p in requiredPackages) {
-  if (!require(p, character.only = TRUE))
-    install.packages(p)
-  suppressMessages(library(p, character.only = TRUE))
-}
+options(echo = FALSE, verbose = F,warn = -1) 
+
+requiredPackages = c('tidyr', 'stringr', 'bio3d',
+                     'plyr','dplyr', 'data.table','veriNA3d') #'parallel',
+suppressMessages(
+  for (p in requiredPackages) {
+    if (!require(p, character.only = TRUE))
+      install.packages(p)
+    library(p, character.only = TRUE)
+  }
+)
 
 
 #########################
@@ -38,8 +42,7 @@ if(INT == 'all'){
 }
 
 tryCatch({
-  pdb_file <- readPDB(PDB_FILENAME,
-                      download = "NO")
+  pdb_file <- readPDB(PDB_FILENAME)
 }, error = function(e) {
   cat("ERROR :", conditionMessage(e), "\n")
 })
@@ -53,7 +56,8 @@ all_chains <- pdb_file$atom
 pdb_protChains <-
   combine.select(
     atom.select(pdb_file, ATOMS_INTERACTION, verbose = F),
-    atom.select(pdb_file, "protein", verbose = F)
+    atom.select(pdb_file, "protein", verbose = F),
+    verbose =F
   )
 # Select protein chains
 protein_chains <- all_chains[pdb_protChains$atom ,]
@@ -144,7 +148,9 @@ for (j in 1:length(INT)) {
         OUTPUT_DIR,
         paste(
           PDB_ID,
-          "_",
+          "_chain",
+          unique(struct$chain),
+          '_',
           INT[j],
           "_",
           "predicted_interfaces.txt",

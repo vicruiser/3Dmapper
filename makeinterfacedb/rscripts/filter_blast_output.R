@@ -1,11 +1,14 @@
 #! /usr/bin/Rscript
 # path to packages
+options(echo = FALSE, verbose = F,warn = -1) 
 requiredPackages = c('tidyr', 'stringr')
+suppressMessages(
 for (p in requiredPackages) {
   if (!require(p, character.only = TRUE))
     install.packages(p)
-  suppressMessages(library(p, character.only = TRUE))
+  library(p, character.only = TRUE)
 }
+)
 
 # input arguments
 INPUT_FILE = as.character(commandArgs(TRUE)[1])
@@ -85,5 +88,5 @@ if (file.size(INPUT_FILE) > 0) {
     row.names = F,
     append = T
   )
-  stop("No BLAST hits were found for this chain.",)
+  stop("No BLAST hits were found for this chain.")
 }

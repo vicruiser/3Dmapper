@@ -93,11 +93,7 @@ def aesthetis():
 def out_file(out_dir, spinner):
     # create output directory if it doesn't exist
     if not os.path.exists(out_dir):
-<<<<<<< HEAD
         os.makedirs(out_dir, exist_ok=True)
-=======
-        os.makedirs(out_dir)
->>>>>>> d4d3a59650c6de6b30b08112a8aa0c0773363858
         spinner.info(text="Directory " + out_dir + " created.\n")
         out_message = "Directory " + out_dir+ ' created.'
     else:
@@ -224,8 +220,10 @@ def main():
 
     # if parallel is True
     num_cores  = parallel(args.parallel, args.njobs)
-
+    # find variants index file created with makevariantsdb
     index_file = glob.glob(os.path.join(args.vardb, '*.index'))[0]
+    
+
     start= start_spinner(args.verbose, logger, time_format, spinner)
     if args.varid:
         # find positions index file
@@ -242,10 +240,9 @@ def main():
                         out, err = call_subprocess(cmd)
                         if err is None and out != b'':
                             toprocess = out.decode('utf-8')
-                            transcriptid = [s for s in toprocess.split(
-                                " ") if 'ENST' in s]
+                            transcriptid = [toprocess[2].strip()]
 
-                            Parallel(n_jobs=num_cores)(delayed(wrapper)(t,
+                            Parallel(n_jobs=num_cores, prefer = "threads")(delayed(wrapper)(t,
                                                                         args.psdb,
                                                                         args.vardb,
                                                                         args.out,
@@ -270,11 +267,10 @@ def main():
                 cmd = ('grep \'\\b{}\\b\' {}').format(ids, index_file)
                 # call subprocess
                 out, err = call_subprocess(cmd)
-                print(out)
                 if err is None and out != b'':
                     toprocess = out.decode('utf-8').split(" ")
                     transcriptid = [toprocess[2].strip()]
-                    Parallel(n_jobs=num_cores)(delayed(wrapper)(t,
+                    Parallel(n_jobs=num_cores, prefer = "threads")(delayed(wrapper)(t,
                                                                 args.psdb,
                                                                 args.vardb,
                                                                 args.out,
@@ -312,9 +308,9 @@ def main():
                 input = 'file'
                 with open(ids) as list_prot_ids:
                     logger.info(
-                        'Input positions file contains a list of ensembl ids to process.')
+                        'Input positions file contains a list of protein ids to process.')
                     # for every ensembl id
-                    Parallel(n_jobs=num_cores)(delayed(wrapper)(prot_id.replace('\n', ''),
+                    Parallel(n_jobs=num_cores, prefer = "threads")(delayed(wrapper)(prot_id.replace('\n', ''),
                                                                 args.psdb,
                                                                 args.vardb,
                                                                 args.out,
@@ -345,7 +341,7 @@ def main():
         # for prot id get the gene id
         if input == 'not_file':
             # print(args.prot_id)
-            Parallel(n_jobs=num_cores)(delayed(wrapper)(ids,
+            Parallel(n_jobs=num_cores, prefer = "threads")(delayed(wrapper)(ids,
                                                         args.psdb,
                                                         args.vardb,
                                                         args.out,
@@ -361,13 +357,6 @@ def main():
                                                         args.csv,
                                                         args.hdf)
                                        for ids in args.prot_id)
-
-        if not any(fname.endswith('.txt') for fname in os.listdir(args.out)):
-            logger.warning(
-                'Error: Input ensembl ids has no mapping positions.')
-            spinner.warn(
-                text=' Input ensembl ids has no mapping positions.')
-            exit(-1)
 
         # Compute execution time
         finish_message(logger, report, time_format, start, spinner)

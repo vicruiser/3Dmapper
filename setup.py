@@ -72,12 +72,12 @@ class git_clone_external(DistutilsInstall):
                 subprocess.call(
                     cmd2, cwd=os.path.dirname(os.path.realpath(__file__)))
                 
-            if not os.path.exists(stride_dir):
-                cmd3 = ['wget', "http://webclu.bio.wzw.tum.de/stride/stride.tar.gz"]
+            #if not os.path.exists(stride_dir):
+            #    cmd3 = ['wget', "http://webclu.bio.wzw.tum.de/stride/stride.tar.gz"]
 
                 #self.run_command( cmd1, d)
-                subprocess.call(cmd3, cwd=os.path.dirname(
-                    os.path.realpath(__file__)))
+            #    subprocess.call(cmd3, cwd=os.path.dirname(
+            #        os.path.realpath(__file__)))
 
             #self.run_command(self, ["make", "clean"], bcftools_dir)
             #self.run_command(self, ["make"], bcftools_dir)
@@ -93,12 +93,12 @@ class git_clone_external(DistutilsInstall):
             subprocess.call(
                 ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
             
-            subprocess.call(
-                ["tar", "-zxf" ,"stride.tar.gz"], cwd=os.path.dirname(
-                    os.path.realpath(__file__)))
+            #subprocess.call(
+            #    ["tar", "-zxf" ,"stride.tar.gz"], cwd=os.path.dirname(
+            #        os.path.realpath(__file__)))
             
-            subprocess.call(
-                ["make"], cwd=stride_dir)
+            #subprocess.call(
+            #    ["make"], cwd=stride_dir)
             
             
             DistutilsInstall.run(self)
@@ -213,7 +213,7 @@ setup(
     #
 
     packages=['mapper', #'makepsdb',
-              'makevariantsdb', 'makeinterfacedb', 'makechimera' ],  # Required!!!!!
+              'makevariantsdb', 'makestructuraldb', 'makevisualization' ],  # Required!!!!!
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
@@ -266,8 +266,8 @@ setup(
         "console_scripts": ['mapper=mapper.__main__:main',
                             #'makepsdb=makepsdb.__main__:main',
                             'makevariantsdb=makevariantsdb.__main__:main',
-                            'makechimera=makechimera.__main__:main',
-                           'makeinterfacedb=makeinterfacedb.__main__:main']
+                            'makevisualization=makechimera.__main__:main',
+                           'makestructuraldb=makeinterfacedb.__main__:main']
 
     },
 

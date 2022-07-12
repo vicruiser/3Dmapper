@@ -8,37 +8,20 @@
 #' @export
 #'
 #' @examples
-
-readPDB <- function(pdb_file,
-                    download = "NO") {
+options(echo = FALSE, verbose = F,warn = -1) 
+readPDB <- function(pdb_file) {
   biounit_filename = basename(pdb_file)
   pdb_filename <- sub("\\.gz", "", biounit_filename)
   
   #Check whether the PDB exists or not.
   if (!file.exists(pdb_file)) {
-    if (download == "YES") {
-      # Read files accordingly to their format (mmCIF or PDB)
-      if (any(str_detect(biounit_filename, "\\.cif"))) {
-        # Choose between downloading the files or use an already downloaded local data base.
-        pdb_url <-
-          file.path("ftp://ftp.pdbj.org/pub/pdb/data/biounit/mmCIF/all",
-                    biounit_filename)
-      } else if (any(str_detect(biounit_filename, "\\.pdb"))) {
-        pdb_url <-
-          file.path("ftp://ftp.pdbj.org/pub/pdb/data/biounit/PDB/all",
-                    biounit_filename)
-      }
-      #Download file
-      tmpdir <- tempdir()
-      file <- basename(pdb_url)
-      download.file(pdb_url, file)
-      R.utils::gunzip(file)
-      
-    } else if (download == "NO") {
-      stop ("Sorry, it is not possible to download the PDB file. Please, provive a PDB file.")
-      
-    }
-  } else {
+      tryCatch({
+        pdb <- read.pdb(pdb_file, verbose =F, rm.alt=F, rm.insert=F)
+      }, error = function(e) {
+        cat("ERROR : The input PDB does not exists. \n")
+      })
+  
+    }else {
     # If the file exists or after it is downloade we can read it.
     #if (!file.exists(file.path(dirname(pdb_file), pdb_filename))) {
     #  R.utils::gunzip(pdb_file, remove = FALSE, overwrite = TRUE)
@@ -46,17 +29,18 @@ readPDB <- function(pdb_file,
     
     if (any(str_detect(pdb_filename, "\\.cif"))) {
       cif_filepath <- file.path(dirname(pdb_file), pdb_filename)
-      cif_file <- cifParser(pdb_file)#cif_filepath)
-      pdb_file <- cifAsPDB(cif_file)
+      cif <- cifParser(pdb_file)#cif_filepath)
+      pdb <- cifAsPDB(cif)
       
     } else if (any(str_detect(pdb_filename, "\\.pdb"))) {
       #pdb_filepath <- file.path(dirname(pdb_file), pdb_filename)
-      pdb_file <- read.pdb(pdb_file, verbose =F)#path)
+      pdb <- read.pdb(pdb_file, verbose =F, rm.alt=F, rm.insert=F)#path)
       
-    } else {
-      stop("Sorry, wrong PDB structure format.")
+      } else {
+      stop("Sorry, wrong PDB structure format. The file must have '.pdb' or '.cif' extensions.")
       
     }
   }
-  return(pdb_file)
+  return(pdb)
 }
+

@@ -11,18 +11,22 @@
 #' @export
 #'
 #' @examples
-read.Blast <- function(pdb_id, blast_outfiles_dir) {
+#' 
+options(echo = FALSE, verbose = F,warn = -1) 
+read.Blast <- function( blast_file) {
   # read all blast output files of all chains corresponding to the selected pdb_id
-  blast_outfiles_paths <- c(Sys.glob(file.path(
-    blast_outfiles_dir,
-    paste(pdb_id, "*filtered*", sep =
-            "")
-  )))
-  blast_output_list <-
-    lapply(blast_outfiles_paths, function(x)
-      fread(x, header = F))
-  blast_output <- as.data.frame(rbindlist(blast_output_list))
+  # blast_outfiles_paths <- c(Sys.glob(file.path(
+  #   blast_outfiles_dir,
+  #   paste(pdb_id, "*filtered*", sep =
+  #           "")
+  # )))
+  # blast_output_list <-
+  #   lapply(blast_outfiles_paths, function(x)
+  #     fread(x, header = F, sep =" "))
+  # blast_output <- as.data.frame(rbindlist(blast_output_list))
   
+  blast_output = fread(blast_file, header = F, sep =" ")
+  #print(blast_output)
   # change column names conveniently to merge data frames afterwards by colname
   colnames(blast_output) <-
     c(

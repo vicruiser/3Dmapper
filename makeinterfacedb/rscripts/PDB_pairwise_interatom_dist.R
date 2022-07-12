@@ -1,7 +1,7 @@
 #! /usr/bin/Rscript
 ##### Load necessary functions
 
-
+options(echo = FALSE, verbose = F,warn = -1) 
 
 #' Title: CALCULATION INTER-ATOMIC DISTANCES
 #'
@@ -73,31 +73,35 @@ PDB_iter_atom_distances <- function(pdb_filename,
   CompareInteractionChains <-
     InteractionChains_list[PairwiseComb[2,]]
   
-  CompareTemplateChains.Vector <- lapply(CompareTemplateChains,
-                                         function(x) {
-                                           x <- x[, c("x", "y", "z")]
-                                           x <- as.vector(t(x))
-                                           return(x)
-                                         })
-  CompareInteractionChains.Vector <-
-    lapply(CompareInteractionChains,
-           function(x) {
-             x <- x[, c("x", "y", "z")]
-             x <- as.vector(t(x))
-             return(x)
-           })
+  rm(TemplateChains_list, InteractionChains_list)
+  gc()
+  
+  #CompareTemplateChains.Vector <- lapply(CompareTemplateChains,
+  #                                       function(x) {
+  #                                         x <- x[, c("x", "y", "z")]
+  #                                         x <- as.vector(t(x))
+  #                                         return(x)
+  #                                       })
+  #CompareInteractionChains.Vector <-
+  #  lapply(CompareInteractionChains,
+  #         function(x) {
+  #           x <- x[, c("x", "y", "z")]
+  #           x <- as.vector(t(x))
+  #           return(x)
+  #         })
   
   distList <- list()
   struct = list()
   i = 1
-  while (i <= length(CompareInteractionChains.Vector)) {
+  while (i <= length(PairwiseComb)/2) {
+    print(i)
     try(#distList[[paste("iter", i, sep = "")]] <-
       distList[[1]] <-
         calc_PDB_dist(
           CompareTemplateChains[[i]],
           CompareInteractionChains[[i]],
-          CompareTemplateChains.Vector[i],
-          CompareInteractionChains.Vector[i],
+          as.vector(t(CompareTemplateChains[[i]][, c("x", "y", "z")])),
+          as.vector(t(CompareInteractionChains[[i]][, c("x", "y", "z")])),
           dist_threshold ,
           type_of_interaction = type_of_interaction
         ),
@@ -166,6 +170,8 @@ PDB_iter_atom_distances <- function(pdb_filename,
           output_dir,
           paste(
             PDB_ID,
+            "_chain",
+            unique(pdb_atom_inter_df$chain),
             "_",
             type_of_interaction,
             "_",
