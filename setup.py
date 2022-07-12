@@ -51,10 +51,9 @@ class git_clone_external(DistutilsInstall):
         #connection = self.internet_on()
         #if connection is True:
             d = os.path.dirname(os.path.realpath(__file__))
-            #print('HOOOOOOOOOOOOOOOOOOOLAAAAAAAAAAAAAAAAAAAAAAAA   ' + d)
             bcftools_dir = os.path.dirname(
                 os.path.realpath(__file__)) + "/bcftools"
-            htslib_dir = os.path.dirname(os.path.realpath(__file__))+ "/htslib"
+            htslib_dir = os.path.dirname(os.path.realpath(__file__))+" /htslib"
             stride_dir = os.path.dirname(os.path.realpath(__file__))+ "/stride"
             
             if not os.path.exists(htslib_dir):
@@ -72,12 +71,12 @@ class git_clone_external(DistutilsInstall):
                 #self.run_command(self, cmd2, d)
                 subprocess.call(
                     cmd2, cwd=os.path.dirname(os.path.realpath(__file__)))
-
-            if not os.path.exists(htslib_dir):
+                
+            if not os.path.exists(stride_dir):
                 cmd3 = ['wget', "http://webclu.bio.wzw.tum.de/stride/stride.tar.gz"]
 
                 #self.run_command( cmd1, d)
-                subprocess.call(cmd1, cwd=os.path.dirname(
+                subprocess.call(cmd3, cwd=os.path.dirname(
                     os.path.realpath(__file__)))
 
             #self.run_command(self, ["make", "clean"], bcftools_dir)
@@ -92,13 +91,15 @@ class git_clone_external(DistutilsInstall):
                 ["cp", "bcftools", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
 
             subprocess.call(
-                ["tar -zxf stride.tar.gz"], cwd=stride_dir)
+                ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
+            
+            subprocess.call(
+                ["tar", "-zxf" ,"stride.tar.gz"], cwd=os.path.dirname(
+                    os.path.realpath(__file__)))
             
             subprocess.call(
                 ["make"], cwd=stride_dir)
-
-            subprocess.call(
-                ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
+            
             
             DistutilsInstall.run(self)
 
@@ -211,7 +212,7 @@ setup(
     #   py_modules=["my_module"],
     #
 
-    packages=['mapper', 'makepsdb',
+    packages=['mapper', #'makepsdb',
               'makevariantsdb', 'makeinterfacedb', 'makechimera' ],  # Required!!!!!
 
     # Specify which Python versions you support. In contrast to the
@@ -262,8 +263,8 @@ setup(
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
     entry_points={
-        "console_scripts": ['3dmapper=mapper.__main__:main',
-                            'makepsdb=makepsdb.__main__:main',
+        "console_scripts": ['mapper=mapper.__main__:main',
+                            #'makepsdb=makepsdb.__main__:main',
                             'makevariantsdb=makevariantsdb.__main__:main',
                             'makechimera=makechimera.__main__:main',
                            'makeinterfacedb=makeinterfacedb.__main__:main']
