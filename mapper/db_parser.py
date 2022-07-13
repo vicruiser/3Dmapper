@@ -30,14 +30,14 @@ def parser(prot_id, db_dir):
     else:
         try:
             if '.gz' in f: 
-               df = pd.read_csv(f[0], sep="\t| ", engine='python', compression='gzip',
+               df = pd.read_csv(f[0], sep="\t", engine='c', compression='gzip',
                    error_bad_lines=False)
             else: 
-                df = pd.read_csv(f[0], sep="\t| ", engine='python')
+                df = pd.read_csv(f[0], sep="\t", engine='c')
         except:
             if '.gz' in f:
-                df = pd.read_csv(f[0], sep=" ", engine='python',compression='gzip',
+                df = pd.read_csv(f[0], sep=" ", engine='c',compression='gzip',
                    error_bad_lines=False)
             else: 
-                df = pd.read_csv(f[0], sep=" ", engine='python')
+                df = pd.read_csv(f[0], sep=" ", engine='c')
         return df
