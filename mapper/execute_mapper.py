@@ -242,7 +242,7 @@ def main():
                             toprocess = out.decode('utf-8')
                             transcriptid = [toprocess[2].strip()]
 
-                            Parallel(n_jobs=num_cores, prefer = "threads")(delayed(wrapper)(t,
+                            Parallel(n_jobs=num_cores)(delayed(wrapper)(t,
                                                                         args.psdb,
                                                                         args.vardb,
                                                                         args.out,
@@ -270,7 +270,7 @@ def main():
                 if err is None and out != b'':
                     toprocess = out.decode('utf-8').split(" ")
                     transcriptid = [toprocess[2].strip()]
-                    Parallel(n_jobs=num_cores, prefer = "threads")(delayed(wrapper)(t,
+                    Parallel(n_jobs=num_cores)(delayed(wrapper)(t,
                                                                 args.psdb,
                                                                 args.vardb,
                                                                 args.out,
@@ -310,7 +310,7 @@ def main():
                     logger.info(
                         'Input positions file contains a list of protein ids to process.')
                     # for every ensembl id
-                    Parallel(n_jobs=num_cores, prefer = "threads")(delayed(wrapper)(prot_id.replace('\n', ''),
+                    Parallel(n_jobs=num_cores)(delayed(wrapper)(prot_id.replace('\n', ''),
                                                                 args.psdb,
                                                                 args.vardb,
                                                                 args.out,
@@ -341,7 +341,7 @@ def main():
         # for prot id get the gene id
         if input == 'not_file':
             # print(args.prot_id)
-            Parallel(n_jobs=num_cores, prefer = "threads")(delayed(wrapper)(ids,
+            Parallel(n_jobs=num_cores)(delayed(wrapper)(ids,
                                                         args.psdb,
                                                         args.vardb,
                                                         args.out,
