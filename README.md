@@ -1,4 +1,4 @@
-[[![Build Status](https://app.travis-ci.com/vicruiser/3Dmapper.svg?branch=master)](https://app.travis-ci.com/vicruiser/3Dmapper) [![Join the chat at https://gitter.im/3d_mapper/community](https://badges.gitter.im/pdbmapper/community.svg)](https://gitter.im/3d_mapper/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://app.travis-ci.com/vicruiser/3Dmapper.svg?branch=master)](https://app.travis-ci.com/vicruiser/3Dmapper) [![Join the chat at https://gitter.im/3d_mapper/community](https://badges.gitter.im/pdbmapper/community.svg)](https://gitter.im/3d_mapper/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Overview
 
