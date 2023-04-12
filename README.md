@@ -1,21 +1,19 @@
 [![build status](http://img.shields.io/travis/vicruiser/3Dmapper/master.svg?style=flat)](https://travis-ci.com/username/vicruiser/3Dmapper) [![Join the chat at https://gitter.im/3d_mapper/community](https://badges.gitter.im/pdbmapper/community.svg)](https://gitter.im/3d_mapper/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# Overview
+## Overview
 
 3Dmapper is a command line tool based on R and Python programming languages that maps annotated genomic variants or positions to protein structures.
 
-
-# Dependencies
+## Dependencies
 
 -   BLAST standalone software version >= 2.6. Follow these [instructions](https://blast.ncbi.nlm.nih.gov/Blast.cgi?CMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download) to download and use the command line tool.
 -   Python > 3.6
 -   R version > 3.5
 -   [GNU parallel](https://www.gnu.org/software/parallel/)
 
+## Quick install
 
-# Quick install
-
-Open a terminal and enter the following:
+Execute the following code in Terminal:
 
 ``` bash
 git clone https://github.com/vicruiser/3Dmapper.git
@@ -24,5 +22,5 @@ pip install .
 sh r_dependencies.sh
 ```
 
-# Tutorial
+## Tutorial
 To learn how to use 3Dmapper, please refer to our [Wiki](https://github.com/vicruiser/3Dmapper/wiki). 
