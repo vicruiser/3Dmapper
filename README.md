@@ -25,4 +25,4 @@ sh r_dependencies.sh
 ```
 
 # Tutorial
-To learn how to use 3Dmapper, please refer to our [!Wiki][https://github.com/vicruiser/3Dmapper/wiki]. 
+To learn how to use 3Dmapper, please refer to our [Wiki](https://github.com/vicruiser/3Dmapper/wiki). 
