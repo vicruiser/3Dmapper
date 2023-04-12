@@ -1,0 +1,1 @@
+makevariantsdb -vf variants.vep 

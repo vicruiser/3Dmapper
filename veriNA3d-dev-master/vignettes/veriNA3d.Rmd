@@ -1,0 +1,688 @@
+---
+title: "VeriNA3d: introduction and use cases"
+author:
+  - name: Diego Gallego
+    affiliation:
+    - Institute for Research in Biomedicine (IRB Barcelona), the Barcelona 
+        Institute of Science and Technology, Spain.
+    - Department of Biochemistry and Molecular Biomedicine, Faculty of Biology,
+        University of Barcelona, Spain.
+  - name: Leonardo Darre
+    affiliation:
+    - Institute for Research in Biomedicine (IRB Barcelona), the Barcelona 
+        Institute of Science and Technology, Spain.
+    - Functional Genomics Laboratory and Biomolecular Simulations Laboratory, 
+        Institute Pasteur of Montevideo, Uruguay.
+  - name: Pablo D. Dans
+    affiliation:
+    - Institute for Research in Biomedicine (IRB Barcelona), the Barcelona 
+        Institute of Science and Technology, Spain.
+  - name: Modesto Orozco
+    affiliation:
+    - Institute for Research in Biomedicine (IRB Barcelona), the Barcelona 
+        Institute of Science and Technology, Spain.
+    - Department of Biochemistry and Molecular Biomedicine, Faculty of Biology,
+        University of Barcelona, Spain.
+date: "`r Sys.Date()`"
+output: BiocStyle::pdf_document
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{Introduction and use cases"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+
+knitr::opts_chunk$set(
+    collapse   = TRUE,
+    comment    = "#>",
+    message    = FALSE,
+    warning    = FALSE,
+    fig.width  = 6,
+    fig.height = 2,
+    fig.wide   = TRUE
+)
+
+```
+# Introduction: Structural Bioinformatics in R
+
+The R language provides an excellent interface for statistical analysis, which
+is also interesting from the point of view of structural data. This gap was 
+filled in 2006 by the R package 
+[bio3d](http://thegrantlab.org/bio3d/) [@Grant2006]. 
+It was presented as a 
+suite of tools to handle PDB formated structures, and trajectories. 
+It integrates a variety of functions to analyse from 
+sequence to 3D structure data (RMSD, NMA, PCA... see their 
+[documentation](http://thegrantlab.org/bio3d/html/index.html) for details).
+As far as we know, bio3d represented the only structural package for R until
+now.
+
+The R package presented in here, veriNA3d, does not replace bio3d at all.
+Rather, it was developed on top of it to cover additional necessities. 
+The only common tool integrated in both packages is a parser for mmCIF files
+(see below). VeriNA3d is mainly intended (but not limited) to the analysis of 
+Nucleic Acids. It integrates a higher level of abstraction than bio3d since it
+also allows the analysis of datasets, in addition to analysis of single
+structures. The functions in the package could be divided in the following 
+blocks:
+
+* Dataset level: Functions to get and analyse lists of pdb IDs. This includes
+access to the [representative lists of RNA](
+http://rna.bgsu.edu/rna3dhub/nrlist/)
+by [@Leontis2012] and other analytical functions.
+
+* Structure level: Functions to get data, parse mmCIF files and analyse them. 
+This includes a wrapper of DSSR [@Lu2015] and a function to calculate
+the \(\epsilon\)RMSD [@Bottaro2014].
+
+* Plots: few functions to show the results of the previous analysis.
+
+The complete list of functions can be found in the README.md file within the
+package, also accessible on the gitlab 
+[main page](http://mmb.irbbarcelona.org/gitlab/dgallego/veriNA3d).
+
+\newpage
+# Parsing mmCIF files
+
+## Origin and standardization of mmCIF files
+
+Atomic structural data of macromolecules has long been distributed in the PDB
+file format. However, one of its main limitations is the column size for the 
+coordinates data, which didn't allowed to save molecules with more than 99999
+atoms, more than 62 chains or more than 9999 residues (in a chain).
+
+Given that the Protein Data Bank is continously growing and accepting bigger
+structures (e.g. a whole *E.coli* ribosome has over 140000 atoms - pdbID 4V4S),
+an alternative file format became the standard: the mmCIF file format.
+
+The mmCIFs are an evolution of the Crystallographic Information File (CIF), 
+originally used for small molecule structures. It stands for 
+**m**acro**m**olecular **CIF** file, and it has actually coexisted with the PDB
+format since the 1997. However, since the PDB is easier to parse and such big
+structures didn't populate the database at the time, most software has been
+developed for the PDB format.
+
+The PDB format was definetely frozen in 2014. However, it will still coexist
+with the standard mmCIF format as long as all softwares evolve to accept
+mmCIFs. Following this trend, the bio3d R package integrated a `read.cif` 
+function in their version 2.3. At that time, we had already started the 
+development of our own `cifParser` function. Given that the mmCIF format is
+constantly evolving and that both functions take slightly different approaches,
+we decided to offer our own version of it, which might provide an useful and
+fast alternative for users working with mmCIF files.
+
+## The CIF object
+
+Parsing a particular file format often involves creating a new class of object.
+In R, the principal [objects](http://adv-r.had.co.nz/OO-essentials.html) are 
+called S3, S4 and RC. Our container for mmCIF data is an S4 object called 
+**CIF**, in contrast with the S3 object (called **pdb**) in bio3d - it is 
+worth noting that this difference does **not** affect the compatibility 
+between the two packages (see below for details).
+
+Since different mmCIF files usually have different sections of data 
+(in addition to the coordinates), we carried out an analysis that checked 
+which ones are always present in all mmCIF files (this included all mmCIF 
+files in the Protein Data Bank in March 2018), and reached a list of 14
+items:
+
+* Atom\_site
+* Atom\_sites
+* Atom\_type
+* Audit\_author
+* Audit\_conform
+* Chem\_comp
+* Database\_2
+* Entity
+* Entry
+* Exptl
+* Pdbx\_database\_status
+* Struct
+* Struct\_asym
+* Struct\_keywords 
+
+The detailed description of each data sections can be found in the
+mmCIF [main site](http://mmcif.wwpdb.org/).
+
+The CIF object is created by the `cifParser` function and contains these 14
+sections of data, which can be accessed with the CIF accessors. To see the
+accessor functions run:
+
+```{r ?cif_accessors}
+library(veriNA3d)
+?cif_accessors
+```
+
+
+To read a mmCIF file and access the coordinates data, use:
+
+```{r cifParser(pdbID)}
+## To parse a local mmCIF file:
+# cif <- cifParser("your-file.cif")
+## To download from PDB directly:
+cif <- cifParser("1bau")
+cif
+## To see the coordinates:
+coords <- cifAtom_site(cif)
+head(coords)
+```
+
+
+## Bidirectional compatibility with bio3d
+
+Using the `cifParser` will often be the first step to analyse a structure. 
+However, if the analysis requires any of the bio3d functions, then a 
+conversion should be done with the `cifAsPDB` function.
+
+```{r cifAsPDB(cif)}
+pdb <- cifAsPDB(cif)
+pdb
+```
+
+It takes a CIF object and generates an equivalent pdb object (as used by all 
+bio3d functions). In addition, all veriNA3d functions are prepared to accept 
+as input either the CIF or pdb objects. Therefore, the compatibility between
+the two packages is bidirectional.
+
+\newpage
+# Downloaded files
+
+The `cifParser` and other functions download the mmCIF files when they are
+not provided by the user. The core code that performs this operation is
+`cifDownload`. 
+
+`cifDownload` uses a temporal directory to save files, which can be found 
+running `tempdir`. These files are saved accross the same R session, so no
+file will be downloaded twice, but removed after the session is terminated.
+
+In some cases, such as intensive use of the package or limited Internet 
+connection, the user might want to keep the files accross different R sessions.
+This functionality can be achieved with a simple process.
+
+By default, `cifDownload` tries to find a directory called
+"~/.veriNA3d_mmCIF_files/". Only when it does not find it, it will use a 
+temporary directory. If you want to keep files across R sessions, just
+create this new folder in your home directory and veriNA3d will start using it
+to save all the downloaded mmCIF files. Note that the only way to recover the
+space in your drive is to remove those files *manually*. 
+
+Creating this directory can be easily done running the following command in R.
+
+```{Create permanent directory}
+dir.create("~/.veriNA3d_mmCIF_files/")
+```
+
+On the other hand, if you prefer to save your files in a specific directory
+of your choice, you can create a symbolic link called .veriNA3d_mmCIF_files
+pointing to your desired location, and it will also work. Instructions for this
+particular task are not included, since they are system specific.
+
+\newpage
+# Getting data from Application Programming Interfaces (API)
+
+Getting data is the first step of any pipeline, and parsing files is just one
+of the many ways data can be accessed. Application Programming Interfaces (API)
+are an intermediate point of access to a remote database. APIs offer the
+users a series of *endpoints* or *calls*, which are just **links**. Thus, 
+instead of dealing directly with the database with SQL or other language, the
+user can just use the appropriate *call* to send a query to the API, and it 
+will return the desired data.
+
+In addition to parsing mmCIF files, veriNA3d also offers a series of functions
+to send queries to different APIs. Since sending queries to remote APIs 
+requires Internet access, the full functionality of veriNA3d might depend
+on a good connection.
+
+To see all the query functions, run:
+
+```{r ?queryFunctions}
+?queryFunctions
+```
+
+IMPORTANT NOTE: 
+The APIs accessed by veriNA3d are free of use with no limit of queries
+per user. However, this could change if the users of the APIs use them 
+irresponsibly. Servers could eventually fall down if they receive more 
+*calls* than they can actually process. To avoid that, veriNA3d actually
+saves in memory the result of any query, and any time that you use the same
+query again, it will take the cached result. To see this effect, run this test:
+
+```{r "queryTechnique(pdbID, verbose=TRUE)"}
+## Run a query for the first time, which will access the API
+tech <- queryTechnique("4KQX", verbose=TRUE)
+
+## Run the same query for the second time, which will get it from memory
+tech <- queryTechnique("4KQX", verbose=TRUE)
+
+## See result
+tech
+```
+
+However, this is only saved across the current session of R, and any script
+that uses the query functions will send them to the API every time it is run.
+VeriNA3d does not guarantee the correct service of the APIs and it does not
+monitor any of your processes. However, the API providers 
+can known which IP address is querying their services at any time. To avoid 
+overloading the servers, please make a responsible use (e.g. save locally the 
+data that you use frequently).
+
+## Querying the EMBL-EBI REST API
+
+An invaluable resource for structural & computational biologists is the 
+[PDBe REST API](https://www.ebi.ac.uk/pdbe/pdbe-rest-api) [@Velankar2015].
+Around this technology, the package includes the following set of functions:
+
+* queryAuthors: List of authors
+* queryReldate: Release date
+* queryDepdate: Deposition date
+* queryRevdate: Revision date
+* queryDescription: Author description
+* queryEntities: Entitity information
+* queryFormats: File formats for the given ID
+* queryModres: Modified residues
+* queryLigands: Ligands in structure
+* queryOrgLigands: Ligands in structure (substracting ions)
+* queryResol: Resolution (if applicable)
+* queryTechnique: Experimental Technique
+* queryStatus: Released/Obsolete and related status information
+
+The list of functions is **intentionally limited** in comparison with the 
+dozens of *endpoints* of the REST API. Integrating them all would needlessly
+increase the total amount of functions of the package. Moreover, the API
+might offer more and more *endpoints* with the time, and trying to keep them
+all would make the manteinance of this package more difficult. To allow the 
+users to access their desired endpoints, an alternative method is provided.
+
+The core of all the query functions is `queryAPI`, which
+integrates all the error-handling and cache functionalities. With the 
+`queryAPI` function, any user can design their own queries, with a simple
+process. Herein a couple of examples.
+
+### Example 1
+
+This snapshot shows the REST API website and a *call* that is not implemented
+in veriNA3d:
+
+\begin{center}
+\includegraphics[width=6in]{PDBe_REST_API.png}
+\end{center}
+
+The link of this *endpoint* is:
+https://www.ebi.ac.uk/pdbe/api/pdb/compound/summary/ATP
+
+The `queryAPI` function can understand and send this query using the arguments
+'ID', 'API', 'string1', and 'string2' properly:
+
+```{r "Example1: queryAPI(ID, API, string1, string2)"}
+atpsummary <- queryAPI(ID="ATP", API="ebi", 
+                        string1="pdb/compound/summary/", string2="")
+str(atpsummary$ATP)
+```
+
+* The common root in all the REST API *endpoints* is 
+"https://www.ebi.ac.uk/pdbe/api/", which is internally managed by the function
+by using *API="ebi"*.
+* The *string1="pdb/compound/summary/"* indicates everything that comes after
+the root and before the ID. 
+* The *ID="ATP"* obviously represents the desired structure, either a
+4 character string for a pdbID or <= 3 character string for compounds.
+* The *string2=""* is also a necessary argument that reflects that nothing
+comes after the ID.
+
+### Example 2
+
+This snapshot shows a second *call* not implemented in veriNA3d:
+
+\begin{center}
+\includegraphics[width=6in]{PDBe_REST_API2.png}
+\end{center}
+
+The link of this *endpoint* is: 
+https://www.ebi.ac.uk/pdbe/api/pisa/noofinterfaces/3gcb/0
+
+The proper call with `queryAPI` would be:
+
+```{r "Example2: queryAPI(ID, API, string1, string2)"}
+PISAsummary <- queryAPI(ID="3gcb", API="ebi", 
+                        string1="pisa/noofinterfaces/", string2="0")
+str(PISAsummary$"3gcb")
+```
+
+This second example shows a case in which the "string2" argument is necessary.
+If you are unsure about the real link that is actually being constructed,
+you can always use *verbose=TRUE* to see it printed.
+
+\newpage
+# The \(\epsilon\)RMSD to compare structures
+
+A new interesting metric to compare Nucleic Acid structures is the 
+\(\epsilon\)RMSD [@Bottaro2014], currently available in the BaRNAba python
+package [@Bottaro2018]. The metric was implented in the `eRMSD` function
+and completely reproduces BaRNAba results for the structures tested.
+
+The following example shows how to get the \(\epsilon\)RMSD between two 
+models of the same structure:
+
+```{r "eRMSD(structure1, structure2)"}
+## Parse cif file
+cif <- cifParser("2d18")
+## Select a couple of models
+model1 <- selectModel(cif=cif, model=1)
+model3 <- selectModel(cif=cif, model=3)
+
+## Calculate the eRMSD
+eRMSD(cif1=model1, cif2=model3)
+
+## The RMSD can also be calculated easily
+RMSD(cif1=model1, cif2=model3)
+
+```
+
+\newpage
+# Generate substructures
+
+In many cases you might be interested on a particular region of a structure
+(e.g. a peptide from a complex, or a ligand and its binding site). For a 
+given structure, `trimSphere` can generate a smaller pdb object and save it 
+to a PDB file if desired. The region of interest can be selected by using 
+the chain identifier and the residue index, or with the `atom.select` function
+from bio3d (which in turn allows you to select regions of the structure in a 
+variety of ways). In addition to the region of interest, the function can also
+include the surrounding region by seting a cutoff distance.
+
+### Example 1
+
+```{r "trimsphere(structure, chain)"}
+## Parse human ribosome - takes around 12 seconds in R-3.5
+cif <- cifParser("6ek0")
+
+## Query entities and check them
+ent <- queryEntities("6ek0")
+head(ent[, c("entity_id", "molecule_name", "in_chains")])
+
+## Generate a smaller pdb with the 60S ribosomal protein L8
+chain <- "LA"
+protL8 <- trimSphere(cif, chain=chain, cutoff=0)
+protL8
+
+## The same command with the argument file would save it directly:
+trimSphere(cif, chain=chain, cutoff=0, file="output.pdb")
+```
+
+The output.pdb file can then be visualized using your favourite external
+molecular viewer. The following picture was taken using VMD software
+[@Humphrey1996].
+
+\begin{center}
+\includegraphics[width=6in]{6ek0_L9.png}
+\end{center}
+
+### Example 2
+
+To get the desired region of interest and its sorroundings, let's see a 
+second example using the same structure:
+
+```{r "trimsphere(structure, selection)"}
+## Load bio3d library
+library(bio3d)
+
+## Get pdb object from CIF
+pdb <- cifAsPDB(cif)
+
+## Get list of ligands in the human ribosome 6EK0
+queryLigands("6ek0", onlyligands=T)
+
+## Get the atomic index for a desired ligand
+HMTligand_inds <- pdb$atom$eleno[which(pdb$atom$resid == "HMT")]
+
+## Use bio3d function to select the ligand using its atom indices
+sel <- atom.select(pdb, eleno=HMTligand_inds)
+
+## Get substructure and sorroundings at 10 Angstroms
+HTMligand <- trimSphere(pdb, sel=sel, cutoff=5)
+
+## And generate file to visualize it
+trimSphere(pdb, sel=sel, file="output2.pdb", cutoff=5)
+```
+
+\begin{center}
+\includegraphics[width=6in]{6ek0_HMT.png}
+\end{center}
+
+
+### Example 3
+
+A third useful example would be the generation of a pdb with the
+interacting region between two molecules in the structure. To achieve the
+goal, veriNA3d also counts with the `findBindingSite` function, as shown
+below:
+
+```{r "trimsphere(structure, selection2)"}
+## Parse another pdb for this example
+pdb <- cifAsPDB("1nyb")
+
+## Find region of interaction between RNA and protein
+data <- findBindingSite(pdb, select="RNA", byres=TRUE)
+
+## Get atom indices from interacting region molecules
+eleno <- append(data$eleno_A, data$eleno_B)
+
+## Select using bio3d
+sel <- atom.select(pdb, eleno=eleno)
+
+## Get substructure
+trimSphere(pdb, sel=sel, file="interacting_site.pdb", verbose=FALSE)
+```
+
+\begin{center}
+\includegraphics[width=6in]{1nyb_interacting_site.png}
+\end{center}
+
+\newpage
+# Calculate phosphate pair-wise distances
+
+Atomic distances are calculated internally in the `trimSphere` function, a 
+resource that is also made available to the user through the functions
+`measureEntityDist` (returns all the distances between the atoms 
+of two entities) and `measureElenoDist` (returns all the distances between two
+sets of atoms).
+
+Herein it is shown how to calculate the pair-wise distances between all the
+phosphate atoms of an RNA structure, which could be easily adapted for alpha
+carbons or other elements.
+
+```{r measureElenoDist(structure, refeleno, eleno, cutoff)}
+## Parse pdb
+pdb <- cifAsPDB("1nyb")
+
+## Select P atoms by element number (eleno)
+ind <- which(pdb$atom$elety == "P")
+eleno <- pdb$atom$eleno[ind]
+
+## Count number of phosphates
+total <- length(eleno)
+
+## Execute function to measure the distances
+P_distances <- measureElenoDist(pdb=pdb, refeleno=eleno, eleno=eleno, 
+                                n=total, cutoff=100)
+```
+
+\newpage
+# Manage Nucleic Acid datasets
+
+VeriNA3d also provides a set of tools to work at a higher level of abstraction,
+which allow the user to manage datasets of structures at once. Such approaches
+are often found in the literature in a variety of studies, either
+with descriptive [@Murray2003, @Darre2016], validation [@Jain2015] or 
+modeling [@Wang2011, @Wang2015] purposes.
+However, as far as we know, no software with dataset analysis
+purposes has ever been freely distributed before.
+
+## Non-redundant lists of RNA
+
+VeriNA3d integrates
+the function `getRNAList`, which returns the desired non-redundant list
+of RNA structures, as found in [@Leontis2012]
+[website](http://rna.bgsu.edu/rna3dhub/nrlist/). 
+Here it is shown an example of how to make a non-redundant dataset of 
+protein-RNA complexes with resolutions better than 2 Angstroms.
+
+```{r getRNAList(release, threshold)}
+## Get non-redundant list from Leontis website
+rnalist <- getRNAList(release="3.47", threshold="2.0A")
+head(rnalist)
+```
+
+The previous object is a data-frame with three columns:
+
+* Equivalence class
+* Representative structure
+* Members of the Equivalence class
+
+Note that the output is formated according with Leontis&Zirbel nomenclature
+(AAAA|M|C), where "AAAA" is the PDB accession code, "M" is the model and "C" 
+is the Chain.
+
+The representative structures might not necessarily have the desired properties
+(e.g. being a protein-RNA complex). To get only representatives which are
+complexed with a protein, all the members of the class should be checked,
+which can be done with `getAltRepres`.
+
+```{r 'getAltRepres(rnalist, type="protRNA")'}
+## Set progressbar=TRUE to see the progress
+protrna <- getAltRepres(rnalist=rnalist, type="protRNA", progressbar=FALSE)
+head(protrna)
+```
+
+Many equivalence classes will lack a proper representative, so a NA value is
+returned. To get the definite list in a more friendly format and removing
+missing data, use `represAsDataFrame`.
+
+```{r represAsDataFrame(nrlist)}
+nrlist <- represAsDataFrame(protrna)
+head(nrlist)
+```
+
+## Queries
+
+When analysing a dataset, a particular piece of data might be useful, such
+as the file formats available or if a particular ligand is present or not in
+all the pdb files. A handy function to approach this need is `applyToPDB`.
+Here it's shown how to get the structures in the previous list that contain
+Mg ions:
+
+```{r applyToPDB(listpdb=nrlist, FUN=hasHetAtm, hetAtms="MG")}
+## Set progressbar=TRUE to see the progress
+nrlist_mg <- applyToPDB(FUN=hasHetAtm, listpdb=nrlist$pdb, 
+                        hetAtms="MG", progressbar=FALSE)
+nrlist <- cbind(nrlist, Mg=nrlist_mg[, 2])
+head(nrlist)
+
+## To see only the structures containing Mg use
+head(nrlist[nrlist$Mg == TRUE, ])
+```
+
+In the example, the argument hetAtms is passed to the hasHetAtm function.
+
+## Analysing datasets
+
+When you have your desired list of PDB IDs, the function `pipeNucData` and 
+`pipeProtNucData` can extract multiple structural parameters for all the 
+dataset.
+
+```{r pipeNucData(pdblist, chainlist, cores)}
+## After the download is finished, this dataset is analysed in less than 2 min
+## (single core, intel i5 2.3Ghz). Set progressbar=TRUE to see the progress.
+ntinfo <- pipeNucData(pdbID=nrlist$pdb, 
+                        model=nrlist$model,
+                        chain=nrlist$chain, 
+                        progressbar=FALSE, cores=2)
+str(ntinfo)
+```
+
+In this case, `pipeNucData` is downloading each structure from internet, but
+you can also download them manually before execution, save them in a directory
+and provide it to the function. When reading files locally, the function is
+obviously faster. The file format can either be pdb or cif, being the cif files
+the recommended option (they can also be read when compressed in .gz). To make
+it work with local files, the extension should also be provided
+(e.g. ".cif.gz", ".cif" or ".pdb").
+
+```{r pipeNucData(pdblist, chainlist, cores, path, extension), eval=FALSE}
+ntinfo <- pipeNucData(pdbID=nrlist$pdb, 
+                        model=nrlist$model,
+                        chain=nrlist$chain, 
+                        progressbar=FALSE, cores=2, 
+                        path="/your/path/to/the/dataset/", extension=".cif.gz")
+```
+
+The second dataset analysis available in the dataset is designed to study
+the interactions between proteins and nucleic acids, and would be executed as
+follows:
+
+
+```{r pipeProtNucData(pdblist, chainlist, cores)}
+## After the download is finished, this dataset is analysed in less than 1 min
+## (single core, intel i5 2.3Ghz). Set progressbar=TRUE to see the progress.
+aantinfo <- pipeProtNucData(pdbID=nrlist$pdb, 
+                            model=nrlist$model,
+                            chain=nrlist$chain, 
+                            progressbar=FALSE, cores=2)
+str(aantinfo)
+```
+
+\newpage
+# The `dssr` wrapper: getting the base pairs
+
+The DSSR software (Disecting the Spatial Structure of RNA) [@Lu2015] 
+represents an unvaluable resource to handle RNA structures. Some of the 
+functions of veriNA3d overlap with the functionalities of DSSR, and both 
+applications provide unique different features. We implement a wrapper to
+execute DSSR directly from R and get the best of both worlds in one place.
+
+Note that installing veriNA3d does not automatically install DSSR, since
+we don't redistribute third-party software. Before any user can use our 
+wrapper, the `dssr` function, DSSR should be installed separately. To
+address this installation we redirect you to the 
+[DSSR manual](http://docs.x3dna.org/dssr-manual.pdf), where anyone can find
+the specific instructions for their system. Once DSSR is installed and working 
+in your computer, you will also be able to use it with our wrapper. If the
+DSSR executable (named x3dna-dssr) is in your path, `dssr` will find it
+automatically. If the wrapper does not find it, you can still use it
+specifying the absolute path to the executable with the argument exefile.
+Find more information running `?dssr`.
+
+One of the DSSR capabilities that users might be interested in is the detection
+and classification of base pairs. The following code shows a simple example.
+The output of the `dssr` wrapper is an object got from the json DSSR output.
+From R, json objects are parsed in the form of a tree of lists, with different
+types of information. Most of the interesting data is under the list models,
+sublist parameters, as shown herein.
+
+
+```{r dssr(pdbID)}
+## Execute dssr, the wrapper will donwload the (mmCIF) file if necessary
+rna <- dssr("1bau")
+
+## The contents of the `rna` object can be seen with
+names(rna)
+
+## Then, the contents of the list model inside `rna`
+names(rna$model)
+
+## And, inside the sublist parameters
+names(rna$models$parameters)
+
+## The number 1 herein selects the model of the structure, and is needed even
+## in XRAY structures.
+class(rna$models$parameters$pairs[[1]])
+
+## Finally, to get the data about base pairs, use:
+rna$models$parameters$pairs[[1]][, c("index", "nt1", "nt2", "LW")]
+
+```
+
+\newpage
+# References

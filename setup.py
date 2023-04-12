@@ -54,7 +54,7 @@ class git_clone_external(DistutilsInstall):
             bcftools_dir = os.path.dirname(
                 os.path.realpath(__file__)) + "/bcftools"
             htslib_dir = os.path.dirname(os.path.realpath(__file__))+" /htslib"
-            stride_dir = os.path.dirname(os.path.realpath(__file__))+ "/stride"
+            verina_dir = os.path.dirname(os.path.realpath(__file__))+ "/verina"
             
             if not os.path.exists(htslib_dir):
                 cmd1 = ['git', 'clone',
@@ -72,12 +72,13 @@ class git_clone_external(DistutilsInstall):
                 subprocess.call(
                     cmd2, cwd=os.path.dirname(os.path.realpath(__file__)))
                 
-            #if not os.path.exists(stride_dir):
-            #    cmd3 = ['wget', "http://webclu.bio.wzw.tum.de/stride/stride.tar.gz"]
+            # if not os.path.exists(verina_dir):
+            #     cmd3 = ['git','clone',
+            #                 'https://mmb.irbbarcelona.org/gitlab/dgallego/veriNA3d-dev.git']
 
-                #self.run_command( cmd1, d)
-            #    subprocess.call(cmd3, cwd=os.path.dirname(
-            #        os.path.realpath(__file__)))
+            #     #self.run_command( cmd1, d)
+            #     subprocess.call(cmd3, cwd=os.path.dirname(
+            #         os.path.realpath(__file__)))
 
             #self.run_command(self, ["make", "clean"], bcftools_dir)
             #self.run_command(self, ["make"], bcftools_dir)
@@ -92,6 +93,12 @@ class git_clone_external(DistutilsInstall):
 
             subprocess.call(
                 ["cp", "plugins/split-vep.so", "%s/bin/" % os.environ.get('VIRTUAL_ENV', '/usr/local/')], cwd=bcftools_dir)
+
+            # subprocess.call(
+            #     ["R","CMD", "build", "%s" % os.environ.get('VIRTUAL_ENV', '/usr/local/') , "--no-build-vignettes"], cwd=verina_dir)
+
+            # subprocess.call(
+            #     ["R","CMD", "build", "%s" % os.environ.get('VIRTUAL_ENV', '/usr/local/') , "--no-build-vignettes"], cwd=verina_dir)
             
             #subprocess.call(
             #    ["tar", "-zxf" ,"stride.tar.gz"], cwd=os.path.dirname(
@@ -213,7 +220,7 @@ setup(
     #
 
     packages=['mapper', #'makepsdb',
-              'makevariantsdb', 'makestructuraldb', 'makevisualization' ],  # Required!!!!!
+              'makevariantsdb', 'makeinterfacedb', 'makechimera' ],  # Required!!!!!
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this

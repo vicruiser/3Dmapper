@@ -1,0 +1,106 @@
+import(bio3d)
+import(parallel)
+importFrom("graphics", "abline", "axis", "barplot", "contour",
+            "legend", "par", "plot", "points", "text", "title")
+importFrom("grDevices", "dev.off", "png", "rgb")
+importFrom("methods", "new")
+importFrom("stats", "complete.cases", "sd")
+importFrom("utils", "download.file", "read.table", "setTxtProgressBar",
+            "txtProgressBar", "data", "combn")
+importFrom(plot3D, persp3D)
+importFrom(MASS, kde2d, bandwidth.nrd)
+importFrom(jsonlite, fromJSON)
+importFrom(RColorBrewer, brewer.pal)
+importFrom(RANN, nn2)
+importFrom(circlize, circos.par, circos.initialize,
+                circos.trackPlotRegion, circos.axis, circos.trackPoints,
+                circos.trackHist, circos.clear)
+
+#exportPattern("^[[:alpha:]]+")
+exportClasses(CIF)
+export(
+    applyToPDB,
+
+    checkNuc,
+    cifAsPDB,
+    cifAtom_site,
+    cifAtom_sites,
+    cifAtom_type,
+    cifAudit_author,
+    cifAudit_conform,
+    cifChem_comp,
+    cifDatabase_2,
+    cifDownload,
+    cifEntity,
+    cifEntry,
+    cifExptl,
+    cifParser,
+    cifPdbx_database_status,
+    cifStruct,
+    cifStruct_asym,
+    cifStruct_keywords,
+    classifyDNA,
+    classifyRNA,
+
+    countEntities,
+
+    cleanByPucker,
+
+    dssr,
+
+    eRMSD,
+
+    findBindingSite,
+    findHDR,
+
+    getAltRepres,
+    getID,
+    getRNAList,
+
+    hasHetAtm,
+
+    measureEntityDist,
+    measureElenoDist,
+    measureNuc,
+
+    pipeNucData,
+    pipeProtNucData,
+
+    plot2D,
+    plot3Ddens,
+    plotCategorical,
+    plotCircularDistribution,
+
+    queryAPI,
+    queryAuthors,
+    queryChains,
+    queryCompType,
+    queryDepdate,
+    queryDescription,
+    queryEntities,
+    queryEntryList,
+    queryFormats,
+    queryHeader,
+    queryHetAtms,
+    queryLigands,
+    queryModres,
+    queryNDBId,
+    queryObsoleteList,
+    queryOrgLigands,
+    queryReldate,
+    queryResol,
+    queryRevdate,
+    queryStatus,
+    queryTechnique,
+
+    represAsDataFrame,
+    RMSD,
+    rVector,
+
+    selectModel,
+
+    trimByID,
+    trimSphere,
+
+    validation
+)

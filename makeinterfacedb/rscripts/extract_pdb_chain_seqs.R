@@ -40,11 +40,11 @@ suppressMessages(
 
 suppressMessages(
   if(!require("veriNA3d")){
-  system('wget mmb.irbbarcelona.org/gitlab/dgallego/veriNA3d-dev/repository/archive.zip?ref=master -O ~/PDBmapper-master/veriNA3d_0.99.0.zip')
-  system('unzip ~/PDBmapper-master/veriNA3d_0.99.0.zip')
-  system('mv ~/PDBmapper-master/veriNA3d-*master* ~/PDBmapper-master/veriNA3d_0.99.0')
-  system('R CMD build ~/PDBmapper-master/veriNA3d_0.99.0 --no-build-vignettes')
-  system('R CMD INSTALL ~/PDBmapper-master/veriNA3d*.tar.gz')
+  system('wget mmb.irbbarcelona.org/gitlab/dgallego/veriNA3d-dev/repository/archive.zip?ref=master -O ~/veriNA3d_0.99.0.zip')
+  system('unzip ~/veriNA3d_0.99.0.zip')
+  system('mv ~/veriNA3d-*master* ~/veriNA3d_0.99.0')
+  system('R CMD build ~/veriNA3d_0.99.0 --no-build-vignettes')
+  system('R CMD INSTALL ~/veriNA3d*.tar.gz')
   
 })
 

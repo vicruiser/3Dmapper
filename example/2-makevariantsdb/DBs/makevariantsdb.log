@@ -1,0 +1,10 @@
+[2023-04-12 16:55:44,376]    main -  Starting process of splitting input file of variants.
+[2023-04-12 16:55:44,378]    main -  Input is a single file.
+[2023-04-12 16:55:44,459]    main -  Input file is in vep format.
+[2023-04-12 16:55:44,459]   split -  Splitting input file.
+[2023-04-12 16:55:44,470]   split -  This file contains gene ids
+[2023-04-12 16:55:44,484]   split -  This file contains gene ids
+[2023-04-12 16:55:44,500]   split -  'Uploaded_variation' column found.
+[2023-04-12 16:55:44,520]   split -  This file was splitted successfully
+[2023-04-12 16:55:44,530]   split -  This file was indexed correctly.
+[2023-04-12 16:55:44,540]    main -  Splitting process is done.

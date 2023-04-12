@@ -1,0 +1,26 @@
+
+    ----------------------------------------------------
+    ____  _____                                        
+   |___ \|  __ \                                       
+     __) | |  | |_ __ ___   __ _ _ __  _ __   ___ _ __ 
+    |__ <| |  | | '_ ` _ \ / _` | '_ \| '_ \ / _ \ '__|
+    ___) | |__| | | | | | | (_| | |_) | |_) |  __/ |   
+   |____/|_____/|_| |_| |_|\__,_| .__/| .__/ \___|_|   
+                                | |   | |              
+                                |_|   |_|              
+    ----------------------------------------------------
+    
+          -----------------------------------
+         |  >>>Publication link<<<<<         |
+         |  victoria.ruiz.serra@gmail.com    |
+          -----------------------------------
+        
+        Command line input:
+        -------------------
+    
+makevariantsdb -vf variants.vep
+
+
+[Wed Apr 12 16:55:44 2023] Starting process of splitting input file of variants.
+[Wed Apr 12 16:55:44 2023] Splitting process is done.
+[Wed Apr 12 16:55:44 2023] Generation of genomic variants DB in ./DBs/varDB completed successfully. Total time: 0:00:00

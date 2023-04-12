@@ -1,0 +1,20 @@
+
+    Command line input:
+    -------------------
+    
+mapper -pid P09769 O15151 -psdb ../1-makestructuraldb/structural_db/structuralDB/ -vdb ../2-makevariantsdb/DBs/varDB/ --id_mapping dict_geneprot_GRCh38_uniprot.txt -csv -a -l
+
+
+[Wed Apr 12 17:01:53 2023] Directory ./3dmapper_results created.
+[Wed Apr 12 17:01:53 2023] 3Dmapper has finished successfully. Execution time: 0:00:00
+ 
+
+    Command line input:
+    -------------------
+    
+mapper -pid P09769 O15151 -psdb ../1-makestructuraldb/structural_db/structuralDB/ -vdb ../2-makevariantsdb/DBs/varDB/ --id_mapping dict_geneprot_GRCh38_uniprot.txt -hdf -l -a
+
+
+[Wed Apr 12 17:02:42 2023] ./3dmapper_results is an existing directory. Results will be written in there.
+[Wed Apr 12 17:02:42 2023] 3Dmapper has finished successfully. Execution time: 0:00:01
+ 

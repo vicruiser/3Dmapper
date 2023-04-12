@@ -1,0 +1,6 @@
+./pdbs/AF-O15151-F1-model_v4.pdb
+./pdbs/7jt9-assembly1.cif.gz
+./pdbs/5mnj-assembly1.cif.gz
+./pdbs/AF-P09769-F1-model_v4.pdb
+./pdbs/6yr7-assembly1.cif.gz
+./pdbs/2vyr-assembly1.cif.gz

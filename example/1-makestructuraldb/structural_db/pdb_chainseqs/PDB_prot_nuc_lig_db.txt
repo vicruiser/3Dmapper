@@ -1,0 +1,7 @@
+pdbid n_prot_chains n_read_prot_chains name_prot_chains name_read_prot_chains len_prot_chain n_unique_ligands ligands n_ligands n_nuc_chains nuc_chains len_nuc_chain
+AF-O15151-F1-model_v4.pdb 1 1 A A 490 0 NA 0 0 NA NA
+7jt9-assembly1.cif.gz 1 1 A A 71 0 NA 0 0 NA NA
+5mnj-assembly1.cif.gz 4 4 A-B-C-D A-B-C-D 146-75-63-63 2 ZN-ZN-SO4 3 0 NA NA
+AF-P09769-F1-model_v4.pdb 1 1 A A 529 0 NA 0 0 NA NA
+6yr7-assembly1.cif.gz 4 4 A-B-Q-C A-B-Q-C 229-229-8-8 1 B3P 1 0 NA NA
+2vyr-assembly1.cif.gz 12 12 A-B-C-D-E-F-G-H-I-J-K-L A-B-C-D-E-F-G-H-I-J-K-L 86-86-86-86-124-124-123-125-124-124-124-124 1 SO4-SO4-SO4 3 0 NA NA
