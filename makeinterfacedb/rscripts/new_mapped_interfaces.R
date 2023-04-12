@@ -1,7 +1,7 @@
 ###############################################################################
 # Reformat predicted interfaces results
 ###############################################################################
-
+options(echo = FALSE, verbose = F,warn = -1) 
 #' Title
 #'
 #' @param pdb_id
@@ -13,24 +13,31 @@
 #'
 #' @examples
 new.Mapped.Interfaces <-
-  function(pdb_id , interfaces_dir, blast_output) {
+  function(pdb_id, chain_id, interfaces_dir, blast_output) {
+    
     # read output files of all calculated distances (prot, lig and ac. nuc)
     # corresponding to the selected pdb_id
     # pi stands for "predicted interfaces"
     pi_paths   <- Sys.glob(file.path(
       interfaces_dir,
-      paste("*", pdb_id, "*predicted_interfaces*", sep =
+      paste("*", pdb_id, '*_chain', chain_id,'_', "*predicted_interfaces*", sep =
               "")
     ))
-    pi_df_list <-
-      lapply(pi_paths, function(x)
-        fread(x, header = T))
-    pi         <-
-      as.data.frame(rbindlist(pi_df_list, use.names = TRUE, fill = TRUE))
 
-    
+    new_mpi_list = list()
+    for(i in pi_paths ){
+
+     
+    #pi_df_list <-
+    #  lapply(pi_paths, function(x)
+    #    fread(x, header = T))
+    pi <- fread(i, header = T)
+      #as.data.frame(rbindlist(pi_df_list, use.names = TRUE, fill = TRUE))
+
+
     # subset ligand interactions and change chain id and use residue id instead
     if (nrow(pi) > 0) {
+      
       pi_ligand <- subset(pi, interaction == "ligand")
       pi_ligand$chain.1 <- pi_ligand$resid.1
       
@@ -93,7 +100,7 @@ new.Mapped.Interfaces <-
           "real.pos",
           "real.pos.1"
         )
-        
+
         pi_all <- rbindlist(
           list(
             pi_protein,
@@ -104,6 +111,7 @@ new.Mapped.Interfaces <-
           use.names = T,
           fill = T
         )
+
       } else{
         pi_reversed <- data.frame(
           type.1 = character() ,
@@ -129,36 +137,12 @@ new.Mapped.Interfaces <-
         pi_all <-    data.table(rbind(pi_protein,
                                       pi_ligand,
                                       pi_reversed,
-                                      pi_nuc))
+                                      pi_nuc, fill = T))
         
         
       }
 
       pi_all$chain.1 <- as.character(pi_all$chain.1)
-      
-      # Calculate the min distance between each interacting residue pair
-      dist <- pi_all[, c("resno", "resno.1", "distance", "b", "b.1")]
-      min_dist <-
-        lapply(split(dist, by = c("resno", "resno.1")), function(x)
-          min(x$distance))
-      min_b<-
-        lapply(split(dist, by = c("resno", "resno.1")), function(x)
-          min(x$b))
-      min_b.1<-
-        lapply(split(dist, by = c("resno", "resno.1")), function(x)
-          min(x$b.1))
-      
-      
-      min_max_mean_dist <-
-        data.frame(
-          resno = as.numeric(sub("\\..*", "", names(min_dist))),
-          resno.1 = as.numeric(sub(".*\\.", "", names(min_dist))),
-          distance = unlist(min_dist),
-          b =unlist(min_b),
-          b.1= unlist(min_b.1)
-        )
-      rownames(min_max_mean_dist) <- NULL
-      
       # unique by number of residues
       pi_all_unique <-
         unique(pi_all[, c(
@@ -175,11 +159,39 @@ new.Mapped.Interfaces <-
           "real.pos"
         )])
       
+      # Calculate the min distance between each interacting residue pair
+      dist <- pi_all[, c("chain","resno", "resno.1", "distance", "b", "b.1")]
+      min_dist <-
+        lapply(split(dist, by = c("chain","resno", "resno.1")), function(x)
+          min(x$distance))
+      min_b<-
+        lapply(split(dist, by = c("chain","resno", "resno.1")), function(x)
+          min(x$b))
+      min_b.1<-
+        lapply(split(dist, by = c("chain","resno", "resno.1")), function(x)
+          min(x$b.1))
+      
+      nn = str_split_fixed(names(min_dist), '\\.',3)
+      min_max_mean_dist <-
+        data.frame(
+          chain = as.character(nn[,1]),
+          resno = as.numeric(nn[,2]),
+          resno.1 = as.numeric(nn[,3]),
+          distance = as.numeric(unlist(min_dist)),
+          b = as.numeric(unlist(min_b)),
+          b.1= as.numeric(unlist(min_b.1))
+        )
+      rownames(min_max_mean_dist) <- NULL
+      
+
+      pi_all_unique$chain = as.character(pi_all_unique$chain)
+
       #add the distance calculation
       pi_all_unique <-
         merge(pi_all_unique,
               unique(min_max_mean_dist),
-              by = c("resno", "resno.1"))
+              by = c("chain","resno", "resno.1"))
+
       # add struct info
       if (nrow(pi_all_unique) >0){
       pi_all_unique = rbind(pi_all_unique, unique(pi_struct[, c(
@@ -201,9 +213,21 @@ new.Mapped.Interfaces <-
       } else {
         pi_all_unique = pi_struct
       }
-      # merge BLAST info and new mapped pi
-      new_mpi <- merge(blast_output, pi_all_unique, by = c("chain"))
+      
 
+      # load blast results
+      ch = unique(pi_all_unique$chain)
+      blast_output2 = subset(blast_output, chain %in% as.character(unique(pi_all_unique$chain)))
+      blast_output2$chain = as.character(blast_output2$chain)
+      pi_all_unique$chain = as.character(pi_all_unique$chain)
+      # merge BLAST info and new mapped pi
+      new_mpi <- merge(blast_output2,
+                       pi_all_unique,
+                       by = c("chain"),
+                       allow.cartesian = TRUE)
+
+      #print(new_mpi)
+      if(nrow(new_mpi)>0){
       ###############################################################################################
       # Eliminate those residues that do not map to the protein of reference (Ensembl)              #
       ###############################################################################################
@@ -223,6 +247,7 @@ new.Mapped.Interfaces <-
       new_mpi <-
         subset(new_mpi, real.pos >= qstart & real.pos <= qend)
       
+      if(nrow(new_mpi)>0){
       # 2) Get mapped position
       # split new_mpi dataframe by chain and prot.id since the same blast hit is repeated
       new_mpi_template_split <-
@@ -269,12 +294,135 @@ new.Mapped.Interfaces <-
                                          x <- cbind(x, as.data.frame(y))
                                          return(x)
                                        })
-      new_mpi <- rbindlist(new_mpi_template_split)
+
+      new_mpi <- rbindlist(new_mpi_template_split, fill =TRUE)
       
       new_mpi = subset(new_mpi, resid_qseq != '-' &
                          resid_sseq != '-')
-      return(new_mpi)
+      
+      #new_mpi_list[[i]] =  new_mpi
+      new_mpi = new_mpi[order(new_mpi$spos),]
+      
+      individual_new_mpi  =  unique(new_mpi[, c(
+        "prot.id",
+        "slen",
+        "spos",
+        "resid_sseq",
+        "pdb.id.x",
+        "chain",
+        "qlen",
+        "resno",
+        "qpos",
+        "resid_qseq",
+        "evalue",
+        "pident",
+        "qcov",
+        "length",
+        "interaction",
+        "chain.1",
+        "resno.1",
+        "resid.1",
+        "distance",
+        "b",
+        "b.1",
+        "qstart",
+        "qend",
+        "sstart",
+        "send"
+      )])
+      
+      individual_new_mpi = individual_new_mpi[, c(
+        "prot.id",
+        "slen",
+        "spos",
+        "resid_sseq",
+        "pdb.id.x",
+        "chain",
+        "qlen",
+        "resno",
+        "qpos",
+        "resid_qseq",
+        "evalue",
+        "pident",
+        "qcov",
+        "length",
+        "interaction",
+        "chain.1",
+        "resno.1",
+        "resid.1",
+        "distance",
+        "b",
+        "b.1",
+        "sstart",
+        "send",
+        "qstart",
+        "qend"
+      )]
+      
+      colnames(individual_new_mpi) =
+        c(
+          "Protein_accession",
+          "Protein_length",
+          "Protein_position",
+          "Protein_aa",
+          "PDB_code",
+          "PDB_chain",
+          "PDB_chain_length",
+          "PDB_3D_position",
+          "PDB_seq_position",
+          "PDB_aa",
+          "Evalue",
+          "Pident",
+          "Protein_coverage",
+          "Length_alignment",
+          "Interaction_type",
+          "PDB_interacting_chain",
+          "PDB_interacting_3D_position",
+          "PDB_interacting_aa",
+          "Interface_min_distance",
+          "PDB_B_factor",
+          "PDB_interacting_B_factor",
+          "Protein_alignment_start",
+          "Protein_alignment_end",
+          "PDB_alignment_start",
+          "PDB_alignment_end"
+        )
+      
+      individual_new_mpi$Structure_feature_id = paste(
+        individual_new_mpi$PDB_code,
+        individual_new_mpi$Protein_accession,
+        individual_new_mpi$PDB_chain,
+        individual_new_mpi$PDB_interacting_chain,
+        individual_new_mpi$Interaction_type,
+        sep = "_"
+      )
+      
+      
+      individual_new_mpi_list = split(individual_new_mpi, individual_new_mpi$Protein_accession)
+      for (prot in names(individual_new_mpi_list)){
+        fn = file.path(output_dir, paste(prot, '.txt.gz', sep = ""))
+        file.lock = lock(fn)
+        fwrite(
+          individual_new_mpi_list[[prot]],
+          fn,
+          quote = F,
+          row.names = F,
+          col.names = file.info(fn)$size==0,
+          append = T,
+          sep = "\t",
+          compress = "gzip"
+        )
+        unlock(file.lock)
+      }
+      
+      
+      }
+      }
     } else{
-      stop("no pi")
+      next
+      #stop("no pi")
     }
+    }
+    #new_mpi = as.data.frame(rbindlist(new_mpi_list, use.names = TRUE, fill = TRUE))
+    #return(new_mpi)
   }

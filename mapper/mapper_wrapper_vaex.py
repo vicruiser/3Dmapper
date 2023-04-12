@@ -7,6 +7,7 @@ import os
 import re
 from subprocess import call
 import itertools
+from time import sleep
 from .logger import get_logger
 from .translate import translate
 from .db_parser import parser
@@ -31,10 +32,21 @@ aa = ['I', 'M','T','N', 'K', 'S', 'R', 'L',
 #       text_succeed=" Running 3Dmapper...done.",
 #       text_fail=" Running 3Dmapper...failed!",
 #       emoji=DNA)
-
+def drop_duplicates(df, columns=None):
+    """Return a :class:`DataFrame` object with no duplicates in the given columns.
+    .. warning:: The resulting dataframe will be in memory, use with caution.
+    :param columns: Column or list of column to remove duplicates by, default to all columns.
+    :return: :class:`DataFrame` object with duplicates filtered away.
+    """
+    if columns is None:
+        columns = df.get_column_names()
+    if type(columns) is str:
+        columns = [columns]
+    return df.groupby(columns, agg={'__hidden_count': vaex.agg.count()}).drop('__hidden_count')
 
 def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc, index_file, dict_geneprot, varid=None, csv = False, hdf = False):
-    
+    print(id)
+    #sleep(0.01)
     # logging
     logger = get_logger('wrapper', out_dir)
     # translate ensembl id
@@ -45,7 +57,7 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
             id,  out_dir, dict_geneprot, isoform)
 
         gene_id, prot_id, transcript_id = ids['geneID'], ids['protID'], ids['transcriptID']
-        
+
         if 'APPRIS' in ids.keys():
             APPRIS = ids['APPRIS']
         else:
@@ -121,7 +133,7 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
                         raise IOError()
                 try: 
                     coding_positions_index = annovars_left.Amino_acids.str.contains('|'.join(aa))
-                    noncoding_positions = annovars_left.loc[~coding_positions_index]
+                    noncoding_positions = annovars_left[~coding_positions_index]
                 except: 
                     noncoding_positions = False 
                 if isoform is None:
@@ -131,7 +143,7 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
                 # non-protein coding mutations
                 if noncoding_positions is not False:
                     #noncoding_positions['APPRIS_isoform'] = ''
-                    noncoding_positions['Mapping_position'] = 'Noncoding'
+                    noncoding_positions['Mapping_position'] = np.array(['Noncoding']*noncoding_positions.length_unfiltered(), dtype = np.str)
                     writefile(transcript_id, out_dir, float(pident), isoform, consequence, noncoding_positions, 'NoncodingPositions', csv, hdf)
                     unmapped_positions = annovars_left[coding_positions_index]
                 else: 
@@ -139,9 +151,9 @@ def wrapper(id, psdb, vardb, out_dir, pident, evalue, isoform, consequence, loc,
                         
                 if len(unmapped_positions) > 0:
                     #unmapped_positions = unmapped_positions.iloc[:, 0:16]
-                    unmapped_positions.drop_duplicates()
+                    unmapped_positions = drop_duplicates(unmapped_positions)
                    # unmapped_positions['APPRIS_isoform'] = ''
-                    unmapped_positions['Mapping_position'] = 'Unmapped'
+                    unmapped_positions['Mapping_position'] = np.array(['Unmapped']*unmapped_positions.length_unfiltered(), dtype = np.str)
                     writefile(transcript_id, out_dir, float(pident), isoform, consequence, unmapped_positions, 'UnmappedPositions', csv, hdf)
             except:
                 pass

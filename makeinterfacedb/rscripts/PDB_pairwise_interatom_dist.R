@@ -1,7 +1,7 @@
 #! /usr/bin/Rscript
 ##### Load necessary functions
 
-
+options(echo = FALSE, verbose = F,warn = -1) 
 
 #' Title: CALCULATION INTER-ATOMIC DISTANCES
 #'
@@ -26,12 +26,12 @@ PDB_iter_atom_distances <- function(pdb_filename,
                                     output_dir, 
                                     ROOT, 
                                     biolip) {
-  
   biounit_filename = basename(pdb_filename)
   if (biolip == "True" & type_of_interaction == "ligand"){
     bp = fread(file.path(ROOT,'biolip_list.txt'), header = F)
     pdb_file$atom = subset(pdb_file$atom, !resid %in% bp$V1 )
     if (nrow(pdb_file$atom)<1) {
+
       stop("This PDB file does not interact with any ligand.")
     } 
   }
@@ -41,8 +41,7 @@ PDB_iter_atom_distances <- function(pdb_filename,
   TemplateChains <-   ChainsList[[1]]
   InteractionChains <- ChainsList[[2]]
   names(InteractionChains)[names(InteractionChains) == "real.pos"] = "real.pos.1"
-  
-  
+
   # put dataframe into separate list of data frames according to the different chains
   TemplateChains_list <-
     split.data.frame(TemplateChains, f = TemplateChains$chain)
@@ -67,49 +66,51 @@ PDB_iter_atom_distances <- function(pdb_filename,
   } else {
     stop("type_of_interaction not found")
   }
-  
   # Select the chains to be comapred
   CompareTemplateChains <- TemplateChains_list[PairwiseComb[1,]]
   CompareInteractionChains <-
     InteractionChains_list[PairwiseComb[2,]]
   
-  CompareTemplateChains.Vector <- lapply(CompareTemplateChains,
-                                         function(x) {
-                                           x <- x[, c("x", "y", "z")]
-                                           x <- as.vector(t(x))
-                                           return(x)
-                                         })
-  CompareInteractionChains.Vector <-
-    lapply(CompareInteractionChains,
-           function(x) {
-             x <- x[, c("x", "y", "z")]
-             x <- as.vector(t(x))
-             return(x)
-           })
+  rm(TemplateChains_list, InteractionChains_list)
+  gc()
   
+  #CompareTemplateChains.Vector <- lapply(CompareTemplateChains,
+  #                                       function(x) {
+  #                                         x <- x[, c("x", "y", "z")]
+  #                                         x <- as.vector(t(x))
+  #                                         return(x)
+  #                                       })
+  #CompareInteractionChains.Vector <-
+  #  lapply(CompareInteractionChains,
+  #         function(x) {
+  #           x <- x[, c("x", "y", "z")]
+  #           x <- as.vector(t(x))
+  #           return(x)
+  #         })
   distList <- list()
   struct = list()
   i = 1
-  while (i <= length(CompareInteractionChains.Vector)) {
-    try(#distList[[paste("iter", i, sep = "")]] <-
-      distList[[1]] <-
+  while (i <= length(PairwiseComb)/2) {
+
+    #distList[[paste("iter", i, sep = "")]] <-
+      pdb_atom_inter_df <-
         calc_PDB_dist(
           CompareTemplateChains[[i]],
           CompareInteractionChains[[i]],
-          CompareTemplateChains.Vector[i],
-          CompareInteractionChains.Vector[i],
+          as.vector(t(CompareTemplateChains[[i]][, c("x", "y", "z")])),
+          as.vector(t(CompareInteractionChains[[i]][, c("x", "y", "z")])),
           dist_threshold ,
           type_of_interaction = type_of_interaction
-        ),
-      silent = TRUE)
+        )
     # Filter by selected distance threshold
-    i = i + 1
     
+
     
-    pdb_atom_inter_df <-
-      ldply(distList, function(x)
-        data.frame(x))
+   # pdb_atom_inter_df <-
+  #    ldply(distList, function(x)
+  #      data.frame(x))
     if (nrow(pdb_atom_inter_df) > 0) {
+    #  print(head(pdb_atom_inter_df))
       #add identifier of the PDB structure
       PDB_ID <- sub("\\.gz+", "", biounit_filename)
       pdb_atom_inter_df$pdb.id <-  PDB_ID
@@ -137,6 +138,7 @@ PDB_iter_atom_distances <- function(pdb_filename,
           "real.pos",
           "real.pos.1"
         )]
+        pdb_atom_inter_df$resid.1 = aa321(pdb_atom_inter_df$resid.1)
         struct[[i]] = unique(pdb_atom_inter_df[,c ("chain", "resno")])
       } else {
         pdb_atom_inter_df <- pdb_atom_inter_df[, c(
@@ -166,6 +168,8 @@ PDB_iter_atom_distances <- function(pdb_filename,
           output_dir,
           paste(
             PDB_ID,
+            "_chain",
+            unique(pdb_atom_inter_df$chain),
             "_",
             type_of_interaction,
             "_",
@@ -173,6 +177,9 @@ PDB_iter_atom_distances <- function(pdb_filename,
             sep = ""
           )
         )
+      #print(head(pdb_atom_inter_df))
+      
+      pdb_atom_inter_df$resid = aa321(pdb_atom_inter_df$resid)
       write.table(
         pdb_atom_inter_df,
         file = output_filePath,
@@ -187,6 +194,7 @@ PDB_iter_atom_distances <- function(pdb_filename,
       gc()
       
     }
+    i = i + 1
   }
 
   if (type_of_interaction == "protein"){

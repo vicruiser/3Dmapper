@@ -1,11 +1,14 @@
 #! /usr/bin/Rscript
 # path to packages
+options(echo = FALSE, verbose = F,warn = -1) 
 requiredPackages = c('tidyr', 'stringr')
+suppressMessages(
 for (p in requiredPackages) {
   if (!require(p, character.only = TRUE))
     install.packages(p)
-  suppressMessages(library(p, character.only = TRUE))
+  library(p, character.only = TRUE)
 }
+)
 
 # input arguments
 INPUT_FILE = as.character(commandArgs(TRUE)[1])
@@ -54,7 +57,8 @@ if (file.size(INPUT_FILE) > 0) {
     )
     # split pdb.id and chain variables into two columsn
     blast_out_filtered <-
-      separate(blast_out_filtered, qseqid, c("pdbid", "chain"), sep = "chain")
+      separate(blast_out_filtered, qseqid, c("pdbid", "chain"), sep = "_chain")
+    blast_out_filtered$pdbid = str_remove(blast_out_filtered$pdbid, '\\.gz')
     # write new file
     write.table(
       blast_out_filtered,
@@ -85,5 +89,5 @@ if (file.size(INPUT_FILE) > 0) {
     row.names = F,
     append = T
   )
-  stop("No BLAST hits were found for this chain.",)
+  stop("No BLAST hits were found for this chain.")
 }

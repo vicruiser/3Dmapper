@@ -1,13 +1,17 @@
 #! /usr/bin/Rscript
 ################################################################
 warn.conflicts = FALSE
-library(veriNA3d)
-requiredPackages = c('tidyr', 'stringr', 'bio3d',  'plyr','dplyr', 'data.table') #'parallel',
-for (p in requiredPackages) {
-  if (!require(p, character.only = TRUE))
-    install.packages(p)
-  suppressMessages(library(p, character.only = TRUE))
-}
+options(echo = FALSE, verbose = F,warn = -1) 
+
+requiredPackages = c('tidyr', 'stringr', 'bio3d',
+                     'plyr','dplyr', 'data.table','veriNA3d') #'parallel',
+suppressMessages(
+  for (p in requiredPackages) {
+    if (!require(p, character.only = TRUE))
+      install.packages(p)
+    library(p, character.only = TRUE)
+  }
+)
 
 
 #########################
@@ -38,8 +42,7 @@ if(INT == 'all'){
 }
 
 tryCatch({
-  pdb_file <- readPDB(PDB_FILENAME,
-                      download = "NO")
+  pdb_file <- readPDB(PDB_FILENAME)
 }, error = function(e) {
   cat("ERROR :", conditionMessage(e), "\n")
 })
@@ -52,9 +55,13 @@ all_chains <- pdb_file$atom
 # Select position of protein chains in PDB file
 pdb_protChains <-
   combine.select(
+  combine.select(
     atom.select(pdb_file, ATOMS_INTERACTION, verbose = F),
-    atom.select(pdb_file, "protein", verbose = F)
-  )
+    atom.select(pdb_file, "protein", verbose = F),
+    verbose =F
+  ), atom.select(pdb_file, resid= "UNK"),
+operator = "OR", verbose = F)
+
 # Select protein chains
 protein_chains <- all_chains[pdb_protChains$atom ,]
 if (ATOMS_INTERACTION == "calpha") {
@@ -83,7 +90,6 @@ PDB_ID <- basename(sub("\\.gz+", "", PDB_FILENAME))
 
 
 for (j in 1:length(INT)) {
-  
   skip_to_next <- FALSE
   tryCatch({
     interfaces = PDB_iter_atom_distances(
@@ -139,20 +145,27 @@ for (j in 1:length(INT)) {
                           pdb.id = PDB_ID,
                           real.pos = struct[,"real.pos"],
                           real.pos.1 ="NA"))
+   
+   for (ch in unique(struct$chain)){
+     struct_ch = subset(struct, chain == ch)
+     struct_ch$resid = aa321(struct_ch$resid)
     output_filePath <-
       file.path(
         OUTPUT_DIR,
         paste(
           PDB_ID,
-          "_",
+          "_chain",
+          ch,
+          '_',
           INT[j],
           "_",
           "predicted_interfaces.txt",
           sep = ""
         )
       ) 
+    
     write.table(
-      struct,
+      struct_ch,
       file = output_filePath,
       append = TRUE,
       quote = FALSE,
@@ -160,7 +173,7 @@ for (j in 1:length(INT)) {
       row.names = F,
       col.names = !file.exists(output_filePath)
     )  
-    
+   }
 
 }
   

@@ -17,6 +17,7 @@ from .logger import get_logger
 from .writefile import writefile
 
 def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalue, isoform, APPRIS, consequence, loc, var_id=None, csv=False, hdf=False):
+    print(prot_id)
     '''
     Map interfaces and genomic anntoated positions and returns a
     setID.File, necessary input for SKAT. Additionaly, it creates
@@ -113,7 +114,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
             # spread each individual position into one row
             sub_df = explode2(sub_df, ['Protein_position'])
             # drop unnecesary columns
-            sub_df.drop(['start', 'end'], inplace=True, axis=1)
+            sub_df = sub_df.drop(['start', 'end'], axis=1)
             # concatenate final result
             annovars = pd.concat([remaining_df, sub_df], sort=False)
             annovars = annovars.reset_index(drop=True)
@@ -122,6 +123,14 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
      # parse interfaces corresponding to the selected protein ID
     try:
         psdf = parser(prot_id, psdb)
+        psdf = psdf.astype({"Protein_position":str, "Protein_accession":str, "Protein_length":np.int32,
+                            "PDB_chain_length":np.int32,
+                            "PDB_3D_position":np.int32, "PDB_seq_position":np.int32, "Evalue":float, 
+                            "Pident":float,
+                            "Protein_alignment_start":np.int32, 
+                            "Protein_alignment_end":np.int32,"PDB_alignment_start":np.int32, 
+                            "PDB_alignment_end":np.int32, "Structure_feature_id":str})
+
         if 'Pident' not in list(psdf.columns):
             logger.error(' Wrong structural data format. Header is missing')
             raise IOError()
@@ -133,37 +142,37 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
         columns_list = columns_type.index[columns_type].tolist()
 
         # cols_stack
-        cols_stack = psdf.apply(lambda x: x.astype(
-            str).str.match(r'[a-zA-Z0.-9]+/[a-zA-Z0.-9]+'))
-        colsnames_stack = psdf.columns[cols_stack.any()].tolist()
+        #cols_stack = psdf.apply(lambda x: x.astype(
+        #    str).str.match(r'[a-zA-Z0.-9]+/[a-zA-Z0.-9]+'))
+        #colsnames_stack = psdf.columns[cols_stack.any()].tolist()
         # add column for chimera script
-        if 'PDB_interacting_3D_position' in colsnames_stack:
+        #if 'PDB_interacting_3D_position' in colsnames_stack:
             #psdf['Interface_interacting_positions'] = psdf['PDB_interacting_position']  
-            psdf['Chimera_interacting_position'] = psdf['PDB_interacting_3D_position']
-        if 'Evalue' in colsnames_stack:
-            colsnames_stack.remove('Evalue')
-        if 'PDB_code' in colsnames_stack:
-            colsnames_stack.remove('PDB_code')
-        if 'PDB_3D_position' in colsnames_stack:
+        #    psdf['Chimera_interacting_position'] = psdf['PDB_interacting_3D_position']
+        #if 'Evalue' in colsnames_stack:
+        #    colsnames_stack.remove('Evalue')
+        #if 'PDB_code' in colsnames_stack:
+        #    colsnames_stack.remove('PDB_code')
+        #if 'PDB_3D_position' in colsnames_stack:
             #colsnames_stack.remove('PDB_3D_position')
-            psdf['Chimera_3D_position'] = psdf['PDB_3D_position']
-        if 'Structure_feature_id' in colsnames_stack:
-            colsnames_stack.remove('Structure_feature_id')
-        if any(colsnames_stack):
-            psdf = explode(psdf , colsnames_stack, '/')
-        elif any(columns_list):
-            psdf = explode(
-                psdf, columns_list, '/')
-        else:
-            psdf[colsnames_stack] = \
-                psdf[colsnames_stack].astype(str)
+        #    psdf['Chimera_3D_position'] = psdf['PDB_3D_position']
+        #if 'Structure_feature_id' in colsnames_stack:
+        #    colsnames_stack.remove('Structure_feature_id')
+        #if any(colsnames_stack):
+        #    psdf = explode(psdf , colsnames_stack, '/')
+        #if any(columns_list):
+        #    psdf = explode(
+        #        psdf, columns_list, '/')
+        #else:
+        #    psdf[colsnames_stack] = \
+        #        psdf[colsnames_stack].astype(str)
         # if default database is used minor modifications are needed
         if pident is not None:
             logger.info('Filtering interfaces by pident = ' +
                         str(pident) + '%.')
             # filter by pident
             pident = float(pident)  # from str to int
-            psdf = psdf.loc[psdf.Pident.astype(float) >= pident]
+            psdf = psdf.loc[psdf['Pident'] >= pident]
             # if pident threshold is to high, the next maximum value of pident is
             # notified in log file
             if psdf.empty:
@@ -179,7 +188,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                         str(evalue) + '%.')
             # filter by pident
             evalue = float(evalue)  # from str to int
-            psdf = psdf.loc[psdf.Evalue.astype(float) >= evalue]
+            psdf = psdf.loc[psdf['Evalue'] >= evalue]
             # if pident threshold is to high, the next maximum value of pident is
             # notified in log file
             if psdf.empty:
@@ -207,7 +216,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
 
         if loc:
             # remove non protein coding positions
-            annovars.drop_duplicates(inplace=True)
+            annovars = annovars.drop_duplicates()
             try:
                 coding_positions_index = annovars.Amino_acids.str.contains(
                     '|'.join(aa), regex=True, na=False)
@@ -226,7 +235,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                 unmapped_positions = annovars
 
             if unmapped_positions.empty is False:
-                unmapped_positions.drop_duplicates(inplace=True)
+                unmapped_positions = unmapped_positions.drop_duplicates()
                 if APPRIS is not None: 
                     unmapped_positions['APPRIS_isoform'] = APPRIS
                 
@@ -236,8 +245,12 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
    
     elif psdf is not False and annovars is not False:
         # for sucessful merge, Protein_position column must be str type
-        psdf['Protein_position'] = psdf['Protein_position'].astype(str)
-        annovars['Protein_position'] = annovars['Protein_position'].astype(str)
+        if 'Protein_position' in psdf.columns and 'Protein_position' in annovars.columns:
+            psdf['Protein_position'] = psdf['Protein_position'].astype(str)
+            annovars['Protein_position'] = annovars['Protein_position'].astype(str)
+        else: 
+            raise IOError
+            
         if APPRIS is not None:
             annovars['APPRIS_isoform'] = APPRIS
        # annovars['Uniprot_accession'] = Uniprot_id
@@ -260,7 +273,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
 
             # remove non protein coding positions
             if left_positions.empty is False:
-                left_positions.drop_duplicates(inplace=True)
+                left_positions = left_positions.drop_duplicates()
                 coding_positions_index = left_positions.Amino_acids.str.contains(
                     '|'.join(aa), regex=True, na=False)
                 noncoding_positions = left_positions.loc[~coding_positions_index]
@@ -275,37 +288,40 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                     del(noncoding_positions, coding_positions_index)
                 
                 left_positions['Protein_accession'] = prot_id
+                left_positions['Protein_position'] = left_positions['Protein_position'].astype(int)
 
                 # remove protein position since we know there are no matching positions
                 # and will reduce the maximum number of combinations of rows
                 #pdb.id ensembl.prot.id temp.chain int.chain 
-                psdf = psdf.loc[:, ['PDB_code', 'Protein_accession',
+                """psdf = psdf.loc[:, ['PDB_code', 'Protein_accession',
                                     'PDB_chain', 'Protein_alignment_start',
                                      'Protein_alignment_end', 'PDB_alignment_start',
                                       'PDB_alignment_end', 'Pident']]
+                """
+                psdf = psdf[['Protein_accession', 'Protein_alignment_start', 'Protein_alignment_end']]
                 #psdf = psdf.iloc[:, np.r_[0:3, 4:9]]
-                psdf.drop_duplicates(inplace=True)
+                psdf = psdf.drop_duplicates()
                 # merge rest of positions with protein structures
                 unmapped_positions = left_positions.join(
                     psdf.set_index('Protein_accession'), on='Protein_accession', how='inner')
                 # convert col to numeric to make comparison
-                unmapped_positions['Protein_position'] = pd.to_numeric(
-                    unmapped_positions['Protein_position'], errors='coerce')
-                unmapped_positions['Protein_position'] = unmapped_positions.Protein_position.values.astype(
-                    int)
-                unmapped_positions[(unmapped_positions.Protein_position.values >= unmapped_positions.Protein_alignment_start.values.astype(int)) & (
-                    (unmapped_positions.Protein_position <= unmapped_positions.Protein_alignment_end.astype(int)))]
-                
-                if unmapped_positions.empty is False:
+                #unmapped_positions['Protein_position'] = pd.to_numeric(
+                #    unmapped_positions['Protein_position'], errors='coerce')
+                del(left_positions)
+
+                unmapped_positions[
+                    (unmapped_positions["Protein_position"] >= unmapped_positions["Protein_alignment_start"]) & 
+                    ((unmapped_positions["Protein_position"] <= unmapped_positions["Protein_alignment_end"]))]
+                if not unmapped_positions.empty:
                     cs = annovars.columns.values.tolist()
-                    cs.append("Protein_accession")  
+                    cs.append("Protein_accession")
                     unmapped_positions = unmapped_positions[[c for c in unmapped_positions.columns if c in cs]]
-                    unmapped_positions.drop_duplicates(inplace=True)
+                    unmapped_positions = unmapped_positions.drop_duplicates()
                     unmapped_positions['Mapping_position'] = 'Unmapped'
                     writefile(prot_id, out_dir, pident, isoform, consequence,
                             unmapped_positions, 'UnmappedPositions', csv, hdf)
                 
-                    del(left_positions, unmapped_positions)  
+                    del(unmapped_positions)  
                 # mapped position is on the rest of the structure
             structure_positions = mapped_positions[mapped_positions['Interaction_type'].isna()]
             structure_positions = structure_positions.drop(['Chimera_interacting_position', 'Chimera_3D_position',
@@ -314,7 +330,7 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
                                                               'PDB_interacting_chain', 'Interaction_type'], axis=1, errors = 'ignore')
             #do proper arragenments if no resulst are retrieved
             if structure_positions.empty is False:
-                structure_positions.drop_duplicates(inplace=True)
+                structure_positions = structure_positions.drop_duplicates()
                 #structure_positions['PDB_seq_position'] = structure_positions['Protein_position'] - \
                 # structure_positions['Protein_alignment_start'] + structure_positions['PDB_alignment_start']
                 structure_positions['Mapping_position'] = 'Structure'
@@ -354,8 +370,8 @@ def mapper(prot_id,  gene_id, transcript_id, psdb, vardb, out_dir, pident, evalu
             mapped_positions = mapped_positions[mapped_positions['Interaction_type'].notna()]
             setID_file = mapped_positions[['Structure_feature_id',
                                           'Uploaded_variation']]
-            setID_file.drop_duplicates(inplace=True)
-            mapped_positions.drop_duplicates(inplace=True)
+            setID_file = setID_file.drop_duplicates()
+            mapped_positions = mapped_positions.drop_duplicates()
             # Save the merged dataframe, appending results and not
             #  reapeting headers
             with open(os.path.join(out_dir, ('setID_pident' + str(pident) + '_isoform_' +

@@ -11,14 +11,16 @@
 # sink(file=con, type="output")
 # # Don't print messages (e.g. errors/warnings)
 # sink(file=con, type="message")
-options(echo = FALSE, verbose = F)
+options(echo = FALSE, verbose = F,warn = -1) 
 
 requiredPackages = c("bio3d", "stringr", "data.table") #'parallel',
-for (p in requiredPackages) {
-  if (!require(p, character.only = TRUE))
-    install.packages(p)
-  invisible(suppressPackageStartupMessages(library(p, character.only = TRUE, quietly = T, warn.conflicts = FALSE)))
-}
+suppressMessages(
+  for (p in requiredPackages) {
+    if (!require(p, character.only = TRUE))
+      install.packages(p)
+    library(p, character.only = TRUE)
+  }
+)
 
 ###################################################################
 # Note: to install veriNA3d, since it is in a private repository, #
@@ -36,15 +38,17 @@ for (p in requiredPackages) {
 # be availabe soon                                                #
 ###################################################################
 
-if(!require("veriNA3d")){
+suppressMessages(
+  if(!require("veriNA3d")){
   system('wget mmb.irbbarcelona.org/gitlab/dgallego/veriNA3d-dev/repository/archive.zip?ref=master -O ~/PDBmapper-master/veriNA3d_0.99.0.zip')
   system('unzip ~/PDBmapper-master/veriNA3d_0.99.0.zip')
   system('mv ~/PDBmapper-master/veriNA3d-*master* ~/PDBmapper-master/veriNA3d_0.99.0')
   system('R CMD build ~/PDBmapper-master/veriNA3d_0.99.0 --no-build-vignettes')
   system('R CMD INSTALL ~/PDBmapper-master/veriNA3d*.tar.gz')
   
-}
-invisible(suppressPackageStartupMessages(library("veriNA3d", character.only = TRUE)))
+})
+
+suppressMessages(library("veriNA3d", character.only = TRUE))
 
 
 args = commandArgs(trailingOnly = TRUE)
@@ -65,7 +69,7 @@ tryCatch({
     pdb_file <- cifAsPDB(cif_file)
     
   } else if (str_detect(pdb_filename, ".pdb")) {
-    pdb_file <- read.pdb(pdb_filename, verbose = F)
+    pdb_file <- read.pdb(pdb_filename, verbose = F, rm.insert = F, rm.alt = F)
     
     
   } else{
@@ -105,9 +109,9 @@ error = function(err) {
 
 
 # select only protein chains
-prot_info <- atom.select(pdb_file, string = "protein")
-lig_info <- atom.select(pdb_file, string = "ligand")
-nuc_info <- atom.select(pdb_file, string = "nucleic")
+prot_info <- atom.select(pdb_file, string = "protein", verbose = F)
+lig_info <- atom.select(pdb_file, string = "ligand", verbose = F)
+nuc_info <- atom.select(pdb_file, string = "nucleic", verbose = F)
 chains_info <- pdb_file$atom[prot_info$atom,]
 # count number of chains
 nChains <- length(unique(chains_info$chain))

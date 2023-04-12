@@ -15,6 +15,7 @@
 #'
 #' @examples
 #'
+options(echo = FALSE, verbose = F,warn = -1) 
 calc_PDB_dist <- function(
                           CompareTemplateChains,
                           CompareInteractionChains,
@@ -22,11 +23,11 @@ calc_PDB_dist <- function(
                           CompareInteractionChains.Vector,
                           dist_threshold,
                           type_of_interaction ) {
-  allDist <- dist.xyz(CompareTemplateChains.Vector[[1]],
-                      CompareInteractionChains.Vector[[1]])
-  
+
+  allDist <- dist.xyz(CompareTemplateChains.Vector,#[[1]],
+                      CompareInteractionChains.Vector) #[[1]])
   filtered_pdb_dist <- which(allDist <= dist_threshold, arr.ind = T)
-  
+
   if (nrow(filtered_pdb_dist) > 0) {
     df_results <-
       data.frame(
@@ -35,11 +36,13 @@ calc_PDB_dist <- function(
         distance = allDist[filtered_pdb_dist],
         interaction = type_of_interaction
       )
-    
+
     return(df_results)
     
   } else {
-    stop("No existing interaction between these two chains.")
+    df_results = data.frame()
+    return(df_results)
+    #stop("No existing interaction between these two chains.")
     
   }
 }
