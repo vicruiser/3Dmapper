@@ -1,0 +1,29 @@
+
+    ----------------------------------------------------
+    ____  _____                                        
+   |___ \|  __ \                                       
+     __) | |  | |_ __ ___   __ _ _ __  _ __   ___ _ __ 
+    |__ <| |  | | '_ ` _ \ / _` | '_ \| '_ \ / _ \ '__|
+    ___) | |__| | | | | | | (_| | |_) | |_) |  __/ |   
+   |____/|_____/|_| |_| |_|\__,_| .__/| .__/ \___|_|   
+                                | |   | |              
+                                |_|   |_|              
+    ----------------------------------------------------
+    
+      -----------------------------------
+      |  >>>Publication link<<<<<         |
+      |  victoria.ruiz.serra@gmail.com    |
+      -----------------------------------
+    
+    Command line input:
+    -------------------
+    
+makevisualization -p list_pdbs.txt --pdb_list -i ../3-mapper/3dmapper_results/csv/InterfacePositions_pident20.0_isoform_all_consequence_all.csv --force -s ../3-mapper/3dmapper_results/csv/StructurePositions_pident20.0_isoform_all_consequence_all.csv -is sphere -o chimerax_scripts
+
+
+[Thu Apr 13 16:54:01 2023] AF-O15151-F1-model_v4.pdb_struct_int.cxc script was written successfully.
+[Thu Apr 13 16:54:01 2023] 7jt9-assembly1.cif_struct_int.cxc script was written successfully.
+[Thu Apr 13 16:54:01 2023] 5mnj-assembly1.cif_struct_int.cxc script was written successfully.
+[Thu Apr 13 16:54:01 2023] AF-P09769-F1-model_v4.pdb_struct_int.cxc script was written successfully.
+[Thu Apr 13 16:54:01 2023] 2vyr-assembly1.cif_struct_int.cxc script was written successfully.
+[Thu Apr 13 16:54:01 2023] ChimeraX scripts have been successfully writen to chimerax_scripts. Total time: 0:00:00

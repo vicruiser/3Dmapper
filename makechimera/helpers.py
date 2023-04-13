@@ -6,6 +6,9 @@ import os
 import pandas as pd
 import re
 import sys
+import pathlib
+import gzip
+import shutil
   
 
 def add_details(main_details: dict, args) -> dict:
@@ -59,9 +62,15 @@ def check_args(args: argparse.Namespace):
     
     # check PDB code matches standard format with or without bioassembly
     for pdb in args.pdb:
-        if not re.match(r'^[a-zA-Z0-9_]{4}\.pdb[0-9]+$', pdb):
-            if not re.match(r'^[a-zA-Z0-9_]{4}$', pdb):
-                sys.exit(f'Error: the PDB code "{pdb}" does not follow standard format (If you are trying to pass a file containing PDB codes to the tool, add the parameter --pdb_list).')
+        #print(pdb)
+        if '.gz' in pathlib.Path(pdb).suffixes:
+            with gzip.open(pdb, 'r') as f_in, open(pdb.strip('.gz'), 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)
+                pdb = pdb.strip('.gz')
+        #print(jj)
+        #if (not re.match(r'^[a-zA-Z0-9_]{4}\.pdb[0-9]+$', pdb) or re.match(r'^[a-zA-Z0-9_]{4}\.cif.gz[0-9]+$', pdb)):
+        #    if not re.match(r'^[a-zA-Z0-9_]{4}$', pdb):
+        #        sys.exit(f'Error: the PDB code "{pdb}" does not follow standard format (If you are trying to pass a file containing PDB codes to the tool, add the parameter --pdb_list).')
        
         
     # MAPPED FILES
@@ -81,8 +90,8 @@ def check_args(args: argparse.Namespace):
             
         # check that mapped-to-interface file contains necessary columns
         necess_cols = ["PDB_code", "PDB_chain", "PDB_3D_position", 
-                    "Interaction_type", "PDB_interacting_chain", 
-                    "Chimera_3D_position"] 
+                    "Interaction_type", "PDB_interacting_chain"]#, 
+                    #"Chimera_3D_position"] 
         
         with open(args.interface_file, 'r') as f:
             mapped = pd.read_csv(f)
@@ -291,7 +300,7 @@ def read_interface_data(map_file: str, cols: list = None) -> pd.DataFrame:
     """ 
     if not cols:
         cols = ["PDB_code", "PDB_chain", "PDB_3D_position", "Interaction_type",
-                "PDB_interacting_chain", "Chimera_3D_position"]  
+                "PDB_interacting_chain"]#, "Chimera_3D_position"]  
     
     with open(map_file, 'r') as f:
         data = pd.read_csv(f)

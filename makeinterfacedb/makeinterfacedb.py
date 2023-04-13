@@ -7,6 +7,12 @@ import multiprocessing as mp
 from multiprocessing import Pool
 import sys
 
+from halo import Halo
+import datetime
+import time
+from timeit import default_timer as timer
+
+
 #sys.path.append('/gpfs/scratch/bsc08/bsc08927/3dmapper_v2/3Dmapper/makeinterfacedb/')
 #from memory_profiler import profile
 from .parse_argv import parse_commandline
@@ -200,15 +206,68 @@ def main():
                     #pp = Process(target = pipeline, args =(int_file) for int_file in int_f)
                     #pp.start()
     else:
+        description = '''
+    ----------------------------------------------------
+    ____  _____                                        
+   |___ \|  __ \                                       
+     __) | |  | |_ __ ___   __ _ _ __  _ __   ___ _ __ 
+    |__ <| |  | | '_ ` _ \ / _` | '_ \| '_ \ / _ \ '__|
+    ___) | |__| | | | | | | (_| | |_) | |_) |  __/ |   
+   |____/|_____/|_| |_| |_|\__,_| .__/| .__/ \___|_|   
+                                | |   | |              
+                                |_|   |_|              
+    ----------------------------------------------------
+    '''
+
+        epilog = '''
+          -----------------------------------
+         |  >>>Publication link<<<<<         |
+         |  victoria.ruiz.serra@gmail.com    |
+          -----------------------------------
+        '''
+        # print ascii art
+        print(description)
+        print(epilog)
+
+        # initialize spinner decorator
+        spinner = Halo(text='Loading', spinner='dots12', color="cyan")
+        spinner.start(text=' Running makestructuraldb...')
+        # set up the results report
+        report = open(os.path.join(args.out, 'makestructuraldb.report'), 'w')
+        report.write(description)
+        report.write(epilog)
+        report.write('''
+            Command line input:
+            -------------------
+        \n''')
+        progname = os.path.basename(sys.argv[0])
+        report.write(progname + ' ' + " ".join(sys.argv[1:]) + '\n' + '\n' + '\n')
+        time_format = '[' + time.ctime(time.time()) + '] '
+
+
+        # spinner.start(text=' Running makevariantsdb...')
+        start = time.time()
+
+
         if isfile(args.pdb) == 'list_files':
             for f in args.pdb:
                 with open(f) as list_int_files:
                             int_f = list_int_files.read().splitlines()
                             for int_infile in int_f:
                                 pipeline(int_infile)
+            end = time.time()                    
+            spinner.stop_and_persist(symbol='\U0001F4CD',
+                                 text=' makestructuraldb process finished. Total time:  ' +
+                                 str(datetime.timedelta(
+                                     seconds=round(end-start))))
         elif isfile(args.pdb) == 'is_file':
             for f in args.pdb:
                 pipeline(f)
+            end = time.time()
+            spinner.stop_and_persist(symbol='\U0001F4CD',
+                                 text=' makestructuraldb process finished. Total time:  ' +
+                                 str(datetime.timedelta(
+                                     seconds=round(end-start))))
         elif isfile(args.pdb) == 'file_not_recognized':
             sys.exit('Error: file %s does not exist.' % args.pdb[0])
 

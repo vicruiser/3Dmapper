@@ -1,0 +1,6 @@
+/home/victoria/PhD/2021_2022/3Dmapper/example/1-makestructuraldb/pdbs/AF-O15151-F1-model_v4.pdb
+/home/victoria/PhD/2021_2022/3Dmapper/example/1-makestructuraldb/pdbs/7jt9-assembly1.cif.gz
+/home/victoria/PhD/2021_2022/3Dmapper/example/1-makestructuraldb/pdbs/5mnj-assembly1.cif.gz
+/home/victoria/PhD/2021_2022/3Dmapper/example/1-makestructuraldb/pdbs/AF-P09769-F1-model_v4.pdb
+/home/victoria/PhD/2021_2022/3Dmapper/example/1-makestructuraldb/pdbs/6yr7-assembly1.cif.gz
+/home/victoria/PhD/2021_2022/3Dmapper/example/1-makestructuraldb/pdbs/2vyr-assembly1.cif.gz

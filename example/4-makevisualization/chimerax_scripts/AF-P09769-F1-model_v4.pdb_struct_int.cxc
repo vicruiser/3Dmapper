@@ -1,17 +1,5 @@
-#!/usr/bin/python
 
-"""
-Contains:
-- ChimeraX script templates with placeholders to facilitate string formatting.
-- CLI aesthetics.
-"""
-
-# CHIMERAX TEMPLATES
-# ==================
-
-script_template = """\
-
-# Chimera X script to visualize the variants mapped to {pdb_code}.
+# Chimera X script to visualize the variants mapped to /home/victoria/PhD/2021_2022/3Dmapper/example/1-makestructuraldb/pdbs/AF-P09769-F1-model_v4.pdb.
 
 
 # NOTE: to manually customize the details of the script, refer to the sections labeled with the OPTIONS keyword and modify
@@ -24,7 +12,7 @@ script_template = """\
 # =====================================================
 
 # select protein by PDB code
-open {assembly}
+open /home/victoria/PhD/2021_2022/3Dmapper/example/1-makestructuraldb/pdbs/AF-P09769-F1-model_v4.pdb
 
 # include only chosen biological assembly
 close #1,3-end
@@ -33,16 +21,16 @@ close #1,3-end
 # =====================================================
 
 # set lighting (OPTIONS: full, soft, simple)
-lighting {lighting}
+lighting full
 
 # set background (OPTIONS: white, black)
-set bg {bg}
+set bg white
 
 # set up silhoutte outline (OPTIONS: true, false)
-set silhouettes {silhouettes}
+set silhouettes true
 
 # set molecule style (OPTIONS: ball, sphere, stick)
-style {mol_style}
+style ball
 
 # display ribbons if not already displayed (OPTIONS: show, hide)
 show ribbons
@@ -64,7 +52,7 @@ color bychain
 # =====================================================
 
 # display atoms from the affected interface and show them in molecule style (OPTIONS: sphere, ball, stick)
-select {interfaces}; show sel atoms; style sel {int_style}; ~select
+select #1000; show sel atoms; style sel sphere; ~select
 
 
 
@@ -72,10 +60,10 @@ select {interfaces}; show sel atoms; style sel {int_style}; ~select
 # =====================================================
 
 # color variant residues mapped to interfaces (OPTIONS: https://www.rbvi.ucsf.edu/chimerax/docs/user/commands/colornames.html)
-color {variants_itf} red
+color #1000 red
 
 # label varying residues mapped to interfaces
-label {variants_itf} height 1.5 size 68
+label #1000 height 1.5 size 68
 
 
 
@@ -83,59 +71,11 @@ label {variants_itf} height 1.5 size 68
 # =====================================================
 
 # color variant residues mapped to structure (OPTIONS: https://www.rbvi.ucsf.edu/chimerax/docs/user/commands/colornames.html)
-color {variants_str} blue
+color /A:2,4,11,17,24,26,28,29,45,63,72,76,79,81,84,89,90,91,92,93,96,97,98,100,102,105,115,116,135,139,143,147,150,166,167,172,173,178,179,181,191,192,193,201,202,207,213,216,218,227,239,246,255,258,260,261,268,270,282,284,290,292,295,300,303,304,306,314,319,321,323,324,328,336,340,342,351,352,360,368,371,376,377,381,382,385,388,391,392,397,398,404,411,417,420,429,433,434,436,440,450,451,453,466,469,473,475,484,486,488,496,499,505,508,513,518,525 blue
 
 # label varying residue mapped to structure
-label {variants_str} height 1.5 size 68
+label /A:2,4,11,17,24,26,28,29,45,63,72,76,79,81,84,89,90,91,92,93,96,97,98,100,102,105,115,116,135,139,143,147,150,166,167,172,173,178,179,181,191,192,193,201,202,207,213,216,218,227,239,246,255,258,260,261,268,270,282,284,290,292,295,300,303,304,306,314,319,321,323,324,328,336,340,342,351,352,360,368,371,376,377,381,382,385,388,391,392,397,398,404,411,417,420,429,433,434,436,440,450,451,453,466,469,473,475,484,486,488,496,499,505,508,513,518,525 height 1.5 size 68
 
 # display atoms from the affected interface and show them in molecule style (OPTIONS: sphere, ball, stick)
-select {variants_str}; show sel atoms; style sel {int_style}; ~select
-
-"""
-
-test_template = """\
-pdb_code: {pdb_code}
-assembly: {assembly}
-main_chain: {main_chain}
-second_chain: {second_chain}
-main_resid: {main_resid}
-second_resid: {second_resid}
-var_pos: {var_pos}
-"""
-
-
-
-# CLI AESTHETICS
-# ==============
-
-description = '''
-    ----------------------------------------------------
-    ____  _____                                        
-   |___ \|  __ \                                       
-     __) | |  | |_ __ ___   __ _ _ __  _ __   ___ _ __ 
-    |__ <| |  | | '_ ` _ \ / _` | '_ \| '_ \ / _ \ '__|
-    ___) | |__| | | | | | | (_| | |_) | |_) |  __/ |   
-   |____/|_____/|_| |_| |_|\__,_| .__/| .__/ \___|_|   
-                                | |   | |              
-                                |_|   |_|              
-    ----------------------------------------------------
-    '''
-
-epilog = '''
-      -----------------------------------
-      |  >>>Publication link<<<<<         |
-      |  victoria.ruiz.serra@gmail.com    |
-      -----------------------------------
-    '''
-        
-
-
-    
-
-
-
-
-
-
-    
+select /A:2,4,11,17,24,26,28,29,45,63,72,76,79,81,84,89,90,91,92,93,96,97,98,100,102,105,115,116,135,139,143,147,150,166,167,172,173,178,179,181,191,192,193,201,202,207,213,216,218,227,239,246,255,258,260,261,268,270,282,284,290,292,295,300,303,304,306,314,319,321,323,324,328,336,340,342,351,352,360,368,371,376,377,381,382,385,388,391,392,397,398,404,411,417,420,429,433,434,436,440,450,451,453,466,469,473,475,484,486,488,496,499,505,508,513,518,525; show sel atoms; style sel sphere; ~select
 
