@@ -53,9 +53,11 @@ def parse_commandline():
     parser.add_argument("-t", "--int-type",
                         metavar="<String>",
                         dest="type",
-                        choices=['noh', 'calpha', 'cbeta'],
-                        help="interface definition. Options are: 'noh' (by default) to calculate distance considering heavy atoms only; 'calpha' to compute CA-CA distance;\
-                         or 'cbeta' to measure distances between CB-CB (CA in the case of Glycine)")
+                        choices=['noh','h', 'calpha', 'cbeta', 'sidechain', 'backbone', 'all' ],
+                        help="interface definition. Options are: 'noh' (by default) to calculate distance considering heavy atoms only; 'h' to compute hydrogen bonds; \
+                         'calpha' to compute CA-CA distance; 'cbeta' to measure distances between CB-CB (CA in the case of Glycine); \
+                         'sidechain' consider atoms only from sidechains; 'backbone' to calculate distances between atoms in the backbone only; \
+                          or 'all' to calcule interfaces between any possible atom")
     parser.set_defaults(type='noh')
 
     parser.add_argument("-e", "--evalue", metavar="<float>", dest="evalue",
